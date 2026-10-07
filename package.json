@@ -1,0 +1,1 @@
+{"name":"peekaplate-onboarding","private":true,"type":"module","scripts":{"check":"node --check site/onboarding.js && node --check site/entry.js && node --check netlify/functions/onboarding-confirmation.mjs"},"dependencies":{"nodemailer":"^10.0.14"},"devDependencies":{"netlify-cli":"^27.10.2"}}

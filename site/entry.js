@@ -1,0 +1,1 @@
+document.querySelector('#join-email').addEventListener('submit',e=>{e.preventDefault();try{sessionStorage.setItem('peekaplate-email',document.querySelector('#hero-email').value.trim())}catch{}location.assign('/join/')});
