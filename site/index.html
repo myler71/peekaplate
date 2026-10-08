@@ -107,7 +107,7 @@ ul,ol{margin:0;padding:0;list-style:none}
 
 /* statement */
 .statement{font-size:clamp(24px,2.8vw,34px);line-height:1.3;font-weight:500;letter-spacing:-.8px;text-align:center;max-width:840px;margin:0 auto;text-wrap:balance}
-.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;max-width:960px;margin:44px auto 0}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;max-width:640px;margin:44px auto 0}
 .stat{display:flex;flex-direction:column;gap:4px;padding:22px 24px;border:1px solid var(--line);border-radius:20px}
 .stat b{font-size:36px;font-weight:500;letter-spacing:-1px}
 .stat span{font-size:13px;color:var(--ink-3);line-height:1.4}
@@ -373,7 +373,7 @@ footer a{text-decoration:none}
       <a href="#how">How it works</a>
       <a href="#why-now">Why now</a>
       <a href="#peek">Peek inside</a>
-      <a href="#pilot">Pilot</a>
+      <a href="#faq">FAQ</a>
     </div>
     <a class="btn btn-accent btn-sm" href="#contact">Get in touch</a>
   </nav>
@@ -433,8 +433,6 @@ footer a{text-decoration:none}
     <div class="stats">
       <div class="stat"><b>86%</b><span>of restaurant operators are comfortable with AI tools</span><small>Toast AI survey, 2025 · n=712</small></div>
       <div class="stat"><b>26%</b><span>already use AI for menu optimization</span><small>Toast AI survey, 2025 · n=712</small></div>
-      <div class="stat"><b>0</b><span>apps to download. A QR at the host stand opens the menu</span></div>
-      <div class="stat tbd"><b>[X]</b><span>pilot restaurants live (to confirm)</span></div>
     </div>
   </div>
 </section>
@@ -559,7 +557,7 @@ footer a{text-decoration:none}
           <div class="eyebrow">AI reasoning · Harvest Bowl</div>
           <h2 class="h2">From browsing behavior to a decision you can test</h2>
         </div>
-        <a class="btn btn-accent" href="#pilot">See the pilot plan →</a>
+        <a class="btn btn-accent" href="#contact">Become a pilot partner →</a>
       </div>
       <div class="reason">
         <div class="rs"><small>OBSERVED</small><div><p>High consideration, long dwell, low purchase.</p><div class="pills"><i>consideration ↑</i><i>dwell ↑</i><i>orders ↓</i></div></div></div>
@@ -634,16 +632,16 @@ footer a{text-decoration:none}
   <div class="wrap">
     <div class="sec-head">
       <div class="eyebrow">Competition</div>
-      <h2 class="h2">Others see the visual, the order or the visit. Not the intent.</h2>
+      <h2 class="h2">Others see the order or the visit. Not the intent.</h2>
     </div>
     <div class="table-scroll">
       <table class="cmp">
-        <thead><tr><th scope="col"><span class="sr-only"></span></th><th scope="col">3D / AR menus</th><th scope="col">QR ordering &amp; POS</th><th scope="col">Waitlist &amp; CRM</th><th scope="col" class="us">PeekaPlate</th></tr></thead>
+        <thead><tr><th scope="col"><span class="sr-only"></span></th><th scope="col">QR ordering &amp; POS</th><th scope="col">Waitlist &amp; CRM</th><th scope="col" class="us">PeekaPlate</th></tr></thead>
         <tbody>
-          <tr><th scope="row">What it sees</th><td>The visual effect</td><td>The final order</td><td>The visit and past purchases</td><td class="us">What guests considered before ordering</td></tr>
-          <tr><th scope="row">Explains why a dish underperforms</th><td>–</td><td>–</td><td>–</td><td class="us">Yes, per dish</td></tr>
-          <tr><th scope="row">Runs the fix</th><td>–</td><td>Sometimes, from order data</td><td>Generic promotions</td><td class="us">Menu experiments and intent-based follow-ups</td></tr>
-          <tr><th scope="row">Works with your stack</th><td>Standalone</td><td>Is the stack</td><td>Is the stack</td><td class="us">Connects to POS, waitlist and CRM</td></tr>
+          <tr><th scope="row">What it sees</th><td>The final order</td><td>The visit and past purchases</td><td class="us">What guests considered before ordering</td></tr>
+          <tr><th scope="row">Explains why a dish underperforms</th><td>–</td><td>–</td><td class="us">Yes, per dish</td></tr>
+          <tr><th scope="row">Runs the fix</th><td>Sometimes, from order data</td><td>Generic promotions</td><td class="us">Menu experiments and intent-based follow-ups</td></tr>
+          <tr><th scope="row">Works with your stack</th><td>Is the stack</td><td>Is the stack</td><td class="us">Connects to POS, waitlist and CRM</td></tr>
         </tbody>
       </table>
     </div>
@@ -668,52 +666,15 @@ footer a{text-decoration:none}
   </div>
 </section>
 
-<section class="sec soft" id="pilot">
-  <div class="wrap">
-    <div class="sec-head">
-      <div class="eyebrow">The pilot · 6 weeks</div>
-      <h2 class="h2">Can browsing tell us why a dish isn’t selling, and does fixing it change orders?</h2>
-    </div>
-    <div class="setup"><span>1–2 visual-first SF restaurants with a waitlist</span><span>Top 10–20 dishes from their own photos</span><span>A QR card at the host stand</span></div>
-    <div class="pilot">
-      <div class="timeline">
-        <div class="tl"><small>Week 1</small><div><b>Dishes and setup</b><p>Model the top dishes, place the QR card, connect the POS order report.</p></div></div>
-        <div class="tl"><small>Weeks 2–4</small><div><b>Collect sessions, match orders</b><p>Anonymous browsing per dish, matched daily to what was actually ordered.</p></div></div>
-        <div class="tl"><small>Week 5</small><div><b>Diagnose and test</b><p>Flag high-attention, low-order dishes; run one A/B test on the flagged dish.</p></div></div>
-        <div class="tl"><small>Week 6</small><div><b>Results</b><p>A readout for the owner, and a go/no-go on the model.</p></div></div>
-      </div>
-      <div class="pass">
-        <h3>It passes if…</h3>
-        <ul style="display:grid;gap:10px">
-          <li>Browsing predicts orders better than order history alone</li>
-          <li>Owners rate the AI’s reasons as believable and useful</li>
-          <li>The fix moves menu-item conversion on the flagged dish</li>
-        </ul>
-        <p class="risk">Biggest risk: matching sessions to orders. Pilot fix: a manual daily match with the POS report.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="sec">
-  <div class="wrap">
-    <div class="sec-head" style="margin-bottom:32px"><h2 class="h2">PeekaPlate isn’t for every restaurant</h2></div>
-    <div class="fit">
-      <div class="yes"><h3>A great fit if…</h3><p>You run a visual-first restaurant where looks sell dishes</p><p>Guests regularly wait 10+ minutes for a table</p><p>You want to know why some dishes don’t sell, and test a fix</p></div>
-      <div class="no"><h3>Not yet a fit if…</h3><p>You want to replace your printed menu at the table</p><p>You need full-menu 3D on day one</p><p>You don’t use a POS that can export order reports</p></div>
-    </div>
-  </div>
-</section>
-
-<section class="sec" id="faq">
+<section class="sec soft" id="faq">
   <div class="wrap">
     <div class="sec-head"><div class="eyebrow">FAQ</div><h2 class="h2">Questions we get asked</h2></div>
     <div class="faq">
-      <details open><summary>Do guests need to download an app?</summary><p>No. A QR code opens PeekaPlate in the phone’s browser. AR uses the phone’s built-in viewer (iOS Quick Look, Android Scene Viewer).</p></details>
+      <details open><summary>Do guests need to download an app?</summary><p>No. PeekaPlate is white-labeled: the interactive menu carries each restaurant’s own brand and lives on the restaurant’s own website, or opens from a QR code at the host stand. It runs in the phone’s browser with no app and no account. AR uses the phone’s built-in viewer (iOS Quick Look, Android Scene Viewer).</p></details>
       <details><summary>Do restaurants need a 3D photo shoot?</summary><p>No. We start with the restaurant’s existing photos of its top 10–20 dishes and generate 2.5D and 3D views from them. Real scans can come later.</p></details>
       <details><summary>What happens to guest data?</summary><p>Browsing is anonymous and kept separate for each restaurant. A phone number is only linked if a guest opts in to follow-ups, every text includes STOP to unsubscribe, and we never message about dietary or allergy information.</p></details>
       <details><summary>Does it replace the restaurant’s menu or POS?</summary><p>No. PeekaPlate is an optional preview while guests wait. It connects to the POS, waitlist and CRM tools a restaurant already uses.</p></details>
-      <details><summary>What does a pilot cost?</summary><p>[Pilot pricing to confirm.] Early pilots are designed to be low-effort for the restaurant: a QR card, your photos and a daily POS report.</p></details>
+      <details><summary>What does a pilot cost?</summary><p>Early pilots are designed to be low-effort for the restaurant: a QR card, your photos and a daily POS report.</p></details>
     </div>
   </div>
 </section>
