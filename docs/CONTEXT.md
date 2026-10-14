@@ -27,7 +27,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "diner",
       "status": "foundation",
-      "summary": "Static TypeScript/Vite shell usable without JavaScript; evolving Claude prototype direction is documented, not implemented as a real menu. Build checks initial JS gzip budget, rejects known initial renderer modules and fails on unaccounted imports. Viewer, analytics and device performance remain planned.",
+      "summary": "Static TypeScript/Vite shell usable without JavaScript. The supplied prototype is confirmed as latest design progress; shared Figma/tokens and flows are separately tracked, not implemented here. Build checks initial JS gzip budget and renderer boundaries. Viewer, analytics and device performance remain planned.",
       "paths": [
         "frontend/diner/index.html",
         "frontend/diner/src/main.ts",
@@ -43,7 +43,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "contracts"
       ],
-      "sourceFingerprint": "51f379b91056380008e166833c886802b60594776e217bd9e1d01b5732b67e58"
+      "sourceFingerprint": "abe12b9f023c31b0406d90c47659049b51d2a0b4da5596c7bfe6cd0aa6b0171a"
     },
     {
       "id": "console",
@@ -129,7 +129,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "delivery",
       "status": "foundation",
-      "summary": "Local staff-command development starts disposable Postgres, synthetic JWT issuance and workerd without cloud credentials. Existing purposeful CI jobs include real database/Worker integration; no extra CI job. Docs distinguish local evidence from the hosted auth/roles/pooling checkpoint. Monthly grouped updates and human review/comment policy remain.",
+      "summary": "Local staff-command development uses disposable Postgres, synthetic JWTs and workerd. PR 9 merged with passing PR/main CI. The team guide maps dated research/design assignments separately from code and records provider choice as pending confirmation before provisioning. Monthly grouped updates and human review/comment policy remain.",
       "paths": [
         "README.md",
         "SECURITY.md",
@@ -161,7 +161,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "2de7ade9e585d6730b1fe67c31d65c031ec0d216ceabdca569f4eebce1fef549"
+      "sourceFingerprint": "3f96c5f4a7c2478bdd82dda818a9a20d473cd929bf6b8bc36ec656ab5abbfdc8"
     },
     {
       "id": "agents",
@@ -193,6 +193,14 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     }
   ],
   "handoffs": [
+    {
+      "summary": "Updated team_guide with all 24 ClickUp tasks and seven scope subtasks, dated assignments, latest design progress and summarized project coordination. Research/design completion is distinct from implementation; Sai initiated code setup. PR 9 merged at 413be96 with successful main CI. No runtime behavior or external board/chat state changed.",
+      "modules": [
+        "delivery",
+        "diner"
+      ],
+      "next": "Confirm the provider decision and sprint scope with linked deliverables, reconcile the completed approval ticket with missing approval/publication code, recover local Docker and stop at the protected cloud-credential checkpoint before hosted integration."
+    },
     {
       "summary": "Added a plain-language team guide covering the product, current local command flow, every tracked file, verification, research and agent limits, and ordered next steps. Corrected the stale health-only security overview. Runtime behavior is unchanged.",
       "modules": [

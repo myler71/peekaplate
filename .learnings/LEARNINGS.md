@@ -49,3 +49,15 @@ Related files: `.github/workflows/ci.yml`, `.github/dependabot.yml`, `CONTRIBUTI
 An onboarding page that lists only the installed stack can imply that a planned language or processing stage has been rejected. State current prerequisites, the accepted extension path and its implementation trigger in the README. Link the owning ADR rather than leaving this distinction only in a delivery document. Keep planned work clearly separate from runnable commands and existing capabilities.
 
 Related files: `README.md`, `docs/adr/0001-scope-and-repository.md`.
+
+## LRN-20261014-003 · Separate planning status from implementation evidence
+
+**Logged**: 2026-10-14
+**Priority**: medium
+**Status**: resolved
+**Area**: docs
+**Category**: correction
+
+A task titled “implement” or marked complete may represent research or a design deliverable. Record the task's actual assignment and dated status separately from verified repository behavior. Use confirmed design progress as the current reference even when its handoff ticket is still open. Reconcile mismatches explicitly; do not invent staffing titles or credit planned features as working code.
+
+Related files: `docs/team_guide.md`, `docs/frontend-design.md`.

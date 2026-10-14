@@ -1,6 +1,6 @@
 # PeekaPlate: team guide
 
-Updated October 14, 2026. This guide covers the repository foundation and the local staff-command work in [PR #9](https://github.com/vivienk/peekaplate_staging/pull/9). The PR records its merge status, review and CI results. This is an explanation of the current code, not a replacement for the accepted [architecture decisions](adr/README.md).
+Updated October 14, 2026. This guide connects the team's research and design work with the repository foundation and local staff-command work merged in [PR #9](https://github.com/vivienk/peekaplate_staging/pull/9). It explains the current code and next steps; the accepted [architecture decisions](adr/README.md) remain the engineering reference.
 
 ## 1. What we are building
 
@@ -19,6 +19,8 @@ The first pilot targets one venue and a small set of enhanced dishes. It is not 
 
 ## 2. What has actually been done
 
+The team's work to date has mainly been research, product planning and design. Sai started the code setup. Keep those contributions distinct: a completed research or design ticket is useful input to engineering, but it does not mean the corresponding product feature has been coded or deployed.
+
 | Stage | What was completed | What it gives the team |
 | --- | --- | --- |
 | Architecture | Eight accepted decision records covering the stack, events, evidence, visuals, privacy, orders, delivery and agents | A shared explanation of why the system is organized this way |
@@ -32,6 +34,67 @@ The first pilot targets one venue and a small set of enhanced dishes. It is not 
 The public diner is currently a staging message. The staff console is a React shell. Neither screen connects to the dish-editing command yet. There is no finished login screen, real published menu, analytics ingestion, POS adapter or Three.js viewer.
 
 No Cloudflare or Supabase resources were provisioned for this work. Merging the code does not deploy it: staging deployment has a separate manual workflow.
+
+### How the ClickUp work connects to the repository
+
+The [ClickUp board](https://app.clickup.com/90141746115/v/b/t/90141746115) was read on October 14, including all 24 top-level tasks and the seven scope subtasks under sprint planning. At the end of that review, the board showed **12 To do, 4 In progress and 8 Complete** top-level tasks. Statuses changed during the review; this is a dated snapshot, not a live tracker. Assignees below are the displayed ClickUp assignments, not new commitments or job titles. “Unassigned” means no person was assigned in that field.
+
+The latest design progress is the [PeekaPlate Flow Prototype](https://claude.ai/artifact/LjkRVm78VioRB2FrVSauwJ), confirmed as the current reference on October 14. Use it when discussing screens. The separate Figma/design-system tasks describe the handoff work recorded on the board; their open status does not erase progress in the prototype.
+
+| ClickUp task | Status | Assigned people | What it contributes |
+| --- | --- | --- | --- |
+| [Define Sprint Goals + candidate Sprint Backlog](https://app.clickup.com/t/90141746115/86bcex5hb) | In progress | Vivien Kong | Candidate small restaurant/dish workflow and boundaries; planning must select the actual sprint commitment |
+| [Sprint 2 Planning](https://app.clickup.com/t/90141746115/86bchxfk2) | To do | Unassigned | Review evidence, carryover, dates, capacity and acceptance criteria |
+| [Refine candidate Sprint 1 PBIs + engineering acceptance criteria](https://app.clickup.com/t/90141746115/86bcex5x3) | To do | Vivien Kong | Turn the product idea into one specified flow with inputs, outputs, failures and tests |
+| [Run restaurant validation outreach + survey tracking](https://app.clickup.com/t/90141746115/86bcex5wq) | To do | Unassigned | Operator outreach and response tracking; the description asks for team participation |
+| [Run lightweight diner + restaurant discovery](https://app.clickup.com/t/90141746115/86bcex99b) | To do | Vivien Kong, Shirley Rosario | Interview findings and assumptions that should change the backlog |
+| [Define diner JTBD + behavior hypotheses](https://app.clickup.com/t/90141746115/86bcex5rr) | Complete | Adam H | Explain diners' needs and testable behavior hypotheses; observations are not proof of intent |
+| [Map the end-to-end PeekaPlate product system](https://app.clickup.com/t/90141746115/86bcex5qb) | Complete | Vivien Kong | Map content, processing, review, diner experience and measurement; this is a system specification |
+| [Create current-state + future-state diner journey map](https://app.clickup.com/t/90141746115/86bcex99f) | Complete | Rania, Amr Hussien | Separate researched behavior from proposed improvements |
+| [Create end-to-end diner UX flow](https://app.clickup.com/t/90141746115/86bcex5t5) | Complete | Amr Hussien | Define browsing, dish details, exploration and fallback states |
+| [Design clickable interactive menu MVP](https://app.clickup.com/t/90141746115/86bcex5te) | Complete | Amr Hussien | Prototype the core diner path for testing and engineering handoff |
+| [Interactive Diner Experience](https://app.clickup.com/t/90141746115/86bcexf9r) | Complete | Rania, Adam H, Amr Hussien | Describe dish interactions; the repository's diner is still a shell |
+| [Restaurant owner receives a lightweight summary / report](https://app.clickup.com/t/90141746115/86bcexfw4) | Complete | Amr Hussien, Rania | Specify report content and useful actions; no live report is implemented here |
+| [Refine prototype layout + finalize brand palette](https://app.clickup.com/t/90141746115/86bchyk6t) | To do | Amr Hussien, Rania | Refine the existing structure and accessible palette with Vivien's review |
+| [Recreate prototype in shared Figma + establish design system](https://app.clickup.com/t/90141746115/86bchyk6w) | To do | Rania, Amr Hussien | Prepare editable shared screens, reusable styles/components and a complete diner screen |
+| [Map the complete diner and owner flows](https://app.clickup.com/t/90141746115/86bchyk71) | To do | Amr Hussien, Rania | Connect screens, review/approval, owner actions, failures and tracking points |
+| [Design Agent MVP + human-review workflow](https://app.clickup.com/t/90141746115/86bcex9a1) | In progress | Eirene Woo, Shirley Rosario, Vivien Kong | Specify source-to-draft processing, confidence, correction and human review |
+| [Specify multimodal dish-processing pipeline](https://app.clickup.com/t/90141746115/86bcex5tt) | In progress | Eirene Woo, Shirley Rosario, Vivien Kong | Define source fields, structured outputs, validation and fallback; not a running pipeline |
+| [Define AI evaluation rubric + guardrails](https://app.clickup.com/t/90141746115/86bcex5vm) | To do | Unassigned | Define accuracy, severity, confidence and mandatory human-review rules |
+| [Implement minimum human-review / approval path](https://app.clickup.com/t/90141746115/86bcexenj) | Complete | Sai Hemanth Kilaru | Board status requires reconciliation: the repo creates draft revisions, but does not implement approval or publication |
+| [Implement 2D → 3D / spatial dish generation slice](https://app.clickup.com/t/90141746115/86bcexezr) | To do | Vivien Kong, Adam H | Investigate asset feasibility, quality and fallback; older generation wording needs alignment with the visual ADR |
+| [Define diner behavior event taxonomy + measurement plan](https://app.clickup.com/t/90141746115/86bcex5w6) | In progress | Adam H | Define event names, fields and what can be measured versus inferred |
+| [Behavioral events capture](https://app.clickup.com/t/90141746115/86bcexfnc) | To do | Eirene Woo, Vivien Kong | Specify event properties and funnels; the ingest/queue/archive path still needs implementation |
+| [Agent analyzes event data and identifies basic patterns](https://app.clickup.com/t/90141746115/86bcexfrx) | To do | Eirene Woo, Vivien Kong, Shirley Rosario | Specify allowed signals, patterns and uncertainty; no analysis agent runs in this repo |
+| [Create technical risk + QA readiness plan](https://app.clickup.com/t/90141746115/86bcex5wx) | To do | Vivien Kong, Shirley Rosario | Prioritize latency, cost, truthful output, device performance and event-reliability risks |
+
+JTBD means “jobs to be done”: what a diner is trying to accomplish. PBI means “product backlog item”: a proposed piece of product work. Adam H and Amr Hussien are separate people; matching initials on board cards are not reliable identification.
+
+The seven subtasks below refine the sprint goal. They are additional scope work, not seven extra implemented features.
+
+| Scope subtask | Status | Assigned people | Decision needed |
+| --- | --- | --- | --- |
+| [Agent Workflow + Orchestration](https://app.clickup.com/t/90141746115/86bcexdce) | In progress | Eirene Woo, Shirley Rosario, Vivien Kong | Inputs, outputs, step sequence, states, handoffs and failures |
+| [Users Review + Approval](https://app.clickup.com/t/90141746115/86bcexkyh) | To do | Unassigned | What needs review and the exact approval boundary before publication |
+| [Spatial Generation](https://app.clickup.com/t/90141746115/86bcexkyy) | To do | Unassigned | Eligible representations, asset format, quality bar and fallback |
+| [Diner Experience](https://app.clickup.com/t/90141746115/86bcexkzb) | To do | Unassigned | Minimum journey and loading/error/fallback states |
+| [Behavioral Instrumentation](https://app.clickup.com/t/90141746115/86bcexkzx) | To do | Shirley Rosario, Eirene Woo, Vivien Kong | Minimum observations and fields, distinct from inferred intent |
+| [Restaurant Intelligence](https://app.clickup.com/t/90141746115/86bcexm04) | To do | Eirene Woo, Vivien Kong | Allowed aggregated signals and interpretations without causal overclaims |
+| [Owner Insight / Report](https://app.clickup.com/t/90141746115/86bcexm0h) | To do | Unassigned | Example report, supporting evidence, limitations and useful next actions |
+
+### Recent coordination and decisions to reconcile
+
+The October 13 [Sprint 2 recap](https://discord.com/channels/1556028660832673885/1556115536243589212/1559805887839731717) prioritizes environment setup, menu capture, backend and event tracking, with unfinished work carried forward. Its handoffs are: Sai prepares the repository, agents and CI; Shirley develops the readiness plan and ticket classification; Amr and Rania develop design tokens and layouts; Adam finishes the event taxonomy; Vivien identifies third-party APIs and coordinates setup. These are recorded handoffs, not a new allocation of coding tasks.
+
+The recent [design discussion](https://discord.com/channels/1556028660832673885/1556115291577126912) supports iterating on the existing prototype, splitting work to avoid overlap, and refining the brand palette. The recap also asks for an accessible interface adaptable to restaurant branding, including light and dark modes. These are design requirements to specify and implement, not capabilities of the current shells. The [general channel](https://discord.com/channels/1556028660832673885/1556028661570867252) supports attaching completed requirement documentation to its ticket. The inspected product and dev channels contained no messages at the time of review.
+
+Three points need an explicit decision before the related implementation:
+
+- **Provider:** the repo currently accepts Supabase. The [October 14 setup update](https://discord.com/channels/1556028660832673885/1556115536243589212/1560031592410521641) says Vivien is still finalizing Supabase versus Neon. Confirm that choice before provisioning; choosing Neon requires an ADR update and an equivalent identity plan.
+- **Visual scope:** older tickets discuss generated 3D and a Tripo experiment; newer planning and the recap start with photos/2.5D. The accepted visual ADR permits reviewed T1/T2 representations of captured food and prohibits invented edible surfaces. Research wording does not authorize bypassing that rule.
+- **Scope and completion:** one restaurant/three dishes is a candidate test slice, not evidence of an agreed pilot or working system. Reconcile sprint dates, the approval ticket's status, open scope subtasks and linked design deliverables before committing implementation. POS linkage and owner reporting remain later repository work unless explicitly selected.
+
+This review covered task descriptions, displayed assignments and scope subtasks, plus recent visible messages in general, design, daily-updates, product and dev. It did not audit every attachment, linked PRD, interview record or full chat history. Task links may require workspace access. Personal chat details and raw conversation text are not reproduced here.
 
 ## 3. The few technical words worth knowing
 
@@ -129,7 +192,7 @@ That future flow must record the exact publication and dish version shown. We do
 | Selective event sourcing | Preserve history where reconstruction matters; ordinary settings and accounts do not all need event streams |
 | Supabase | The accepted plan combines PostgreSQL and staff identity; Neon would need an explicit replacement decision and equivalent identity/integration checks |
 | Local Docker tests | Exercise an actual database while keeping test data disposable and separate from real restaurant information |
-| Python later | It is accepted for a real processing/analysis job, with uv and pytest; no such job exists yet |
+| Python processing jobs | Python with uv and pytest is accepted for processing/analysis work; no such job exists yet |
 | Vitest, pgTAP and Playwright now | Test TypeScript logic, database behavior and browser behavior with tools appropriate to each |
 | No Rust service or extra orchestration framework | No current requirement justifies another service, language or task system |
 | Repository-owned context | A small source-linked map helps agents find the right files without adding another database or memory service |
@@ -144,11 +207,11 @@ That future flow must record the exact publication and dish version shown. We do
 
 Three.js is planned for the optional viewer, loaded after a tap. It is not installed as a working diner feature. Start with T0, then selected T1/T2 dishes whose assets, performance and truthfulness pass review.
 
-The supplied design link is an evolving Claude prototype, not a confirmed Figma file. Its direction is recorded in [frontend-design.md](frontend-design.md). The existing shells do not yet implement that design.
+The supplied [design reference](https://claude.ai/artifact/LjkRVm78VioRB2FrVSauwJ) is the latest design progress confirmed on October 14. Its direction and implementation handoff are recorded in [frontend-design.md](frontend-design.md). The existing shells do not yet implement that design.
 
 ## 8. What “tested” means right now
 
-The implementation at `abb9252` passed [CI run 38640316602](https://github.com/vivienk/peekaplate_staging/actions/runs/38640316602). The guide and accompanying documentation corrections are a later documentation-only addition to the same PR; use its latest CI run for the final reviewed commit.
+PR #9 merged into `main` at `413be96`. Its final reviewed commit `fc08808` passed [PR CI run 38642140834](https://github.com/vivienk/peekaplate_staging/actions/runs/38642140834), and the merged commit passed [main CI run 38642528971](https://github.com/vivienk/peekaplate_staging/actions/runs/38642528971). The ClickUp/Discord additions to this guide are a subsequent documentation update, not additional runtime functionality.
 
 | Evidence | What it establishes | What it does not establish |
 | --- | --- | --- |
@@ -336,37 +399,39 @@ Local `.env` and `.dev.vars` files may hold credentials and are ignored. A `.git
 
 ## 10. How the team should work day to day
 
-1. Pick one outcome from [delivery.md](delivery.md), such as “an authorized reviewer can approve this exact captured revision.” Name an owner and the evidence that will show it works.
+1. Pick a selected ClickUp outcome and connect it to [delivery.md](delivery.md), such as “an authorized reviewer can approve this exact captured revision.” Record the assigned person, linked requirement/design, and evidence that will show it works. A research task can finish with findings; an implementation task needs running behavior and tests.
 2. Have the repo guide or developer identify the relevant files, contracts and ADRs. Give the builder clear file ownership and dependencies.
 3. Implement the whole small flow, including request rules, caller changes, database changes and tests where needed.
 4. Run the relevant checks. Use `pnpm check` and `pnpm verify <check>` for recorded results. A check that was not run stays marked **NOT RUN**.
 5. Update affected documentation and the context node. Run `pnpm context:refresh`; inspect the written summary too, because a refreshed fingerprint cannot make false prose true.
-6. Open a PR with exact results. Review the same code version from architecture and correctness perspectives when the change warrants both.
+6. Open a PR with exact results and the relevant task link. Link the deliverable and PR back to the ticket during the team's normal update process. Review the same code version from architecture and correctness perspectives when the change warrants both.
 7. Follow the normal human approval-with-comment process before merging. A specific owner-authorized merge does not silently replace that standing policy for future PRs.
 
-The lead should ask for a demonstration, test evidence and remaining limits. A green check cannot answer whether a dish is accurately represented, whether a venue granted permission, or whether a business interpretation is justified.
+Ask for a demonstration, test evidence and remaining limits. A green check cannot answer whether a dish is accurately represented, whether a venue granted permission, or whether a business interpretation is justified.
 
 The context map is an index, not an all-knowing memory. `pnpm context:show -- backend` finds the backend's relevant files. The model still verifies claims against source and tests. Error recording covers checks run through the verification runner; unexpected failures outside it need a sanitized manual record. Neither file automatically discovers every mistake.
 
 ## 11. What to do next, in order
 
-| Order | Owner to assign | Concrete work | Evidence to require |
-| --- | --- | --- | --- |
-| 1 | Local development owner | Recover Windows Docker after saving work and restarting; check `docker version` and `docker info`, then rerun the local backend demo | Engine is reachable and the demo creates a synthetic revision |
-| 2 | Tech lead / account owner | Supply staging access through protected configuration: Cloudflare account/scoped token and a Supabase staging project; prepare separate migration/runtime credentials | Named owners, least-privilege access and no secrets in Git or chat |
-| 3 | Backend/platform lead | Verify real Supabase identity and membership, migrations under the real provider role, and the restricted connection through Hyperdrive | Real-provider isolation, retry, concurrency, rollback, revocation semantics and pooled-context checks; measured latency |
-| 4 | Product/design + backend/frontend leads | Finish the relevant staff screens and PR 2 capture, review and publication flow using approved assets | Reviewers approve exact revisions; unauthorized approval and publication races fail; published T0 content is reproducible |
-| 5 | Frontend + backend leads | Build the real T0 diner and durable observation flow in PR 3 | Useful menu without analytics/WebGL; offline/retry/partial receipt and archive-recovery tests |
-| 6 | Data and visual leads | Build ticket linkage in PR 4 and selected T1/T2 in PR 5 after their prerequisites | Correct permitted POS mapping; truthful visual assets, payload budgets and real-phone checks |
-| 7 | Product/data/release leads | Owner readout, controlled experiment and pilot recovery in PRs 6–7 | Understandable evidence, explicit unknowns, backup/restore drill and operational ownership |
+This is the repository's dependency order. Use the recorded handoffs above and confirm a person for each selected task; this table does not assign new responsibilities.
 
-PRs 4 and 5 can progress in parallel once their respective prerequisites are ready. The exact acceptance criteria stay in `docs/delivery.md`; do not remove a safety or evidence requirement to protect a date. The original pilot dates need the lead's review against actual progress.
+| Order | Concrete work | Evidence to require |
+| --- | --- | --- |
+| 1 | Recover Windows Docker after saving work and restarting; check `docker version` and `docker info`, then rerun the local backend demo | Engine is reachable and the demo creates a synthetic revision |
+| 2 | Confirm Vivien's provider/API decision, then supply staging access through protected configuration: Cloudflare account/scoped token and the selected database/identity project; prepare separate migration/runtime credentials | Recorded decision, least-privilege access and no secrets in Git or chat |
+| 3 | Verify real staff identity and membership, migrations under the real provider role, and the restricted connection through Hyperdrive | Real-provider isolation, retry, concurrency, rollback, revocation semantics and pooled-context checks; measured latency |
+| 4 | Use the latest design and processing/review specifications to finish staff screens and PR 2 capture, review and publication with approved assets | Reviewers approve exact revisions; unauthorized approval and publication races fail; published T0 content is reproducible |
+| 5 | Connect Adam's event taxonomy and the approved diner flow to the real T0 menu and durable observation flow in PR 3 | Useful menu without analytics/WebGL; offline/retry/partial receipt and archive-recovery tests |
+| 6 | When selected for the pilot, build ticket linkage in PR 4 and selected T1/T2 in PR 5 after their prerequisites | Correct permitted POS mapping; truthful visual assets, payload budgets and real-phone checks |
+| 7 | Owner readout, controlled experiment and pilot recovery in PRs 6–7 | Understandable evidence, explicit unknowns, backup/restore drill and operational ownership |
+
+PRs 4 and 5 can progress in parallel once their respective prerequisites are ready. The exact acceptance criteria stay in `docs/delivery.md`; do not remove a safety or evidence requirement to protect a date. Reconcile original pilot dates and sprint numbering with actual progress during planning. Research, design tokens, source-data preparation and event definitions can proceed alongside the cloud-access checkpoint.
 
 The immediate cloud step is **staff identity and the database connection**. Queue/R2 event ingestion comes with the diner-evidence feature. There is no reason to provision every planned service before the code that uses it exists.
 
 Developers can continue local feature work without cloud credentials, but cannot claim hosted readiness until the real-provider checks pass. No cloud deployment or credentials were used for the completed local slice.
 
-## 12. Current limits the lead should keep visible
+## 12. Current limits to keep visible
 
 - Windows Docker recovery is still open. Linux CI passed; that does not repair a local Windows installation. Images and volumes were preserved during diagnosis.
 - Real Supabase authentication, managed database roles, Hyperdrive connection reuse and hosted latency are unverified. Synthetic local identities are not a working staff sign-in product.
