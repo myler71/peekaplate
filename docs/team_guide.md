@@ -28,7 +28,7 @@ The visual experience is one part of this loop. Accurate food information, a usa
 
 **Code foundation:** the repository now has separate places for the diner app, staff app, server rules, database changes, tests and documentation. It also has instructions for coding assistants and checks that run when someone proposes a change.
 
-**First working code flow:** a developer can use a local demo to submit a draft dish change. The backend checks the test user's identity and restaurant permission, saves the change and remembers the result. This work was reviewed and merged in [PR #9](https://github.com/vivienk/peekaplate_staging/pull/9).
+**First working code flow:** a developer can use a local demo to submit a draft dish change. The backend checks a made-up test identity and its restaurant permission, saves the change and remembers the result. Each saved version of a dish is called a **revision**, like version history in a document. This work was reviewed and merged in [PR #9](https://github.com/vivienk/peekaplate_staging/pull/9).
 
 “Local” means it runs in a development environment with made-up test identities and disposable data. It does not mean the team has a live online staging service. The shared cloud database, real staff sign-in and Cloudflare connections have not been configured.
 
