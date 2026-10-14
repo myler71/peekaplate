@@ -18,6 +18,8 @@ Reviewed baseline: [PeekaPlate V1 Team Plan](https://claude.ai/artifact/LUJ4ggBX
 
 `quality` always checks formatting, strict types, unit/script tests, builds, context and PR documentation. Code/build results are not hidden behind a missing PR section. `changes` selects `database` and `browser` for their relevant paths; dependency/CI changes exercise both. `ci` is the only aggregate check to require. No extra review job, paid model call, browser dump or per-platform build matrix is added.
 
+The database lane applies the previous schema, preserves a synthetic row through the forward migration, checks SQL policies, exercises the actual local Worker against PostgreSQL and runs the local startup/demo/cleanup path. These use disposable Docker databases and local signing keys; no provider credentials are required.
+
 Use deterministic checks on each PR. Run field performance, cloud failure injection, manual accessibility and restoration when their feature exists and before its release gate; a passing shell cannot substitute for those results. Add Lighthouse CI to the real T0 delivery slice, where there is a menu worth measuring. Keep heavy load/restore checks separate from routine PR CI.
 
 Record actual run URLs/durations in the PR. The warm PR target is under five minutes; it is not an SLA. The current viewer and ingestion latency are unmeasured because those features do not exist. Dependency groups, frozen installations, path selection and cancellation of superseded runs keep recurring work bounded.

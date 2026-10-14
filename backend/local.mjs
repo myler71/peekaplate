@@ -40,7 +40,7 @@ async function demo() {
   console.log(JSON.stringify(result, null, 2));
 }
 
-async function develop() {
+async function develop(smoke) {
   let worker;
   let issuerServer;
   let wroteSession = false;
@@ -48,10 +48,16 @@ async function develop() {
   const cleanup = async () => {
     if (cleanupStarted) return;
     cleanupStarted = true;
-    if (worker) await worker.stop();
-    if (issuerServer) await new Promise((resolve) => issuerServer.close(resolve));
-    stopDatabase();
-    if (wroteSession) await unlink(sessionFile).catch(() => {});
+    try {
+      if (worker) await worker.stop();
+    } finally {
+      try {
+        if (issuerServer) await new Promise((resolve) => issuerServer.close(resolve));
+      } finally {
+        stopDatabase();
+        if (wroteSession) await unlink(sessionFile);
+      }
+    }
   };
   const shutdown = () => {
     cleanup().finally(() => process.exit());
@@ -116,7 +122,8 @@ async function develop() {
     console.log(
       'Synthetic credentials expire in one hour. Ctrl+C removes the disposable database and session file.',
     );
-    await worker.waitUntilExit();
+    if (smoke) await demo();
+    else await worker.waitUntilExit();
   } finally {
     await cleanup();
   }
@@ -124,7 +131,7 @@ async function develop() {
 
 try {
   if (process.argv[2] === 'demo') await demo();
-  else await develop();
+  else await develop(process.argv[2] === 'check');
 } catch (error) {
   console.error(`Local backend: ${error.message}`);
   process.exitCode = 1;

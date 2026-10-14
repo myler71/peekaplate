@@ -88,7 +88,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "contracts",
         "database"
       ],
-      "sourceFingerprint": "538f4e3eebae69ecbf059023f08ce2a17c9426e72587f6389c66cb2c565a1a95"
+      "sourceFingerprint": "274d4217f999ea59717ca56be69f30a0f3e382d69a92df6b4fbfd0506b641e37"
     },
     {
       "id": "database",
@@ -108,7 +108,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "docs/adr/0005-tenancy-and-privacy.md"
       ],
       "dependsOn": [],
-      "sourceFingerprint": "aa2a73d801e4916dca7ea2465ac87c837475d31bd5bd878f4871ac80099a4ed0"
+      "sourceFingerprint": "ad4e133ee486879b734d426b09fb277233ac139f9f32b3e9c7d89d38a54d88ff"
     },
     {
       "id": "measurement",
@@ -158,7 +158,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "93c535bd2b6914f10749ed78898db0a410b934709f912b9c532b939e9a9879fb"
+      "sourceFingerprint": "1e6fcdff58ecd9492b6c5d97da384df8e24863239964ecece849bc9d2309e3e9"
     },
     {
       "id": "agents",

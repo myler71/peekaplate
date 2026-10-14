@@ -1,6 +1,6 @@
 BEGIN;
 CREATE EXTENSION IF NOT EXISTS pgtap;
-SELECT plan(17);
+SELECT plan(16);
 
 INSERT INTO app_private.venues (id, name) VALUES
   ('00000000-0000-0000-0000-000000000101', 'Staff venue'),

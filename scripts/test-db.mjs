@@ -233,6 +233,15 @@ export async function main() {
       ),
       'real database integration tests',
     );
+    ensureSuccess(
+      spawnSync(process.execPath, ['backend/local.mjs', 'check'], {
+        cwd: root,
+        encoding: 'utf8',
+        stdio: 'inherit',
+        timeout: 120_000,
+      }),
+      'local development command smoke test',
+    );
   } finally {
     stopDatabase();
   }
