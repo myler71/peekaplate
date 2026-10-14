@@ -119,7 +119,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "delivery",
       "status": "foundation",
-      "summary": "README distinguishes installed TypeScript foundations from future Python processing/analysis with uv/pytest. Monthly grouped minor/patch updates, manual majors and independently grouped security updates when enabled. One ci gate covers quality and path-selected integration checks. Verification records sanitized observations locally or in CI summaries. Human review/comment policy applies; owner must configure protections and cloud resources.",
+      "summary": "README documents implementation status, architecture, the TypeScript stack and accepted but unimplemented Python/uv/pytest processing scope, prerequisites, verification and agent roles. Monthly grouped updates and one ci gate cover path-selected checks. Verification records sanitized observations locally or in CI summaries. Human review/comment policy applies; owner must configure protections and cloud resources.",
       "paths": [
         "README.md",
         "package.json",
@@ -148,12 +148,12 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "b78840954baf150784b4802257e9ac3e61d3deea0105da46a281810097b79220"
+      "sourceFingerprint": "5e51365ad08740d7d961e0920fe3f26aa7cc3ff2dd1572d6c2cf1fb93f86cb6f"
     },
     {
       "id": "agents",
       "status": "implemented",
-      "summary": "Aligned Claude/Codex coordinator, architecture, correctness, guide and builder profiles use one shared evidence/JSON review contract. Read-only reviewers pin source and check dirty/untracked changes; builders own bounded complete tasks and handoffs. Read errors.md before work and confirm diagnoses with regression evidence. Context freshness and prompt parity checks do not prove model accuracy or production behavior.",
+      "summary": "Paired Claude/Codex review roles share an evidence/JSON review contract; repo-guide returns task briefs and task-builder returns implementation handoffs. Five bounded behavior cases met expectations after correcting and retesting builder ownership/verification instructions. Native role discovery and tool enforcement remain unverified due to client/environment limits. Builders hand off dependencies outside ownership and source fingerprint updates. Prompt parity and these cases do not prove general model accuracy.",
       "paths": [
         "AGENTS.md",
         "CLAUDE.md",
@@ -176,10 +176,18 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "docs/adr/0008-agent-context-and-review.md"
       ],
       "dependsOn": [],
-      "sourceFingerprint": "282c198c1c4228eb52449f05ad62fef7c1afa581ad551d31992cf4a2bc99806d"
+      "sourceFingerprint": "615c2bdb3e4c90550c42f3723804c7f69b2bcd6669f3ad97ad22f5174263e235"
     }
   ],
   "handoffs": [
+    {
+      "summary": "Evaluated all five role prompts before rewriting README as professional repository documentation. Builder initially exceeded assigned ownership in its plan and bypassed the recorder in a proposed command; paired profiles were corrected and the same case passed in a fresh session. Published cases, outcomes and native-client limits; runtime and ADRs are unchanged.",
+      "modules": [
+        "delivery",
+        "agents"
+      ],
+      "next": "Complete native role discovery/tool-restriction checks in compatible authenticated clients. Continue the delivery plan with verified staff/venue authority and an atomic dish-revision command."
+    },
     {
       "summary": "README now explains current versus planned capabilities, TypeScript rationale and the accepted Python/uv/pytest extension path, runnable checks, event paths, visual tiers, agent workflow and owner setup. ADRs and runtime behavior are unchanged.",
       "modules": [

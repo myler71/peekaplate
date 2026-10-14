@@ -1,109 +1,101 @@
 # PeekaPlate
 
-3D is the hook. The loop is the product.
+**3D is the hook. The loop is the product.**
 
-PeekaPlate is being built to connect the menu a diner considered to a linked restaurant ticket, then help the owner test one useful change. This repository follows the [V1 planning baseline](https://claude.ai/artifact/LUJ4ggBXpF7korJWbg4u8f), with implementation decisions recorded in [ADRs](docs/adr/README.md).
+PeekaPlate is a restaurant menu and measurement platform designed to connect diner menu exposure with linked order outcomes and controlled menu experiments. The [V1 planning baseline](https://claude.ai/artifact/LUJ4ggBXpF7korJWbg4u8f) defines the product scope; [Architecture Decision Records](docs/adr/README.md) define the accepted technical decisions.
 
-**Current stage: repository foundation.** The local apps, health API, initial schemas and checks run. The restaurant product and cloud resources are still to be built and configured.
+## Implementation status
 
-## What exists and what comes next
+The repository contains a tested application foundation: diner and staff-console shells, a health-only API, shared payload schemas, initial PostgreSQL migrations, and development and CI tooling. Staff authentication, business commands, menu publication, intent ingestion, POS integration, visual rendering and cloud resource provisioning are not implemented. Existing checks establish foundation behavior; feature and pilot acceptance criteria are tracked in the [verification map](docs/verification.md).
 
-| Area | Implemented now | Planned work |
+## Technology and architecture
+
+| Component | Technology | Current scope |
 | --- | --- | --- |
-| Diner | TypeScript/Vite shell readable without JavaScript; initial JS budget check | Approved photo/text menu, durable intent tracking, optional Three.js viewer |
-| Staff console | React/Vite shell | Staff login, capture review, approval, publication and owner readouts |
-| API | Hono Worker with `GET /health`; unknown routes return 404 | Verified venue authority, business commands, ingestion and POS integration |
-| Database | Private venue/event/command/outbox tables, constraints and restricted-role tests | Runtime role, atomic command/projection transactions and replay |
-| Delivery | Local tests, CI, manual health-Worker staging workflow and agent guidance | Owner-configured GitHub protections, cloud bindings, deployment and recovery drills |
-| Python | No Python application, package or required local runtime yet | A processing/analysis job when its feature needs one, with `uv` and pytest |
+| Diner frontend | TypeScript, Vite | Static shell with content available without JavaScript |
+| Staff console | React, TypeScript, Vite | Application shell |
+| Backend | Hono, TypeScript, Cloudflare Workers | `GET /health`; unknown routes return 404 |
+| Shared contracts | Zod, TypeScript | Health response and initial dish-intent schemas |
+| Database | PostgreSQL, SQL, dbmate | Private venue, event, command and outbox tables; constraint and restricted-role tests |
+| Processing and analysis | Python, uv, pytest | Accepted scope in [ADR 0001](docs/adr/0001-scope-and-repository.md); no job, package or runtime dependency implemented |
 
-Passing foundation checks does not establish authentication, production tenant isolation, durable ingestion, real-phone performance or pilot readiness. The [verification map](docs/verification.md) separates existing evidence from each future requirement.
+Frontends and backend share contracts. Frontends do not import backend internals or hold database credentials. Authorization belongs to the backend; venue authority must derive from verified identity and membership. Database policies support this boundary; they do not authenticate callers.
 
-## Languages and Python
+The accepted architecture separates two event paths:
 
-The current web apps and API use **TypeScript**. Shared runtime schemas and types live in `packages/contracts`, so the browser and API can use the same payload definitions. This keeps the first web/API sprint on one application toolchain.
+- **Domain events:** selected content, approval, publication, availability and experiment workflows use PostgreSQL event streams. Authorized commands commit events, current projections, retry results and outbox work atomically. Replay rebuilds projections without external effects.
+- **Diner observations:** a browser outbox sends stable event IDs to an ingest Worker. Queue acceptance precedes the client receipt; a consumer creates the R2 archive before indexing in PostgreSQL and acknowledging queue delivery. Exposure records identify the menu actually displayed. Unlinked order outcomes remain unknown.
 
-**Python is part of the extension plan, not excluded from the architecture.** [ADR 0001](docs/adr/0001-scope-and-repository.md) calls for `uv` and pytest with the first real Python processing or analysis job. Capture processing, image analysis or offline analysis may justify that job; none is implemented yet. A Python installation is therefore not needed to run today's application.
+Visual tiers are progressive enhancements: **T0** is the complete photo/text menu; **T1** adds shallow movement to reviewed photo cutouts; **T2** separates captured plating stages with limited viewpoints. Three.js is planned to load after an explicit tap. Menu access must survive analytics or viewer failure. The [frontend design reference](docs/frontend-design.md) records evolving design direction, not approved venue content or a completed visual specification.
 
-When that slice arrives, add its actual code, pinned Python version/dependencies, representative fixtures and pytest coverage together. Document its inputs, outputs and execution environment; select its CI checks only for relevant changes. Python-produced payloads must follow the shared contract and be validated at the boundary. The job's hosting is not selected by this foundation. We do not add an empty service or use pytest to duplicate the existing TypeScript test suite.
+Detailed boundaries, failure handling and deferred capabilities are documented in [architecture](docs/architecture.md) and the [ADRs](docs/adr/README.md).
 
-## Start locally
+## Repository structure
 
-Install Node **24.16.0** and pnpm **11.25.0**, then:
+```text
+frontend/diner/      Public diner application
+frontend/console/    Staff application
+backend/             Worker API
+packages/contracts/  Shared runtime schemas and types
+migrations/          Ordered SQL migrations
+tests/               Database and browser integration tests
+scripts/             Repository checks and local test tools
+docs/                Architecture, decisions, delivery and context
+```
+
+## Local development
+
+Prerequisites: Node **24.16.0** and pnpm **11.25.0**. The current applications require neither Python nor cloud credentials. Database tests additionally require Docker; browser tests require Playwright Chromium.
 
 ```sh
 pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-- Diner: http://127.0.0.1:5173
-- Staff console: http://127.0.0.1:5174
-- API liveness: http://127.0.0.1:8787/health
-
-No cloud credentials or Python runtime are needed for these shells. Docker is needed only for database tests. Real staging deployment requires account resources and credentials; follow the [operations runbook](docs/operations.md).
-
-## Verification and CI
-
-```sh
-pnpm check
-pnpm verify build
-pnpm exec playwright install chromium
-pnpm verify test:e2e
-pnpm verify test:db
-```
-
-| Check | What it verifies |
+| Service | Local address |
 | --- | --- |
-| `pnpm check` | Biome formatting/lint, strict types, Vitest application/contract tests, Node script tests, context freshness and local documentation links |
-| `pnpm verify build` | Both frontend builds and a Worker deployment dry-run; does not deploy |
-| `pnpm verify test:e2e` | Chromium shell/API flows, no-JS content, axe accessibility and narrow-screen overflow |
-| `pnpm verify test:db` | Migrations and pgTAP assertions in isolated disposable PostgreSQL via Docker |
-| Python job tests | pytest when a Python job is implemented; no Python test command exists yet |
+| Diner | http://127.0.0.1:5173 |
+| Staff console | http://127.0.0.1:5174 |
+| API health | http://127.0.0.1:8787/health |
 
-CI has five jobs with distinct purposes: `changes` selects applicable integration lanes; `quality` checks code, builds and documentation; `database` and `browser` exercise those integrations; `ci` is the single aggregate gate. Database/browser jobs are path-selected. A warm ordinary PR targets under five minutes; this is a target, not a guarantee. Browser output stays compact, with traces retained on failure.
+## Verification
 
-`pnpm check` and `pnpm verify` record sanitized failure observations in local [errors.md](errors.md), or a GitHub step summary in CI. Confirm the cause and add regression evidence before marking an issue resolved. Raw logs and secrets do not belong in the ledger; failures outside the runner require a manual entry. See [Contributing](CONTRIBUTING.md) for the complete check and PR workflow.
+| Command | Purpose |
+| --- | --- |
+| `pnpm check` | Formatting/lint, strict types, application/contract and repository-script tests, context freshness and local documentation links |
+| `pnpm verify build` | Frontend builds, initial diner JavaScript budget and Worker deployment dry-run |
+| `pnpm verify test:e2e` | Chromium shell/API flows, no-JavaScript content, accessibility and narrow-screen overflow |
+| `pnpm verify test:db` | Migrations and pgTAP assertions against isolated, disposable PostgreSQL |
 
-## Repository map
+Install the browser once with `pnpm exec playwright install chromium`. Verification records sanitized failure observations in [errors.md](errors.md) locally and step summaries in CI. Resolution requires a confirmed cause and regression evidence. [Contributing](CONTRIBUTING.md) defines the complete verification and PR protocol.
 
-```text
-frontend/diner/      Vite + TypeScript; public diner shell
-frontend/console/    React + Vite; staff shell
-backend/             TypeScript + Hono on Cloudflare Workers
-packages/contracts/  Shared runtime schemas and TypeScript types
-migrations/          Ordered, plain-SQL dbmate migrations
-tests/               Real-Postgres and browser integration checks
-scripts/             Small repository checks and local test tools
-docs/                Architecture, decisions, delivery and context
-```
+## Agent-assisted development
 
-Frontends import contracts, never backend internals or database credentials. New feature/job folders appear with their first implementation; the tree above shows current directories.
+Five paired role profiles are maintained in `.claude/agents/` and `.codex/agents/`:
 
-## Product and data model
+| Role | Responsibility |
+| --- | --- |
+| `repo-guide` | Map a task to source, ADRs, dependencies and acceptance criteria |
+| `task-builder` | Implement one assigned scope with tests and an explicit handoff |
+| `review-coordinator` | Consolidate review evidence for one pinned base/head |
+| `architecture-reviewer` | Review boundaries, authority, event semantics and ADR compliance |
+| `correctness-reviewer` | Review execution paths, failures, retries and regression coverage |
 
-The planned baseline is **T0**, a complete photo/text menu. **T1** adds shallow movement to reviewed photo cutouts. **T2** separates real captured plating stages with limited viewpoints. Three.js will load only after a tap; a viewer or analytics failure must leave the menu usable. No viewer is installed yet. The [design handoff](docs/frontend-design.md) records the evolving Claude prototype; it is not a frozen visual specification or approved venue content.
+[AGENTS.md](AGENTS.md) defines the work protocol. [CONTEXT.md](docs/CONTEXT.md) provides a source-linked module index; `pnpm context:show -- <module-id>` retrieves one module. The [review skill](.agents/skills/peekaplate-review/SKILL.md) defines evidence requirements and structured findings. Reviewers remain read-only; implementation assignments specify owned paths and dependencies.
 
-Business changes and diner observations follow separate planned paths:
+The [prompt evaluation record](docs/research/reviewer-evaluation.md) includes configuration checks, five behavioral cases and the builder correction they identified. Native-client role discovery and tool restrictions remain unverified because the evaluation environment could not complete those checks. Profiles guide behavior; client permissions enforce access. Automated review supports the required human review and does not replace it.
 
-- **Domain events:** selected content, approval, publication, availability and experiment workflows use Postgres event streams. An authorized command commits events, current projections, its retry result and outbox work in one transaction. Replay rebuilds projections without external effects.
-- **Diner observations:** an IndexedDB outbox sends stable event IDs to an ingest Worker. The Worker acknowledges Queue acceptance; a consumer archives to R2 before indexing in Postgres and acknowledging queue delivery. Exposure records identify what the phone actually displayed. Unlinked order outcomes remain unknown.
+## CI and deployment
 
-These are accepted designs, not working endpoints. Venue authority must come from server-verified identity/membership and transaction-local context under a restricted runtime role. RLS tests alone do not authenticate a tenant. Details and failure cases belong in [architecture](docs/architecture.md) and the [ADRs](docs/adr/README.md).
+CI uses five jobs with distinct responsibilities: `changes` selects integration checks, `quality` validates code/builds/documentation, `database` and `browser` test their integrations, and `ci` aggregates all applicable results. Database and browser checks are path-selected. Browser traces are retained on failure.
 
-## Working with agents and reviewers
+Routine npm and GitHub Actions dependency updates are grouped monthly, with one open version-update PR per ecosystem. Major upgrades are manual; enabled security updates can arrive sooner. AI-written and dependency PRs follow the same documentation, verification and human approval-with-comment requirements.
 
-Agent entry points are [AGENTS.md](AGENTS.md), [CONTEXT.md](docs/CONTEXT.md) and the [review skill](.agents/skills/peekaplate-review/SKILL.md). Claude and Codex role definitions live in their standard hidden agent folders.
+The manual staging workflow deploys only the health Worker. Repository administrators must configure branch protections, required `ci`, review rules, staging credentials and cloud resources. Configuration and release procedures are documented in [operations](docs/operations.md).
 
-Start a fresh agent session from this repository. Use `repo-guide` to map a task, `task-builder` for one assigned implementation slice, and `review-coordinator` to combine `architecture-reviewer` and `correctness-reviewer` findings. Give reviewers base/head SHAs; give builders responsibility and owned files. Runtime permissions remain controlled by your client.
+## Project documentation
 
-For Claude's enforced coordinator type allowlist, launch `claude --agent review-coordinator` from the repository. The [official agent documentation](https://code.claude.com/docs/en/sub-agents#restrict-which-subagents-can-be-spawned) limits that allowlist to main-thread agents. For Codex, use the repo's named agent profiles or invoke `$peekaplate-review`. The [reviewer exercise](docs/research/reviewer-evaluation.md) records what was checked and its limits.
-
-The context graph is a source-linked index, not proof that a feature works. Review findings require the governing requirement, source location, reachable failure and evidence. AI-written work follows the same code, documentation and review protocol. The normal merge policy requires human approval with a review comment on the current commit; agent output is labelled automated assistance.
-
-## Delivery order and owner setup
-
-Start with **staff authority and one atomic dish-revision command**. Then implement capture approval/publication, the real T0 menu and durable intent, ticket linkage and selected T1/T2 visuals, owner readouts, and pilot recovery. The [delivery plan](docs/delivery.md) specifies dependencies, owners and evidence; its numbered slices are a roadmap, not GitHub PR numbers.
-
-The repository owner must configure main-branch protections, required `ci`, approval rules, staging credentials and cloud resources. These are not established by a checked-in workflow alone. Routine npm/Actions updates are grouped monthly, with at most one open version-update PR per ecosystem; major upgrades are manual, and security updates can arrive sooner when enabled. Dependency PRs still need normal documentation, checks and review.
-
-The [65-repository research record](docs/research/README.md) explains the adopted patterns, including the lightweight context approach informed by Cognee. It is a bounded repository-pattern survey, not a full audit of 65 projects. Use [Contributing](CONTRIBUTING.md), [verification](docs/verification.md) and [operations](docs/operations.md) for implementation and release details.
+- [Delivery plan](docs/delivery.md): ordered feature slices, beginning with verified staff/venue authority and an atomic dish-revision command.
+- [Verification map](docs/verification.md): existing evidence and feature acceptance requirements.
+- [Contributing](CONTRIBUTING.md): complete PRs, dependency maintenance and context handoffs.
+- [Research record](docs/research/README.md): the 65-repository pattern survey and adopted design choices.
