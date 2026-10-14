@@ -116,10 +116,12 @@ Read this map first, then the relevant source paths and ADRs. It is navigation, 
     {
       "id": "delivery",
       "status": "foundation",
-      "summary": "Pinned workspace dependencies, always-on quality checks, path-selected database/browser lanes and a fail-closed final ci gate. PR documentation and context are checked mechanically; meaning needs human review. Main protections and cloud credentials require owner configuration.",
+      "summary": "Pinned dependencies, monthly grouped minor/patch updates capped at one open PR per ecosystem; major upgrades are manual and security updates independently grouped when enabled. Existing quality and path-selected integration lanes feed one final ci gate. Bots follow the same documentation/context protocol; every merge needs human approval with a review comment. Main protections and cloud credentials require owner configuration.",
       "paths": [
         "package.json",
         "pnpm-workspace.yaml",
+        ".github/dependabot.yml",
+        "CONTRIBUTING.md",
         ".github/workflows/ci.yml",
         ".github/workflows/deploy-staging.yml",
         ".github/PULL_REQUEST_TEMPLATE.md",
@@ -139,7 +141,7 @@ Read this map first, then the relevant source paths and ADRs. It is navigation, 
         "console",
         "backend"
       ],
-      "sourceFingerprint": "330cf466fc78c6ae422fcfea4c237266b193e834cd40502f56c5d88f45bea1da"
+      "sourceFingerprint": "44ec530f07867ca11cd1e7c45107ba30af02ae49e056509d8803c04761805b30"
     },
     {
       "id": "agents",
@@ -170,6 +172,13 @@ Read this map first, then the relevant source paths and ADRs. It is navigation, 
     }
   ],
   "handoffs": [
+    {
+      "summary": "Dependabot PRs failed the required narrative gate and version changes also stale the delivery fingerprint. Retained both safeguards, documented collaborator preparation and human review comments, grouped monthly updates, and placed documentation checks after build verification without adding CI jobs.",
+      "modules": [
+        "delivery"
+      ],
+      "next": "Review the maintenance PR and its exact CI results before merging; owner enables required ci and human approval rules plus Dependabot security settings. Prepare subsequent monthly bot PRs using CONTRIBUTING.md."
+    },
     {
       "summary": "Repository foundation established; implementation status is deliberately separated from the accepted V1 plan. Exact bootstrap checks and review evidence belong to its PR.",
       "modules": [

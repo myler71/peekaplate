@@ -68,9 +68,18 @@ jobs:
           node-version: 24.16.0
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: node scripts/check-pr.mjs
-      - run: pnpm check
+      - name: Code quality and unit tests
+        run: pnpm lint && pnpm typecheck && pnpm test
       - run: pnpm build
+      - name: Context freshness
+        if: ${{ !cancelled() }}
+        run: pnpm context:check
+      - name: Documentation links
+        if: ${{ !cancelled() }}
+        run: pnpm docs:check
+      - name: PR documentation
+        if: ${{ !cancelled() }}
+        run: node scripts/check-pr.mjs
 
   database:
     needs: changes

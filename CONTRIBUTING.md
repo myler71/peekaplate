@@ -27,7 +27,13 @@ Use `pnpm exec vitest run <test-path>` or `node --test <script-test>` while iter
 - Use new timestamped SQL migrations. Test from an empty DB and the previous deployed schema. Never run a destructive down migration against a shared environment.
 - Keep runtime dependencies exact and the lockfile committed. Review dependency bot PRs like code; no automatic dependency merges.
 
-Use the [review skill](.agents/skills/peekaplate-review/SKILL.md) or `review-coordinator` with the base/head SHAs. Authors fix findings; reviewers stay read-only. Resolve conversations and obtain a human approval before ordinary feature merges. The one-time repository bootstrap follows the owner's setup authorization; subsequent work uses this PR process.
+Use the [review skill](.agents/skills/peekaplate-review/SKILL.md) or `review-coordinator` with the base/head SHAs. Authors fix findings; reviewers stay read-only. Resolve conversations and obtain a human approval with a review comment on the current commit before merging any PR, including dependency updates. The comment states what was reviewed, the verification considered and any remaining limitations. AI-written code and documentation are allowed; an agent or bot cannot supply the required human approval. The one-time repository bootstrap followed the owner's setup authorization; subsequent work uses this PR process.
+
+## Dependency PR preparation
+
+Routine updates arrive monthly, grouped into at most one open npm PR and one open Actions PR. Major version upgrades are planned manually; security updates have their own groups and can arrive sooner. No auto-merge.
+
+A collaborator prepares each Dependabot PR before review: complete the normal PR template with factual impact and exact verification results, inspect release notes and the diff, then review affected context summaries and commit refreshed fingerprints when needed. An agent may help prepare these changes. Dependabot's generated release notes alone do not satisfy the template. CI intentionally remains red until the same documentation and code checks pass; there is no bot exemption. Record checks not yet run as `NOT RUN` with a reason, then use the actual CI results during review.
 
 ## Context handoff
 
