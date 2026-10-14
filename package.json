@@ -21,9 +21,11 @@
     "context:refresh": "node scripts/context.mjs refresh",
     "context:show": "node scripts/context.mjs show",
     "docs:check": "node scripts/check-docs.mjs",
-    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm context:check && pnpm docs:check"
+    "verify": "node scripts/verify.mjs",
+    "check": "node scripts/verify.mjs lint typecheck test context:check docs:check"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
     "@biomejs/biome": "2.5.15",
     "@playwright/test": "1.64.0",
     "@types/node": "24.19.2",

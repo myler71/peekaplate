@@ -25,6 +25,8 @@ Keep each slice complete. Split an oversized slice into independently testable P
 
 PRs 4 and 5 may run in parallel after their prerequisites. Avoid a second database, graph service, Rust service or Python test layer for this TypeScript application. Add a pinned `uv` Python job and pytest only when a real capture-processing job lands with its own tests.
 
+PR 1 must establish the complete tenant boundary: verify the session and active venue membership server-side, derive actor/venue/permissions there, then bind context inside the command transaction with transaction-local settings. Browser venue fields cannot grant authority. Use separate migration and runtime credentials; the runtime role must not own tables, be superuser or bypass RLS. Test missing/invalid identity, forged venue fields, cross-venue reads/writes, revoked membership on retry, and context reset after commit/rollback and pooled connection reuse using the deployed connection mode. Caller-set PostgreSQL settings alone do not authenticate a tenant: untrusted clients must never obtain that SQL role or an arbitrary-SQL endpoint.
+
 ## Gate decisions
 
 - **G1:** capture and truthfulness rules signed off; approved T0 content exists. No generated edible surfaces.

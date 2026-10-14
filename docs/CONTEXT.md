@@ -4,6 +4,8 @@ Read this map first, then the relevant source paths and ADRs. It is navigation, 
 
 `foundation` means a tested starting point with incomplete product behavior; `implemented` means the stated narrow capability exists; `planned` means architecture only. Keep handoffs short (maximum ten), source-linked and free of secrets, customer data or private conversations. Use Git history for older context. Never store reasoning transcripts.
 
+The append-only `errors.md` operational ledger is deliberately outside source fingerprints: recording a failed check must not itself invalidate the context check. Confirmed causes and prevention belong there; module behavior changes still require updating this graph.
+
 ```json
 {
   "schemaVersion": 1,
@@ -25,14 +27,15 @@ Read this map first, then the relevant source paths and ADRs. It is navigation, 
     {
       "id": "diner",
       "status": "foundation",
-      "summary": "Static TypeScript/Vite shell with semantic HTML usable without JavaScript. No real menu, analytics or viewer. Build checks initial JS gzip budget and rejects known renderer modules in the initial graph; future assets/device behavior need their own evidence.",
+      "summary": "Static TypeScript/Vite shell usable without JavaScript; evolving Claude prototype direction is documented, not implemented as a real menu. Build checks initial JS gzip budget, rejects known initial renderer modules and fails on unaccounted imports. Viewer, analytics and device performance remain planned.",
       "paths": [
         "frontend/diner/index.html",
         "frontend/diner/src/main.ts",
         "frontend/diner/src/style.css",
         "frontend/diner/vite.config.ts",
         "scripts/check-bundle.mjs",
-        "scripts/check-bundle.test.mjs"
+        "scripts/check-bundle.test.mjs",
+        "docs/frontend-design.md"
       ],
       "adrs": [
         "docs/adr/0004-visual-tiers.md"
@@ -40,7 +43,7 @@ Read this map first, then the relevant source paths and ADRs. It is navigation, 
       "dependsOn": [
         "contracts"
       ],
-      "sourceFingerprint": "28b163424a60728bc438e945964440e02f9e663899ebfbdd5e0453fb7570110c"
+      "sourceFingerprint": "51f379b91056380008e166833c886802b60594776e217bd9e1d01b5732b67e58"
     },
     {
       "id": "console",
@@ -83,7 +86,7 @@ Read this map first, then the relevant source paths and ADRs. It is navigation, 
     {
       "id": "database",
       "status": "foundation",
-      "summary": "Private Postgres venue/event/command/outbox tables with constraints, append-only event triggers and default-deny RLS. No runtime grants or command/projection transaction API yet. Next PR must prove concurrency, authorized retries and atomic projections/outbox; identity allocation is not commit order.",
+      "summary": "Private Postgres venue/event/command/outbox foundation. Real tests cover append-only events, constraints and no-context/own-tenant/cross-tenant event, command and outbox access under a restricted test role. No runtime grants or command/projection API. PR 1 must bind verified authority transaction-locally and prove concurrent commands, atomicity and safe connection reuse; identity allocation is not commit order.",
       "paths": [
         "migrations/202610130001_foundation.sql",
         "tests/db/foundation.sql",
@@ -96,7 +99,7 @@ Read this map first, then the relevant source paths and ADRs. It is navigation, 
         "docs/adr/0005-tenancy-and-privacy.md"
       ],
       "dependsOn": [],
-      "sourceFingerprint": "ad49cafcf674e8f664a5fc746ce0eabd6280f1591b2c2e7f1b06846f628ae50d"
+      "sourceFingerprint": "324527aaebb7619c38ebe1c0eb4781383dd2212e3ee70a61b7c9c76e60010686"
     },
     {
       "id": "measurement",
@@ -111,15 +114,17 @@ Read this map first, then the relevant source paths and ADRs. It is navigation, 
       "dependsOn": [
         "backend"
       ],
-      "sourceFingerprint": "21e69531f6a5ef6183ced4e4604ca9700e56558e3c698a3ee7b62e6ad86d19d1"
+      "sourceFingerprint": "1b098535a4fb3a5952912bbb6cc819a9ab1956c06cb45ac5c0b3716f203b007b"
     },
     {
       "id": "delivery",
       "status": "foundation",
-      "summary": "Pinned workspace dependencies, always-on quality checks, path-selected database/browser lanes and a fail-closed final ci gate. PR documentation and context are checked mechanically; meaning needs human review. Main protections and cloud credentials require owner configuration.",
+      "summary": "Monthly grouped minor/patch updates with manual major upgrades; independently grouped security updates when enabled. One final ci gate covers quality and path-selected DB/browser checks; browser includes shell accessibility/overflow. Named verification records sanitized failure observations locally or in CI step summaries. Requirements map distinguishes foundation evidence from future product gates. Human review/comment policy applies; owner must configure protections and cloud resources.",
       "paths": [
         "package.json",
         "pnpm-workspace.yaml",
+        ".github/dependabot.yml",
+        "CONTRIBUTING.md",
         ".github/workflows/ci.yml",
         ".github/workflows/deploy-staging.yml",
         ".github/PULL_REQUEST_TEMPLATE.md",
@@ -129,7 +134,10 @@ Read this map first, then the relevant source paths and ADRs. It is navigation, 
         "scripts/check-docs.test.mjs",
         "playwright.config.ts",
         "tests/e2e/foundation.spec.ts",
-        "docs/operations.md"
+        "docs/operations.md",
+        "scripts/verify.mjs",
+        "scripts/verify.test.mjs",
+        "docs/verification.md"
       ],
       "adrs": [
         "docs/adr/0007-delivery-and-recovery.md"
@@ -139,12 +147,12 @@ Read this map first, then the relevant source paths and ADRs. It is navigation, 
         "console",
         "backend"
       ],
-      "sourceFingerprint": "330cf466fc78c6ae422fcfea4c237266b193e834cd40502f56c5d88f45bea1da"
+      "sourceFingerprint": "6ba8d038a0f7be4936b33d40a8ee19c76de4e051b68437aaa6d5bd7c4b1fbe1c"
     },
     {
       "id": "agents",
       "status": "implemented",
-      "summary": "Repository guidance and Claude/Codex coordinator, architecture, correctness, guide and task-builder profiles. Reviewers stay read-only; builders own explicitly assigned files. Review requires pinned head, source evidence, uncertainty and separate ADR intent from implemented behavior. Context tooling checks links/freshness, not semantic correctness; models are not infallible or permission boundaries.",
+      "summary": "Aligned Claude/Codex coordinator, architecture, correctness, guide and builder profiles use one shared evidence/JSON review contract. Read-only reviewers pin source and check dirty/untracked changes; builders own bounded complete tasks and handoffs. Read errors.md before work and confirm diagnoses with regression evidence. Context freshness and prompt parity checks do not prove model accuracy or production behavior.",
       "paths": [
         "AGENTS.md",
         "CLAUDE.md",
@@ -160,16 +168,34 @@ Read this map first, then the relevant source paths and ADRs. It is navigation, 
         ".codex/agents/repo-guide.toml",
         ".codex/agents/task-builder.toml",
         "scripts/context.mjs",
-        "scripts/context.test.mjs"
+        "scripts/context.test.mjs",
+        "docs/research/reviewer-evaluation.md"
       ],
       "adrs": [
         "docs/adr/0008-agent-context-and-review.md"
       ],
       "dependsOn": [],
-      "sourceFingerprint": "fd64b81a593e5482c913fa613d80c935313b9730ff29846497ecb7f9ededdbaa"
+      "sourceFingerprint": "282c198c1c4228eb52449f05ad62fef7c1afa581ad551d31992cf4a2bc99806d"
     }
   ],
   "handoffs": [
+    {
+      "summary": "Foundation hardening adds source-to-check traceability, evolving design handoff, command/outbox RLS coverage, shell accessibility checks, fail-closed bundle imports, actionable DB diagnostics and automatic sanitized verification observations. Role adapters share evidence and task handoff rules; no product or cloud capability is invented.",
+      "modules": [
+        "diner",
+        "database",
+        "delivery",
+        "agents"
+      ],
+      "next": "Use the exact setup PR CI evidence, then start PR 1 staff authority and atomic command transaction. Confirm owner merge controls and staging resources; real menu/device/restore performance remains future gate evidence."
+    },
+    {
+      "summary": "Dependabot PRs failed the required narrative gate and version changes also stale the delivery fingerprint. Retained both safeguards, documented collaborator preparation and human review comments, grouped monthly updates, and placed documentation checks after build verification without adding CI jobs.",
+      "modules": [
+        "delivery"
+      ],
+      "next": "Review the maintenance PR and its exact CI results before merging; owner enables required ci and human approval rules plus Dependabot security settings. Prepare subsequent monthly bot PRs using CONTRIBUTING.md."
+    },
     {
       "summary": "Repository foundation established; implementation status is deliberately separated from the accepted V1 plan. Exact bootstrap checks and review evidence belong to its PR.",
       "modules": [
