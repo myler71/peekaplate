@@ -119,8 +119,9 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "delivery",
       "status": "foundation",
-      "summary": "Monthly grouped minor/patch updates with manual major upgrades; independently grouped security updates when enabled. One final ci gate covers quality and path-selected DB/browser checks; browser includes shell accessibility/overflow. Named verification records sanitized failure observations locally or in CI step summaries. Requirements map distinguishes foundation evidence from future product gates. Human review/comment policy applies; owner must configure protections and cloud resources.",
+      "summary": "README distinguishes installed TypeScript foundations from future Python processing/analysis with uv/pytest. Monthly grouped minor/patch updates, manual majors and independently grouped security updates when enabled. One ci gate covers quality and path-selected integration checks. Verification records sanitized observations locally or in CI summaries. Human review/comment policy applies; owner must configure protections and cloud resources.",
       "paths": [
+        "README.md",
         "package.json",
         "pnpm-workspace.yaml",
         ".github/dependabot.yml",
@@ -147,7 +148,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "6ba8d038a0f7be4936b33d40a8ee19c76de4e051b68437aaa6d5bd7c4b1fbe1c"
+      "sourceFingerprint": "b78840954baf150784b4802257e9ac3e61d3deea0105da46a281810097b79220"
     },
     {
       "id": "agents",
@@ -179,6 +180,13 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     }
   ],
   "handoffs": [
+    {
+      "summary": "README now explains current versus planned capabilities, TypeScript rationale and the accepted Python/uv/pytest extension path, runnable checks, event paths, visual tiers, agent workflow and owner setup. ADRs and runtime behavior are unchanged.",
+      "modules": [
+        "delivery"
+      ],
+      "next": "Implement the delivery plan's first feature slice: verified staff/venue authority and an atomic dish-revision command. Introduce a Python job with its own tests only when its processing/analysis feature is implemented."
+    },
     {
       "summary": "Foundation hardening adds source-to-check traceability, evolving design handoff, command/outbox RLS coverage, shell accessibility checks, fail-closed bundle imports, actionable DB diagnostics and automatic sanitized verification observations. Role adapters share evidence and task handoff rules; no product or cloud capability is invented.",
       "modules": [
