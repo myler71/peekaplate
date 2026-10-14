@@ -37,3 +37,15 @@ Related files: `scripts/test-db.mjs`, `docs/research/reviewer-evaluation.md`.
 Dependabot's generated body did not satisfy the required PR sections, and its action-version changes also invalidated the delivery context fingerprint. The early metadata failure prevented code checks from running, obscuring independent results. Keep the same documentation/context requirements for automated and human-authored PRs; a collaborator can prepare the missing evidence. Run code/build checks before metadata and expose documentation failures independently inside the existing quality job. Human approval with a review comment remains a merge responsibility, without a duplicate CI workflow.
 
 Related files: `.github/workflows/ci.yml`, `.github/dependabot.yml`, `CONTRIBUTING.md`.
+
+## LRN-20261014-002 · Distinguish deferred tooling from excluded architecture
+
+**Logged**: 2026-10-14
+**Priority**: medium
+**Status**: resolved
+**Area**: docs
+**Category**: correction
+
+An onboarding page that lists only the installed stack can imply that a planned language or processing stage has been rejected. State current prerequisites, the accepted extension path and its implementation trigger in the README. Link the owning ADR rather than leaving this distinction only in a delivery document. Keep planned work clearly separate from runnable commands and existing capabilities.
+
+Related files: `README.md`, `docs/adr/0001-scope-and-repository.md`.
