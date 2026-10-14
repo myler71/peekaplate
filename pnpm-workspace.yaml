@@ -1,0 +1,11 @@
+packages:
+  - frontend/*
+  - backend
+  - packages/*
+
+minimumReleaseAge: 1440
+saveExact: true
+engineStrict: true
+allowBuilds:
+  esbuild: true
+  workerd: true
