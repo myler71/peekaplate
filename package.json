@@ -1,0 +1,33 @@
+{
+  "name": "peekaplate",
+  "private": true,
+  "type": "module",
+  "version": "0.0.0",
+  "packageManager": "pnpm@11.25.0",
+  "engines": {
+    "node": ">=24.16.0 <25",
+    "pnpm": ">=11.25.0 <12"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel --filter './frontend/*' --filter @peekaplate/backend dev",
+    "build": "pnpm -r --if-present build",
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "test": "vitest run && node --test scripts/*.test.mjs",
+    "test:e2e": "playwright test",
+    "test:db": "node scripts/test-db.mjs",
+    "context:check": "node scripts/context.mjs check",
+    "context:refresh": "node scripts/context.mjs refresh",
+    "context:show": "node scripts/context.mjs show",
+    "docs:check": "node scripts/check-docs.mjs",
+    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm context:check && pnpm docs:check"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.15",
+    "@playwright/test": "1.64.0",
+    "@types/node": "24.19.2",
+    "typescript": "6.0.3",
+    "vitest": "4.1.11"
+  }
+}

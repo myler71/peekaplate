@@ -1,0 +1,9 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
+  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+  "files": { "includes": ["**", "!!**/dist", "!!work", "!!pnpm-lock.yaml"] },
+  "formatter": { "enabled": true, "indentStyle": "space", "lineWidth": 100 },
+  "linter": { "enabled": true, "rules": { "preset": "none" } },
+  "javascript": { "formatter": { "quoteStyle": "single" } },
+  "assist": { "actions": { "source": { "organizeImports": "on" } } }
+}
