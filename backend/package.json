@@ -5,14 +5,19 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev --ip 127.0.0.1 --port 8787",
+    "local": "node local.mjs",
+    "local:demo": "node local.mjs demo",
     "build": "wrangler deploy --env staging --dry-run --outdir dist",
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
     "@peekaplate/contracts": "workspace:*",
-    "hono": "4.13.13"
+    "hono": "4.13.13",
+    "jose": "6.2.12",
+    "pg": "8.23.1"
   },
   "devDependencies": {
+    "@types/pg": "8.23.1",
     "wrangler": "4.149.0"
   }
 }

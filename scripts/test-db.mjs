@@ -1,4 +1,5 @@
 import { spawnSync } from 'node:child_process';
+import { readdirSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
@@ -75,15 +76,42 @@ async function waitForPostgres() {
   throw new Error('Postgres did not become ready within 30 seconds');
 }
 
-export async function main() {
-  let networkCreated = false;
+export function stopDatabase() {
+  spawnSync('docker', ['rm', '--force', '--volumes', container], {
+    encoding: 'utf8',
+    timeout: 30_000,
+  });
+  spawnSync('docker', ['network', 'rm', network], { encoding: 'utf8', timeout: 30_000 });
+}
+
+export function databaseSql(query) {
+  return docker(
+    [
+      'exec',
+      '-i',
+      container,
+      'psql',
+      '-U',
+      'postgres',
+      '-d',
+      'peekaplate',
+      '--set',
+      'ON_ERROR_STOP=1',
+      '--tuples-only',
+      '--no-align',
+    ],
+    'database fixture',
+    { input: query },
+  ).stdout;
+}
+
+export async function startDatabase() {
   try {
     docker(
       ['build', '--tag', postgresImage, '--file', 'tests/db/Dockerfile', 'tests/db'],
       'build database test image',
     );
     docker(['network', 'create', network], 'create database test network');
-    networkCreated = true;
     docker(
       [
         'run',
@@ -94,6 +122,8 @@ export async function main() {
         network,
         '--network-alias',
         'db',
+        '--publish',
+        '127.0.0.1::5432',
         '--mount',
         `type=bind,source=${root}tests/db,target=/tests,readonly`,
         '--env',
@@ -114,45 +144,106 @@ export async function main() {
       `DATABASE_URL=${databaseUrl}`,
       '--mount',
       `type=bind,source=${root}migrations,target=/migrations,readonly`,
+      '--mount',
+      `type=bind,source=${root}migrations/202610130001_foundation.sql,target=/foundation/202610130001_foundation.sql,readonly`,
       dbmateImage,
       '--migrations-dir',
       '/migrations',
       'up',
     ];
+    const foundationArgs = [...dbmateArgs];
+    foundationArgs[foundationArgs.indexOf('/migrations')] = '/foundation';
+    docker(foundationArgs, 'install previous schema');
+    databaseSql(
+      "INSERT INTO app_private.venues(id,name) VALUES ('00000000-0000-4000-8000-000000000099','Upgrade fixture');",
+    );
     docker(dbmateArgs, 'apply migrations');
     docker(dbmateArgs, 'confirm migrations are already applied');
-    const tap = docker(
-      [
-        'exec',
-        container,
-        'psql',
-        '--tuples-only',
-        '--no-align',
-        '--username',
-        'postgres',
-        '--dbname',
-        'peekaplate',
-        '--set',
-        'ON_ERROR_STOP=1',
-        '--file',
-        '/tests/foundation.sql',
-      ],
-      'run pgTAP',
+    if (
+      databaseSql(
+        "SELECT count(*) FROM app_private.venues WHERE id='00000000-0000-4000-8000-000000000099';",
+      ).trim() !== '1'
+    ) {
+      throw new Error('Upgrade lost an existing venue');
+    }
+    databaseSql(
+      "CREATE ROLE peekaplate_local LOGIN PASSWORD 'peekaplate_local_test' IN ROLE peekaplate_runtime;",
     );
-    const count = validateTap(tap.stdout);
-    process.stdout.write(`pgTAP: ${count} assertions passed\n`);
-  } finally {
-    spawnSync('docker', ['rm', '--force', container], {
-      cwd: root,
-      encoding: 'utf8',
-      timeout: 30_000,
-    });
-    if (networkCreated)
-      spawnSync('docker', ['network', 'rm', network], {
+    const address = docker(
+      ['port', container, '5432/tcp'],
+      'locate disposable database',
+    ).stdout.trim();
+    if (!/^127\.0\.0\.1:\d+$/.test(address))
+      throw new Error('Test database must bind only to loopback');
+    return {
+      adminUrl: `postgres://postgres:peekaplate_test@${address}/peekaplate?sslmode=disable`,
+      runtimeUrl: `postgres://peekaplate_local:peekaplate_local_test@${address}/peekaplate?sslmode=disable`,
+    };
+  } catch (error) {
+    stopDatabase();
+    throw error;
+  }
+}
+
+export async function main() {
+  try {
+    const database = await startDatabase();
+    for (const file of readdirSync(new URL('../tests/db/', import.meta.url))
+      .filter((file) => file.endsWith('.sql'))
+      .sort()) {
+      const tap = docker(
+        [
+          'exec',
+          container,
+          'psql',
+          '--tuples-only',
+          '--no-align',
+          '--username',
+          'postgres',
+          '--dbname',
+          'peekaplate',
+          '--set',
+          'ON_ERROR_STOP=1',
+          '--file',
+          `/tests/${file}`,
+        ],
+        'run pgTAP',
+      );
+      const count = validateTap(tap.stdout);
+      process.stdout.write(`pgTAP ${file}: ${count} assertions passed\n`);
+    }
+    const pnpm = process.env.npm_execpath;
+    if (!pnpm || !/pnpm(?:\.c?js)?$/i.test(pnpm))
+      throw new Error('Run this check through pnpm verify test:db');
+    ensureSuccess(
+      spawnSync(
+        process.execPath,
+        [pnpm, 'exec', 'vitest', 'run', '--config', 'vitest.db.config.ts'],
+        {
+          cwd: root,
+          encoding: 'utf8',
+          stdio: 'inherit',
+          timeout: 120_000,
+          env: {
+            ...process.env,
+            PEEKAPLATE_DB_TEST_URL: database.runtimeUrl,
+            PEEKAPLATE_DB_ADMIN_URL: database.adminUrl,
+          },
+        },
+      ),
+      'real database integration tests',
+    );
+    ensureSuccess(
+      spawnSync(process.execPath, ['backend/local.mjs', 'check'], {
         cwd: root,
         encoding: 'utf8',
-        timeout: 30_000,
-      });
+        stdio: 'inherit',
+        timeout: 120_000,
+      }),
+      'local development command smoke test',
+    );
+  } finally {
+    stopDatabase();
   }
 }
 

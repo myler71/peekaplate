@@ -57,3 +57,28 @@ export const DishIntentEventSchema = z
 
 export type HealthResponse = z.infer<typeof HealthResponseSchema>;
 export type DishIntentEvent = z.infer<typeof DishIntentEventSchema>;
+
+const uuid = z.uuid().transform((value) => value.toLowerCase());
+const postgresText = z
+  .string()
+  .refine((value) => !value.includes('\u0000'), 'NUL is not supported');
+
+export const DishRevisionScopeSchema = z.strictObject({ venueId: uuid, dishId: uuid });
+
+export const CreateDishRevisionSchema = z.strictObject({
+  commandId: uuid,
+  expectedVersion: z.number().int().nonnegative().max(2_147_483_646),
+  name: postgresText.trim().min(1).max(160),
+  description: postgresText.trim().max(4000),
+});
+
+export const DishRevisionSchema = z.strictObject({
+  dishId: uuid,
+  revisionId: uuid,
+  version: z.number().int().positive().max(2_147_483_647),
+  name: postgresText.min(1).max(160),
+  description: postgresText.max(4000),
+});
+
+export type CreateDishRevision = z.infer<typeof CreateDishRevisionSchema>;
+export type DishRevision = z.infer<typeof DishRevisionSchema>;

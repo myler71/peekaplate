@@ -4,9 +4,11 @@
 
 PeekaPlate is a restaurant menu and measurement platform designed to connect diner menu exposure with linked order outcomes and controlled menu experiments. The [V1 planning baseline](https://claude.ai/artifact/LUJ4ggBXpF7korJWbg4u8f) defines the product scope; [Architecture Decision Records](docs/adr/README.md) define the accepted technical decisions.
 
+The [team guide](docs/team_guide.md) explains the system and each tracked file's purpose in plain language, distinguishes working features from plans, and gives the next steps.
+
 ## Implementation status
 
-The repository contains a tested application foundation: diner and staff-console shells, a health-only API, shared payload schemas, initial PostgreSQL migrations, and development and CI tooling. Staff authentication, business commands, menu publication, intent ingestion, POS integration, visual rendering and cloud resource provisioning are not implemented. Existing checks establish foundation behavior; feature and pilot acceptance criteria are tracked in the [verification map](docs/verification.md).
+The repository contains diner and staff-console shells and a local staff-command slice: signed staff-token verification, restaurant membership checks, and atomic dish-revision writes with tenant isolation. Local verification uses synthetic identities, real PostgreSQL and the Workers runtime. Hosted Supabase authentication, Hyperdrive connection behavior and cloud resource provisioning remain unverified. Console login, menu publication, intent ingestion, POS integration and visual rendering are not implemented. Feature and pilot acceptance criteria are tracked in the [verification map](docs/verification.md).
 
 ## Technology and architecture
 
@@ -14,9 +16,9 @@ The repository contains a tested application foundation: diner and staff-console
 | --- | --- | --- |
 | Diner frontend | TypeScript, Vite | Static shell with content available without JavaScript |
 | Staff console | React, TypeScript, Vite | Application shell |
-| Backend | Hono, TypeScript, Cloudflare Workers | `GET /health`; unknown routes return 404 |
-| Shared contracts | Zod, TypeScript | Health response and initial dish-intent schemas |
-| Database | PostgreSQL, SQL, dbmate | Private venue, event, command and outbox tables; constraint and restricted-role tests |
+| Backend | Hono, TypeScript, Cloudflare Workers | Health and authenticated dish-revision commands; hosted bindings remain unconfigured |
+| Shared contracts | Zod, TypeScript | Health, dish revision and initial dish-intent schemas |
+| Database | PostgreSQL, SQL, dbmate | Private venues, staff memberships, dish projections, events, receipts and outbox; restricted runtime role |
 | Processing and analysis | Python, uv, pytest | Accepted scope in [ADR 0001](docs/adr/0001-scope-and-repository.md); no job, package or runtime dependency implemented |
 
 Frontends and backend share contracts. Frontends do not import backend internals or hold database credentials. Authorization belongs to the backend; venue authority must derive from verified identity and membership. Database policies support this boundary; they do not authenticate callers.
@@ -58,6 +60,16 @@ pnpm dev
 | Staff console | http://127.0.0.1:5174 |
 | API health | http://127.0.0.1:8787/health |
 
+For authenticated backend development, run the following instead of the unconfigured API process:
+
+```sh
+pnpm dev:backend
+# In a second terminal:
+pnpm local:demo
+```
+
+This starts a disposable Docker database, a loopback-only synthetic JWT issuer and the local Worker. The demo creates a dish revision through HTTP. Generated credentials stay in ignored `work/local-session.json` and expire after one hour; restart the local session to renew them. Ctrl+C removes the session database and credentials. No Supabase or Cloudflare account is required. See [operations](docs/operations.md) for the API contract and the cloud-integration checkpoint.
+
 ## Verification
 
 | Command | Purpose |
@@ -65,7 +77,7 @@ pnpm dev
 | `pnpm check` | Formatting/lint, strict types, application/contract and repository-script tests, context freshness and local documentation links |
 | `pnpm verify build` | Frontend builds, initial diner JavaScript budget and Worker deployment dry-run |
 | `pnpm verify test:e2e` | Chromium shell/API flows, no-JavaScript content, accessibility and narrow-screen overflow |
-| `pnpm verify test:db` | Migrations and pgTAP assertions against isolated, disposable PostgreSQL |
+| `pnpm verify test:db` | Migration upgrade, pgTAP policies and real Worker/JWT/PostgreSQL concurrency, rollback, retry and replay checks |
 
 Install the browser once with `pnpm exec playwright install chromium`. Verification records sanitized failure observations in [errors.md](errors.md) locally and step summaries in CI. Resolution requires a confirmed cause and regression evidence. [Contributing](CONTRIBUTING.md) defines the complete verification and PR protocol.
 
@@ -91,7 +103,7 @@ CI uses five jobs with distinct responsibilities: `changes` selects integration 
 
 Routine npm and GitHub Actions dependency updates are grouped monthly, with one open version-update PR per ecosystem. Major upgrades are manual; enabled security updates can arrive sooner. AI-written and dependency PRs follow the same documentation, verification and human approval-with-comment requirements.
 
-The manual staging workflow deploys only the health Worker. Repository administrators must configure branch protections, required `ci`, review rules, staging credentials and cloud resources. Configuration and release procedures are documented in [operations](docs/operations.md).
+The manual staging workflow deploys the Worker, but its staff routes fail closed until real authentication and database bindings are supplied. No hosted integration has been activated. Repository administrators must configure branch protections, required `ci`, review rules, staging credentials and cloud resources. Configuration and release procedures are documented in [operations](docs/operations.md).
 
 ## Project documentation
 
