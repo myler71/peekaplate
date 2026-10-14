@@ -43,7 +43,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "contracts"
       ],
-      "sourceFingerprint": "abe12b9f023c31b0406d90c47659049b51d2a0b4da5596c7bfe6cd0aa6b0171a"
+      "sourceFingerprint": "09b3c416fc96e33d0e645d05ae270d004ad699983df725bef4f62d6165b3471f"
     },
     {
       "id": "console",
@@ -161,7 +161,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "3f96c5f4a7c2478bdd82dda818a9a20d473cd929bf6b8bc36ec656ab5abbfdc8"
+      "sourceFingerprint": "c65c53bb357c98979b852086567a8ba745d871349213026817bb418c0d6b7a39"
     },
     {
       "id": "agents",
@@ -194,7 +194,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
   ],
   "handoffs": [
     {
-      "summary": "Updated team_guide with all 24 ClickUp tasks and seven scope subtasks, dated assignments, latest design progress and summarized project coordination. Research/design completion is distinct from implementation; Sai initiated code setup. PR 9 merged at 413be96 with successful main CI. No runtime behavior or external board/chat state changed.",
+      "summary": "Rewrote team_guide around a plain-language dish example, two event types and a function/line-linked code walkthrough. File, task and test inventories are expandable references; the final artifact-aligned plan separates parallel preparation from integration prerequisites. Includes 24 ClickUp tasks, seven scope subtasks and current design progress, distinct from implemented code. PR 9 merged at 413be96 with successful main CI. No runtime or external board/chat changes.",
       "modules": [
         "delivery",
         "diner"

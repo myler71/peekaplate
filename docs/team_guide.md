@@ -1,248 +1,200 @@
 # PeekaPlate: team guide
 
-Updated October 14, 2026. This guide connects the team's research and design work with the repository foundation and local staff-command work merged in [PR #9](https://github.com/vivienk/peekaplate_staging/pull/9). It explains the current code and next steps; the accepted [architecture decisions](adr/README.md) remain the engineering reference.
+Updated October 14, 2026.
 
-## 1. What we are building
+PeekaPlate is meant to help a restaurant explain its food and learn how people use its menu. The team has been researching that idea and designing the experience. Sai started the code setup. We now have the project structure, checks for new code, and one tested way to save a staff member's draft dish change.
 
-PeekaPlate helps a restaurant show its food clearly and learn what happens after people browse its menu. The intended loop is:
+**We do not have a finished menu app yet.** The current design shows where the screens are going. The code so far provides the foundation those screens will use.
 
-1. Staff capture real food and prepare accurate dish information.
-2. Reviewers approve the exact content that diners may see.
-3. Diners open the menu, with optional richer views for selected dishes.
-4. The system records which version of the menu was actually shown.
-5. Where a valid link exists, restaurant order data connects a browsing session to a ticket.
-6. The owner uses that evidence to make and evaluate a menu decision.
+This guide starts with the product and progress, then follows the code behind one dish change. The complete file list, task board and test evidence are at the end for reference.
 
-**“3D is the hook. The loop is the product.”** Attractive food views matter, but the useful outcome is an informed restaurant decision. A dish view alone does not prove a sale, an individual's order, or a sales increase.
+## 1. What a restaurant should eventually be able to do
 
-The first pilot targets one venue and a small set of enhanced dishes. It is not a finished platform yet.
+Imagine a restaurant wants to add Tomato Soup to its digital menu. This is an example, not a real restaurant record.
 
-## 2. What has actually been done
+1. Someone supplies a real photo and accurate information about the soup.
+2. Staff check the information, correct anything uncertain and approve the exact version diners will see.
+3. A diner opens the menu through a link or QR code, reads about the soup and optionally explores a richer photo view.
+4. PeekaPlate records useful actions, such as opening the soup's details.
+5. The restaurant sees a simple explanation of those actions and can decide what to improve.
 
-The team's work to date has mainly been research, product planning and design. Sai started the code setup. Keep those contributions distinct: a completed research or design ticket is useful input to engineering, but it does not mean the corresponding product feature has been coded or deployed.
+The last step needs care. Looking at a dish does not prove that someone ordered it. We must say what we observed and what we still do not know. Connecting browsing to actual orders is separate, later work that needs permission and reliable order data.
 
-| Stage | What was completed | What it gives the team |
+The visual experience is one part of this loop. Accurate food information, a usable menu and useful evidence matter just as much.
+
+## 2. Where we are today
+
+**Research and design:** the team has worked on diner needs, restaurant interviews, journeys, screen designs, processing requirements and measurement ideas. The [design shared earlier](https://claude.ai/artifact/LjkRVm78VioRB2FrVSauwJ) is the latest design progress confirmed on October 14. It should guide the upcoming screens. The shared Figma/design-system tasks are a separate handoff; an open task does not mean the design work has not happened.
+
+**Code foundation:** the repository now has separate places for the diner app, staff app, server rules, database changes, tests and documentation. It also has instructions for coding assistants and checks that run when someone proposes a change.
+
+**First working code flow:** a developer can use a local demo to submit a draft dish change. The backend checks the test user's identity and restaurant permission, saves the change and remembers the result. This work was reviewed and merged in [PR #9](https://github.com/vivienk/peekaplate_staging/pull/9).
+
+“Local” means it runs in a development environment with made-up test identities and disposable data. It does not mean the team has a live online staging service. The shared cloud database, real staff sign-in and Cloudflare connections have not been configured.
+
+| Part | What exists now | What still needs building |
 | --- | --- | --- |
-| Architecture | Eight accepted decision records covering the stack, events, evidence, visuals, privacy, orders, delivery and agents | A shared explanation of why the system is organized this way |
-| Repository foundation | Separate diner, staff console, backend, shared contracts, migrations, tests and documentation | Places to work independently without mixing browser code with database authority |
-| Engineering safeguards | Reproducible dependency versions, CI, PR template, ownership guidance, monthly dependency updates, context and error records | Repeatable checks and a consistent handoff process |
-| Research | A recorded survey of 65 public repositories' metadata and folder patterns | Ideas selected for this project's size; not 65 full code or security audits |
-| Agent assistance | Five paired Codex/Claude profiles and selected prompt-behavior evaluations | Defined jobs for navigation, implementation and independent review |
-| Local backend feature | Staff-token verification, restaurant membership checks and dish-revision commands | A real request can create a dish revision safely in a disposable local database |
-| Verification | Unit, database, Worker, local-demo and browser checks, with independent review fixes | Evidence for the implemented local scope |
+| Diner screen | A basic staging page | A real restaurant menu based on the design |
+| Staff screen | A starter page | Sign-in, editing, review, approval and publishing screens |
+| Saving a dish | Tested backend draft-save flow | Connecting it to the staff screen and real identity provider |
+| Food visuals | Design direction and written rules | Reviewed assets and the optional interactive viewer |
+| Diner tracking | Initial rules for event data | Collecting, storing and reporting actual browsing actions |
+| Owner report | Research/design requirements | A report built from real, permitted evidence |
 
-The public diner is currently a staging message. The staff console is a React shell. Neither screen connects to the dish-editing command yet. There is no finished login screen, real published menu, analytics ingestion, POS adapter or Three.js viewer.
+ClickUp's “Complete” status describes a task's recorded progress. It is not proof that a feature works in the code. For example, the approval-path task is marked complete, while approval and publication are still missing from this repository. That mismatch needs to be reconciled with the actual deliverable.
 
-No Cloudflare or Supabase resources were provisioned for this work. Merging the code does not deploy it: staging deployment has a separate manual workflow.
+## 3. What “events” mean in PeekaPlate
 
-### How the ClickUp work connects to the repository
+An **event is a saved record that something happened**. It is not a calendar event, an AI agent or a message sent to the team.
 
-The [ClickUp board](https://app.clickup.com/90141746115/v/b/t/90141746115) was read on October 14, including all 24 top-level tasks and the seven scope subtasks under sprint planning. At the end of that review, the board showed **12 To do, 4 In progress and 8 Complete** top-level tasks. Statuses changed during the review; this is a dated snapshot, not a live tracker. Assignees below are the displayed ClickUp assignments, not new commitments or job titles. “Unassigned” means no person was assigned in that field.
+There are two kinds here:
 
-The latest design progress is the [PeekaPlate Flow Prototype](https://claude.ai/artifact/LjkRVm78VioRB2FrVSauwJ), confirmed as the current reference on October 14. Use it when discussing screens. The separate Figma/design-system tasks describe the handoff work recorded on the board; their open status does not erase progress in the prototype.
-
-| ClickUp task | Status | Assigned people | What it contributes |
+| Kind | Plain example | Why keep it? | Built yet? |
 | --- | --- | --- | --- |
-| [Define Sprint Goals + candidate Sprint Backlog](https://app.clickup.com/t/90141746115/86bcex5hb) | In progress | Vivien Kong | Candidate small restaurant/dish workflow and boundaries; planning must select the actual sprint commitment |
-| [Sprint 2 Planning](https://app.clickup.com/t/90141746115/86bchxfk2) | To do | Unassigned | Review evidence, carryover, dates, capacity and acceptance criteria |
-| [Refine candidate Sprint 1 PBIs + engineering acceptance criteria](https://app.clickup.com/t/90141746115/86bcex5x3) | To do | Vivien Kong | Turn the product idea into one specified flow with inputs, outputs, failures and tests |
-| [Run restaurant validation outreach + survey tracking](https://app.clickup.com/t/90141746115/86bcex5wq) | To do | Unassigned | Operator outreach and response tracking; the description asks for team participation |
-| [Run lightweight diner + restaurant discovery](https://app.clickup.com/t/90141746115/86bcex99b) | To do | Vivien Kong, Shirley Rosario | Interview findings and assumptions that should change the backlog |
-| [Define diner JTBD + behavior hypotheses](https://app.clickup.com/t/90141746115/86bcex5rr) | Complete | Adam H | Explain diners' needs and testable behavior hypotheses; observations are not proof of intent |
-| [Map the end-to-end PeekaPlate product system](https://app.clickup.com/t/90141746115/86bcex5qb) | Complete | Vivien Kong | Map content, processing, review, diner experience and measurement; this is a system specification |
-| [Create current-state + future-state diner journey map](https://app.clickup.com/t/90141746115/86bcex99f) | Complete | Rania, Amr Hussien | Separate researched behavior from proposed improvements |
-| [Create end-to-end diner UX flow](https://app.clickup.com/t/90141746115/86bcex5t5) | Complete | Amr Hussien | Define browsing, dish details, exploration and fallback states |
-| [Design clickable interactive menu MVP](https://app.clickup.com/t/90141746115/86bcex5te) | Complete | Amr Hussien | Prototype the core diner path for testing and engineering handoff |
-| [Interactive Diner Experience](https://app.clickup.com/t/90141746115/86bcexf9r) | Complete | Rania, Adam H, Amr Hussien | Describe dish interactions; the repository's diner is still a shell |
-| [Restaurant owner receives a lightweight summary / report](https://app.clickup.com/t/90141746115/86bcexfw4) | Complete | Amr Hussien, Rania | Specify report content and useful actions; no live report is implemented here |
-| [Refine prototype layout + finalize brand palette](https://app.clickup.com/t/90141746115/86bchyk6t) | To do | Amr Hussien, Rania | Refine the existing structure and accessible palette with Vivien's review |
-| [Recreate prototype in shared Figma + establish design system](https://app.clickup.com/t/90141746115/86bchyk6w) | To do | Rania, Amr Hussien | Prepare editable shared screens, reusable styles/components and a complete diner screen |
-| [Map the complete diner and owner flows](https://app.clickup.com/t/90141746115/86bchyk71) | To do | Amr Hussien, Rania | Connect screens, review/approval, owner actions, failures and tracking points |
-| [Design Agent MVP + human-review workflow](https://app.clickup.com/t/90141746115/86bcex9a1) | In progress | Eirene Woo, Shirley Rosario, Vivien Kong | Specify source-to-draft processing, confidence, correction and human review |
-| [Specify multimodal dish-processing pipeline](https://app.clickup.com/t/90141746115/86bcex5tt) | In progress | Eirene Woo, Shirley Rosario, Vivien Kong | Define source fields, structured outputs, validation and fallback; not a running pipeline |
-| [Define AI evaluation rubric + guardrails](https://app.clickup.com/t/90141746115/86bcex5vm) | To do | Unassigned | Define accuracy, severity, confidence and mandatory human-review rules |
-| [Implement minimum human-review / approval path](https://app.clickup.com/t/90141746115/86bcexenj) | Complete | Sai Hemanth Kilaru | Board status requires reconciliation: the repo creates draft revisions, but does not implement approval or publication |
-| [Implement 2D → 3D / spatial dish generation slice](https://app.clickup.com/t/90141746115/86bcexezr) | To do | Vivien Kong, Adam H | Investigate asset feasibility, quality and fallback; older generation wording needs alignment with the visual ADR |
-| [Define diner behavior event taxonomy + measurement plan](https://app.clickup.com/t/90141746115/86bcex5w6) | In progress | Adam H | Define event names, fields and what can be measured versus inferred |
-| [Behavioral events capture](https://app.clickup.com/t/90141746115/86bcexfnc) | To do | Eirene Woo, Vivien Kong | Specify event properties and funnels; the ingest/queue/archive path still needs implementation |
-| [Agent analyzes event data and identifies basic patterns](https://app.clickup.com/t/90141746115/86bcexfrx) | To do | Eirene Woo, Vivien Kong, Shirley Rosario | Specify allowed signals, patterns and uncertainty; no analysis agent runs in this repo |
-| [Create technical risk + QA readiness plan](https://app.clickup.com/t/90141746115/86bcex5wx) | To do | Vivien Kong, Shirley Rosario | Prioritize latency, cost, truthful output, device performance and event-reliability risks |
+| A staff action that changes the product | An authorized person saved a new version of Tomato Soup | Know what changed and preserve its history | Yes, for draft dish revisions |
+| An observation of diner behavior | A session opened Tomato Soup's details | Understand how the menu was used | No; the collection flow is planned |
 
-JTBD means “jobs to be done”: what a diner is trying to accomplish. PBI means “product backlog item”: a proposed piece of product work. Adam H and Amr Hussien are separate people; matching initials on board cards are not reliable identification.
+### The events we save today
 
-The seven subtasks below refine the sprint goal. They are additional scope work, not seven extra implemented features.
+When the draft changes, the system keeps a record of the change and updates the current dish details. Keeping history this way is called **event sourcing**. We use it for selected changes where history matters; it is not a requirement to turn every setting into an event.
 
-| Scope subtask | Status | Assigned people | Decision needed |
-| --- | --- | --- | --- |
-| [Agent Workflow + Orchestration](https://app.clickup.com/t/90141746115/86bcexdce) | In progress | Eirene Woo, Shirley Rosario, Vivien Kong | Inputs, outputs, step sequence, states, handoffs and failures |
-| [Users Review + Approval](https://app.clickup.com/t/90141746115/86bcexkyh) | To do | Unassigned | What needs review and the exact approval boundary before publication |
-| [Spatial Generation](https://app.clickup.com/t/90141746115/86bcexkyy) | To do | Unassigned | Eligible representations, asset format, quality bar and fallback |
-| [Diner Experience](https://app.clickup.com/t/90141746115/86bcexkzb) | To do | Unassigned | Minimum journey and loading/error/fallback states |
-| [Behavioral Instrumentation](https://app.clickup.com/t/90141746115/86bcexkzx) | To do | Shirley Rosario, Eirene Woo, Vivien Kong | Minimum observations and fields, distinct from inferred intent |
-| [Restaurant Intelligence](https://app.clickup.com/t/90141746115/86bcexm04) | To do | Eirene Woo, Vivien Kong | Allowed aggregated signals and interpretations without causal overclaims |
-| [Owner Insight / Report](https://app.clickup.com/t/90141746115/86bcexm0h) | To do | Unassigned | Example report, supporting evidence, limitations and useful next actions |
+Four records work together when a dish is saved:
 
-### Recent coordination and decisions to reconcile
+- **History:** what change happened. In the code, this is an event.
+- **Current dish:** the latest details, ready to read. Developers call this a projection.
+- **Saved result:** remembers that this particular request was already handled, so retrying it does not create another change. This is a command receipt.
+- **Pending follow-up:** records work that may need delivering later. This is the outbox. The later delivery worker has not been built.
 
-The October 13 [Sprint 2 recap](https://discord.com/channels/1556028660832673885/1556115536243589212/1559805887839731717) prioritizes environment setup, menu capture, backend and event tracking, with unfinished work carried forward. Its handoffs are: Sai prepares the repository, agents and CI; Shirley develops the readiness plan and ticket classification; Amr and Rania develop design tokens and layouts; Adam finishes the event taxonomy; Vivien identifies third-party APIs and coordinates setup. These are recorded handoffs, not a new allocation of coding tasks.
+Those records are saved together. If one fails, none of that change should remain saved. This all-or-nothing operation is called a **transaction**.
 
-The recent [design discussion](https://discord.com/channels/1556028660832673885/1556115291577126912) supports iterating on the existing prototype, splitting work to avoid overlap, and refining the brand palette. The recap also asks for an accessible interface adaptable to restaurant branding, including light and dark modes. These are design requirements to specify and implement, not capabilities of the current shells. The [general channel](https://discord.com/channels/1556028660832673885/1556028661570867252) supports attaching completed requirement documentation to its ticket. The inspected product and dev channels contained no messages at the time of review.
+History also lets us rebuild the current dish from previous changes. That is **replay**. Rebuilding must not send a notification or repeat an outside action. The current code tests rebuilding a dish's data; a complete operational recovery tool is still future work.
 
-Three points need an explicit decision before the related implementation:
+### The diner events we will add
 
-- **Provider:** the repo currently accepts Supabase. The [October 14 setup update](https://discord.com/channels/1556028660832673885/1556115536243589212/1560031592410521641) says Vivien is still finalizing Supabase versus Neon. Confirm that choice before provisioning; choosing Neon requires an ADR update and an equivalent identity plan.
-- **Visual scope:** older tickets discuss generated 3D and a Tripo experiment; newer planning and the recap start with photos/2.5D. The accepted visual ADR permits reviewed T1/T2 representations of captured food and prohibits invented edible surfaces. Research wording does not authorize bypassing that rule.
-- **Scope and completion:** one restaurant/three dishes is a candidate test slice, not evidence of an agreed pilot or working system. Reconcile sprint dates, the approval ticket's status, open scope subtasks and linked design deliverables before committing implementation. POS linkage and owner reporting remain later repository work unless explicitly selected.
+Suppose a diner opens the soup details while their connection is unreliable. The future tracking flow needs to remember the observation, retry safely and avoid counting it twice. It must also identify the exact menu and dish version that person saw.
 
-This review covered task descriptions, displayed assignments and scope subtasks, plus recent visible messages in general, design, daily-updates, product and dev. It did not audit every attachment, linked PRD, interview record or full chat history. Task links may require workspace access. Personal chat details and raw conversation text are not reproduced here.
+The plan is for the browser to send observations to a receiving service. Accepted observations wait in a **queue**, which holds work until it can be processed. A background consumer will save an archive in Cloudflare R2, then add searchable information to PostgreSQL, our database. Only then should it mark that queued work finished. Failed work needs a recovery path.
 
-## 3. The few technical words worth knowing
+This flow is not running yet. A queue is not needed to save today's dish revision: that change is saved directly in the database transaction. Keeping the two paths separate prevents a browsing action from being mistaken for permission to change a restaurant's menu.
 
-| Word | Plain meaning here |
-| --- | --- |
-| Repository / repo | The shared project folder and its recorded change history |
-| Frontend | The pages a diner or staff member sees in their browser |
-| Backend / API | The server code that receives requests, checks permission and changes data |
-| Worker | Cloudflare's way of running our backend code; its real runtime also runs locally for tests |
-| Contract | A shared rule for what a request or response is allowed to contain |
-| Database | The organized, lasting store of restaurant information |
-| Tenant / venue | One restaurant's boundary in the system; a tenant ID identifies that boundary |
-| Authentication | Checking who a caller is |
-| Authorization | Checking what that caller may do at a particular restaurant |
-| JWT | A signed identity token; checking its signature is part of authentication |
-| Migration | A numbered set of instructions that changes the database structure |
-| Transaction | A group of database changes that all succeed together or are all undone |
-| Event | A recorded fact that something happened, such as a dish revision being created |
-| Projection | A convenient current view built from history, such as the latest dish details |
-| Receipt / idempotency | A saved result that lets the same request be retried without doing the work twice |
-| Outbox | A database list of work to deliver later; adding a row does not mean a consumer has delivered it |
-| Replay | Reading past events to rebuild a view without sending notifications or creating new work |
-| RLS | Database rules that limit which restaurant's rows an ordinary application connection can access |
-| PR | A proposed code change, reviewed before it joins the main branch |
-| CI | Automatic checks that GitHub runs on proposed changes |
-| ADR | A short written record of an important architecture decision and its reasons |
+## 4. Follow a dish change through the code
 
-## 4. How the pieces fit together
+The **frontend** is the page someone sees. The **backend** is the code that checks requests and controls data changes. An **API** is the agreed way one program asks another to do something. A **database** keeps information after the request finishes.
 
-```text
-Diner browser                 Staff browser
-frontend/diner                frontend/console
-         \                    /
-          Shared data rules: packages/contracts
-                         |
-              Backend: Cloudflare Worker
-              identity -> permission -> command
-                         |
-                    PostgreSQL
-              restaurant-specific information
-```
+The future staff page will ask the backend to save a dish. Today a developer's demo sends that request instead. There is no working staff form or real login screen yet.
 
-This is the intended application arrangement. Today the browser apps are shells, and the working command is exercised by the local demo and tests.
+The links below point to the merged code at `413be96`, so the line references stay stable as new code is added. A **function** is a named piece of code that performs a job; a **schema** states what information is allowed.
 
-The apps live in one repository so they can share data definitions and one review process. They are separate applications and local processes. Sharing a repository or laptop does not require them to share one production server.
+### A. Start a safe test environment
 
-Planned hosted responsibilities are Cloudflare Pages for the browser apps, Workers for the API, Supabase for PostgreSQL and staff identity, and Hyperdrive for the Worker-to-database connection. Queues and R2 belong to later evidence-processing work. Vercel and Dokploy have not been configured.
+In [backend/local.mjs, `develop()` at line 43](https://github.com/vivienk/peekaplate_staging/blob/413be96/backend/local.mjs#L43), the developer tool starts a temporary database, a test identity service and the backend. [`demo()` at line 10](https://github.com/vivienk/peekaplate_staging/blob/413be96/backend/local.mjs#L10) sends the example dish request. These are development tools. They do not create real staff accounts or put a restaurant online.
 
-Docker currently runs disposable local PostgreSQL databases. It is a development/test tool here. It is not the restaurant-isolation mechanism, and it is not a decision to host the production database on a laptop.
+### B. Check what was sent
 
-## 5. Follow one real operation: create a dish revision
+[packages/contracts/src/index.ts, `CreateDishRevisionSchema` at line 68](https://github.com/vivienk/peekaplate_staging/blob/413be96/packages/contracts/src/index.ts#L68) defines the allowed request: a request ID, the version being edited, a name and a description. `DishRevisionScopeSchema` at line 66 checks restaurant/dish IDs; `DishRevisionSchema` at line 75 defines the result.
 
-Imagine an editor submits “Tomato Soup” for Restaurant A.
+For example, a blank dish name should fail. Sending an extra field saying “give me editor permission” must not grant permission. This shared file keeps the browser and backend working from the same data rules.
 
-1. `backend/src/index.ts` receives the request. Shared contracts check its IDs, text and version fields.
-2. `backend/src/auth.ts` verifies the signed staff token against the configured identity provider's public keys. A caller cannot select a different key source through their token.
-3. `backend/src/dish-command.ts` asks the database whether that person is currently an owner or editor of Restaurant A. Putting Restaurant A's ID in a URL does not grant access.
-4. The command checks its request ID. If this person already sent the identical command to this restaurant, it returns the saved result. Reusing that ID for different content is rejected.
-5. It checks the dish version. If two editors both start from the same old version, one change can succeed and the other receives a conflict instead of silently overwriting it.
-6. One database transaction stores four things: the event, the latest dish view, the retry receipt and the outbox row. If any write fails, the whole change rolls back.
-7. The API returns the new dish revision. The current local demo prints it; a future console screen will show it to staff.
+### C. Receive the request and establish identity
 
-The API route is `POST /venues/{venueId}/dishes/{dishId}/revisions`. A first revision uses expected version `0`. Successful creation and an identical authorized retry return HTTP `200`. Invalid identity returns `401`; missing permission returns `403`; stale versions or conflicting reuse return `409`.
+[backend/src/index.ts, `createApp()` at line 57](https://github.com/vivienk/peekaplate_staging/blob/413be96/backend/src/index.ts#L57) sets up the backend. Its [dish route at line 75](https://github.com/vivienk/peekaplate_staging/blob/413be96/backend/src/index.ts#L75) receives requests to `POST /venues/:venueId/dishes/:dishId/revisions`. This address means “save a revision of this dish at this restaurant.” It checks the request and passes the verified person to the saving function.
 
-A dish revision is a draft content change. Creating it does **not** approve or publish a menu. Those commands are a later feature.
+[backend/src/auth.ts, `createStaffVerifier()` at line 35](https://github.com/vivienk/peekaplate_staging/blob/413be96/backend/src/auth.ts#L35) checks the signed identity token supplied with the request. A token is evidence from the configured identity provider about who is calling. Expired, incorrectly signed or unsuitable identities are rejected. The function returns the verified person's ID; it does not by itself grant restaurant access. `bearerToken()` at line 81 reads the token, and `trustedIssuer()` at line 89 checks the configured provider address.
 
-### What protects Restaurant A from Restaurant B?
+### D. Check restaurant access, retries and competing edits
 
-The backend verifies identity, checks current restaurant membership and sets restaurant/actor context only inside the transaction. A restricted database role and RLS provide another layer of protection. That context must disappear when the transaction ends so a reused connection does not carry one restaurant into the next request.
+[backend/src/dish-command.ts, `createDishRevision()` at line 101](https://github.com/vivienk/peekaplate_staging/blob/413be96/backend/src/dish-command.ts#L101) does the main saving work. It first checks whether that person currently has permission to edit this restaurant. Knowing Restaurant A's ID does not let someone from Restaurant B edit it.
 
-Tests cover rejected cross-restaurant access, revoked membership, read-only staff and context reset. Database owner accounts can bypass ordinary restrictions; the actual hosted migration and runtime accounts must still be configured and tested separately.
+The [checks at lines 127–159](https://github.com/vivienk/peekaplate_staging/blob/413be96/backend/src/dish-command.ts#L127-L159) protect retries and simultaneous edits. Imagine two editors start with soup version 1. One saves version 2; the other's old version-1 request is rejected as a conflict instead of overwriting it. If the first editor repeats the identical request after a connection problem, the saved result comes back without creating version 3. Reusing the same request ID for different content also fails.
 
-## 6. How events are tracked
+### E. Save the four records together
 
-There are two different paths. Keeping them separate prevents a browsing observation from being treated like an authorized business change.
+The [write section at lines 179–225](https://github.com/vivienk/peekaplate_staging/blob/413be96/backend/src/dish-command.ts#L179-L225) saves the history event, current dish, request result and pending follow-up described above. It commits them together, or rolls the change back if something fails. This prevents a dish from appearing saved while its history is missing.
 
-| Path | Example | Current position |
+The database has its own protection too. [migrations/20261014210000_staff_commands.sql](https://github.com/vivienk/peekaplate_staging/blob/413be96/migrations/20261014210000_staff_commands.sql#L2) creates `staff_membership` at line 2 and `dish_current` at line 10. The rules at [lines 22–35](https://github.com/vivienk/peekaplate_staging/blob/413be96/migrations/20261014210000_staff_commands.sql#L22-L35) restrict which rows an ordinary application connection can use. Developers call this row-level security, or RLS. The restricted database role starts at line 37. Actual cloud accounts still need their own permission checks before use.
+
+### F. Return a result; rebuild history when needed
+
+The successful request returns the saved draft revision. The [error handler in index.ts at line 105](https://github.com/vivienk/peekaplate_staging/blob/413be96/backend/src/index.ts#L105) returns controlled errors for identity, permission or version conflicts. Unexpected failures return a generic service error without exposing the database contents or token.
+
+[dish-command.ts, `replayDish()` at line 82](https://github.com/vivienk/peekaplate_staging/blob/413be96/backend/src/dish-command.ts#L82) can rebuild current dish data from a valid sequence of past events. It rejects broken or mixed histories. It does not publish the dish or deliver the outbox work.
+
+### G. Where the screens will connect
+
+[frontend/console/src/main.tsx, lines 8–20](https://github.com/vivienk/peekaplate_staging/blob/413be96/frontend/console/src/main.tsx#L8-L20) currently shows the staff starter screen. This is where a future staff experience begins; it does not call the dish-saving route yet. [frontend/diner/index.html, lines 11–17](https://github.com/vivienk/peekaplate_staging/blob/413be96/frontend/diner/index.html#L11-L17) contains the diner staging message, which works without JavaScript. The real diner menu must read approved, published content once that flow is built.
+
+To see what checks this behavior, start with [backend/src/dish.integration.ts](../backend/src/dish.integration.ts): it exercises the actual backend runtime and database together. The nearby `auth.test.ts` checks identities, `dish-command.test.ts` checks rebuilding history, and `tests/db/staff.sql` checks database permissions. These tests support the claims above; a filename alone is not proof that every possible case is covered.
+
+The two frontend apps and backend share one repository, but they are separate programs. Sharing a folder does not force them onto one production server. The browser must never hold a database administrator password or decide who is allowed to edit a restaurant.
+
+## 5. Why these tools, and where Python fits
+
+The current browser and backend code use **TypeScript**, so they can share rules for requests and responses. **Hono** is the small routing library used by the backend. A **Cloudflare Worker** is where that backend is intended to run online; tests also exercise its runtime locally.
+
+**PostgreSQL** stores the restaurant data and enforces database rules. **Supabase** is the provider in the accepted repository plan because it combines PostgreSQL with staff identity services. The October 14 project update says Vivien is still finalizing Supabase versus Neon. Confirm that decision before setting up accounts. If Neon is chosen, record the change and decide how staff identity will work too.
+
+**Docker** runs a temporary PostgreSQL database for tests. It does not provide restaurant isolation by itself. The backend's permission checks and database rules do that. This Windows machine still needs Docker recovery and a successful local demo; passing Linux CI does not repair the laptop.
+
+**Python is part of the accepted plan for processing or analysis work.** When there is a real job to implement, it should come with its own environment and pytest tests. No Python service exists yet because that processing job has not been built. We have not added a second language just to create an empty folder.
+
+### What T0, T1 and T2 mean
+
+- **T0:** a normal, complete menu with real photos and text. This must work even when optional visuals or tracking fail.
+- **T1:** limited movement of reviewed photo cutouts, giving a shallow sense of depth.
+- **T2:** separate layers based on real captured plating stages, for selected dishes.
+
+Three.js is the planned tool for drawing the optional interactive view in the browser. It is not a working feature yet. The first direction is photos/2.5D. Older tickets about generated 3D are research to reconcile with that direction; they do not permit inventing ingredients or unseen edible surfaces. The normal menu must remain available if the viewer fails.
+
+## 6. How the current team work fits together
+
+The [October 13 sprint recap](https://discord.com/channels/1556028660832673885/1556115536243589212/1559805887839731717) records these immediate handoffs:
+
+| Person | Current handoff | What the next person needs from it |
 | --- | --- | --- |
-| Business history | “An authorized editor created dish revision 2” | Implemented for dish revisions in PostgreSQL |
-| Diner observations | “This session opened this dish from this published menu” | Initial data rules exist; collection and storage flow are not implemented |
+| Sai | Repository, coding-agent instructions and CI setup | A working starting point, clear checks and an explanation of what is ready |
+| Shirley | Readiness plan and task classification | Prioritized risks, remaining questions and evidence needed before building |
+| Amr and Rania | Design tokens, colors, typography and layouts | Shared screen designs, reusable style choices and loading/error/fallback states |
+| Adam | Diner event taxonomy and measurement plan | Clear names for observations, when they occur and what each one means |
+| Vivien | Third-party API list and setup coordination | Confirmed services, access requirements and selected sprint work |
 
-The implemented business path writes to `es_event`, updates `dish_current`, records the result in `es_command` and adds work to `outbox`. The outbox has no delivery worker yet. A pure dish replay function can reconstruct the tested current dish view from its stored events; a full operational rebuild tool is still future work.
+Eirene, Shirley and Vivien also have ClickUp assignments around the dish-processing workflow. Their specifications should explain what comes from a trusted source, what may be uncertain and where a person must review it. Those are inputs to the implementation; they are not already-running AI services.
 
-The planned diner path is: browser keeps unsent observations -> ingest Worker validates them -> Queue accepts them -> browser receives accepted IDs -> consumer creates an R2 archive -> consumer indexes them in PostgreSQL -> queue message is acknowledged. Retries keep the same event IDs. Failed work needs recovery handling.
+Keep using the latest prototype while the design system develops. The [design discussion](https://discord.com/channels/1556028660832673885/1556115291577126912) supports refining the existing structure and splitting work to avoid duplication. Accessible light/dark treatments and restaurant branding remain design and implementation work.
 
-That future flow must record the exact publication and dish version shown. We do not currently have PostHog, a live analytics dashboard, or an `/events` ingestion endpoint. `/events` deliberately returns `404`.
+The full task snapshot below includes actual assignments and unassigned items. It does not give people new titles or silently assign new work. Sprint numbering, dates and selected scope still need to match the team's current agreement. One restaurant with three dishes appears as a candidate test slice, not a confirmed finished pilot.
 
-## 7. Why these choices were made
+## 7. What the checks and coding agents do
 
-| Choice | Reason in ordinary words |
-| --- | --- |
-| TypeScript across the current apps | The browser and backend can share data definitions, and the team maintains one application language |
-| A small Hono Worker | Enough routing for the present API without creating a large server framework or several services |
-| PostgreSQL and plain SQL migrations | Clear data rules, transactions and directly tested restaurant boundaries |
-| Selective event sourcing | Preserve history where reconstruction matters; ordinary settings and accounts do not all need event streams |
-| Supabase | The accepted plan combines PostgreSQL and staff identity; Neon would need an explicit replacement decision and equivalent identity/integration checks |
-| Local Docker tests | Exercise an actual database while keeping test data disposable and separate from real restaurant information |
-| Python processing jobs | Python with uv and pytest is accepted for processing/analysis work; no such job exists yet |
-| Vitest, pgTAP and Playwright now | Test TypeScript logic, database behavior and browser behavior with tools appropriate to each |
-| No Rust service or extra orchestration framework | No current requirement justifies another service, language or task system |
-| Repository-owned context | A small source-linked map helps agents find the right files without adding another database or memory service |
+A **pull request**, or PR, is a proposed change to the shared code. Before it is merged, GitHub runs **CI**: automatic checks for problems such as invalid code, broken tests, stale documentation references or database rules that allow the wrong access.
 
-### T0, T1 and T2
+The checks are split by purpose. Fast code checks run in the quality job. Relevant database changes also run real PostgreSQL tests; relevant browser changes run browser tests. One final result reports whether the required jobs passed. A documentation change should not needlessly run every browser and database test.
 
-**T0** is the complete ordinary menu: real photos and text. It must remain useful when optional features fail.
+The draft-save tests cover wrong identities, access to another restaurant, revoked access, repeated requests, conflicting edits and partial failures. Passing these tests supports this particular local feature. It does not establish that the whole product, cloud setup or real-phone experience is ready.
 
-**T1** adds shallow movement to reviewed photo cutouts. It creates a sense of depth with limited movement; it does not prove a fully captured 3D dish.
+Human review still matters, and the normal process requires a human review comment. Automated review must identify itself honestly. A specific authorization to merge the setup does not remove that rule from future work.
 
-**T2** separates real captured plating stages into layers. It supports selected views without inventing ingredients or unseen edible surfaces.
+The coding-agent files give assistants five jobs: explain the repo, build one assigned change, review architecture, review correctness, or coordinate reviews. These are instruction files, not five services running by themselves. Selected prompt exercises were tested, including a corrected builder prompt; their behavior and client permissions still need checking in normal use.
 
-Three.js is planned for the optional viewer, loaded after a tap. It is not installed as a working diner feature. Start with T0, then selected T1/T2 dishes whose assets, performance and truthfulness pass review.
+Two files help continuity: `docs/CONTEXT.md` points an assistant to relevant code and decisions; `errors.md` records sanitized failures, fixes and prevention. Neither is an all-knowing memory. The error file automatically records failures only when checks run through the verification runner; other unexpected failures need a manual entry.
 
-The supplied [design reference](https://claude.ai/artifact/LjkRVm78VioRB2FrVSauwJ) is the latest design progress confirmed on October 14. Its direction and implementation handoff are recorded in [frontend-design.md](frontend-design.md). The existing shells do not yet implement that design.
+## 8. How to pick up a piece of work
 
-## 8. What “tested” means right now
+First, connect the research and design deliverables to specific implementation tasks. For each task, record the intended result, the person taking it, the source design or requirement, and how the team will demonstrate completion. A research task may finish with findings. A coding task needs working behavior and relevant tests.
 
-PR #9 merged into `main` at `413be96`. Its final reviewed commit `fc08808` passed [PR CI run 38642140834](https://github.com/vivienk/peekaplate_staging/actions/runs/38642140834), and the merged commit passed [main CI run 38642528971](https://github.com/vivienk/peekaplate_staging/actions/runs/38642528971). The ClickUp/Discord additions to this guide are a subsequent documentation update, not additional runtime functionality.
+Link completed deliverables and PRs back to their ClickUp tickets during normal team updates, as discussed in the [general channel](https://discord.com/channels/1556028660832673885/1556028661570867252). Developers use `pnpm check` or `pnpm verify <check>` to record verification, then update the affected documentation and context entry. A check that was not run must remain marked NOT RUN.
 
-| Evidence | What it establishes | What it does not establish |
-| --- | --- | --- |
-| 35 application, contract and local-tool tests | Tested parsing, token checks, HTTP behavior, replay rules and shutdown-error cleanup | Every possible input or hosted provider behavior |
-| 20 repository-script tests | Tested bundle, documentation, PR, context, database-output and verification-runner safeguards | That every written explanation is factually correct |
-| 43 SQL assertions | Tested schema constraints, restricted-role behavior and row policies | Correct permissions for accounts not yet created at the provider |
-| 13 real Worker/PostgreSQL cases | Signed local tokens, atomic writes, concurrency, retry conflicts, rollback, revocation and replay | Real Supabase login or Hyperdrive pooling |
-| Local CLI smoke flow on Linux | Actual local setup, demo command and normal cleanup path | Recovery of this Windows machine's Docker installation |
-| Four browser tests | Shell visibility, no-JavaScript diner content, accessibility scans, narrow layout and health behavior | A completed menu, login, order flow or real-phone viewer |
-| Builds and bundle check | Apps build, Worker bundles, initial diner JavaScript stays within its configured budget | Real diner loading speed on a phone/network |
-| Independent review | Architecture and correctness reviewers examined a fixed code version and rechecked fixes | Infallibility or automatic permission to deploy |
+The dependency plan is the final section of this guide. The commands and setup procedure are in [operations.md](operations.md). Do not start a later step just because a design task with a similar name is marked complete.
 
-Review caught a mismatched SQL test count and a shutdown failure that skipped cleanup. Both were corrected. The cleanup test failed before its fix and passed afterward.
+For the next demo, be precise about what can be shown: a tested draft-save backend, the current prototype, and the remaining steps connecting them. An online menu, staff sign-in and restaurant analytics should only be described as working after those flows exist and have been exercised.
 
-### Why there are five CI jobs
+## Reference: the project files
 
-| Job | Specific purpose |
-| --- | --- |
-| `changes` | Decide whether changed paths need database and browser tests |
-| `quality` | Check formatting/imports, types, unit/script tests, builds, context, document links and the PR explanation |
-| `database` | Test migrations, SQL policies, real Worker/database behavior and the local demo |
-| `browser` | Exercise the existing browser shells and their accessibility/layout checks |
-| `ci` | Give one final result that fails if a required job failed |
+Start with the code walkthrough above. Open this list when you need to find a particular file; it covers all 99 tracked files at this handoff.
 
-The database and browser jobs run when relevant files change. The current Biome setup enforces formatting/import organization; it is not a broad security or correctness ruleset. Types, tests and review serve different purposes.
+<details>
+<summary>Open the complete file-by-file guide</summary>
 
-Routine dependency updates are monthly and grouped, with at most one open version-update PR per ecosystem. Security updates can arrive sooner. No automatic dependency merge is configured. A past full passing run took about 72 seconds of runner time, excluding the GitHub queue; that is a measurement, not a timing guarantee.
-
-## 9. File-by-file walkthrough
-
-These tables cover the tracked project files at this handoff, including this guide. Files generated by installation, builds or local sessions are explained afterward. The path is where a developer or agent should go; the description explains why it exists.
+The filename tells you where to look. The description explains what that file is responsible for. Files with `.test` contain checks; they are not features a restaurant uses. Configuration files tell tools how to run or check the project.
 
 ### Start here: project-wide files
 
@@ -396,49 +348,151 @@ The profiles and selected prompt behaviors were evaluated. The builder initially
 `node_modules/` contains installed dependencies. `dist/` contains built output. `.wrangler/` contains local Worker tooling state. `work/local-session.json` holds a short-lived synthetic local session, and other `work/` files are temporary. Browser output goes into ignored report/test-result directories. These are not source files to hand-edit or commit.
 
 Local `.env` and `.dev.vars` files may hold credentials and are ignored. A `.gitignore` rule is useful hygiene, not a guarantee that someone cannot accidentally publish a secret.
+</details>
 
-## 10. How the team should work day to day
+## Reference: the ClickUp task snapshot
 
-1. Pick a selected ClickUp outcome and connect it to [delivery.md](delivery.md), such as “an authorized reviewer can approve this exact captured revision.” Record the assigned person, linked requirement/design, and evidence that will show it works. A research task can finish with findings; an implementation task needs running behavior and tests.
-2. Have the repo guide or developer identify the relevant files, contracts and ADRs. Give the builder clear file ownership and dependencies.
-3. Implement the whole small flow, including request rules, caller changes, database changes and tests where needed.
-4. Run the relevant checks. Use `pnpm check` and `pnpm verify <check>` for recorded results. A check that was not run stays marked **NOT RUN**.
-5. Update affected documentation and the context node. Run `pnpm context:refresh`; inspect the written summary too, because a refreshed fingerprint cannot make false prose true.
-6. Open a PR with exact results and the relevant task link. Link the deliverable and PR back to the ticket during the team's normal update process. Review the same code version from architecture and correctness perspectives when the change warrants both.
-7. Follow the normal human approval-with-comment process before merging. A specific owner-authorized merge does not silently replace that standing policy for future PRs.
+Read on October 14, 2026: all 24 top-level tasks and seven sprint-scope subtasks. At the end of the review the [board](https://app.clickup.com/90141746115/v/b/t/90141746115) showed 12 To do, 4 In progress and 8 Complete top-level tasks. Statuses changed during the review, so use ClickUp for the current position. “Unassigned” means the assignee field was empty.
 
-Ask for a demonstration, test evidence and remaining limits. A green check cannot answer whether a dish is accurately represented, whether a venue granted permission, or whether a business interpretation is justified.
+<details>
+<summary>Open tasks, recorded assignments and what each contributes</summary>
 
-The context map is an index, not an all-knowing memory. `pnpm context:show -- backend` finds the backend's relevant files. The model still verifies claims against source and tests. Error recording covers checks run through the verification runner; unexpected failures outside it need a sanitized manual record. Neither file automatically discovers every mistake.
+| ClickUp task |Status | Assigned people | What it contributes |
+| --- | --- | --- | --- |
+| [Define Sprint Goals + candidate Sprint Backlog](https://app.clickup.com/t/90141746115/86bcex5hb) | In progress | Vivien Kong | Candidate small restaurant/dish workflow and boundaries; planning must select the actual sprint commitment |
+| [Sprint 2 Planning](https://app.clickup.com/t/90141746115/86bchxfk2) | To do | Unassigned | Review evidence, carryover, dates, capacity and acceptance criteria |
+| [Refine candidate Sprint 1 PBIs + engineering acceptance criteria](https://app.clickup.com/t/90141746115/86bcex5x3) | To do | Vivien Kong | Turn the product idea into one specified flow with inputs, outputs, failures and tests |
+| [Run restaurant validation outreach + survey tracking](https://app.clickup.com/t/90141746115/86bcex5wq) | To do | Unassigned | Operator outreach and response tracking; the description asks for team participation |
+| [Run lightweight diner + restaurant discovery](https://app.clickup.com/t/90141746115/86bcex99b) | To do | Vivien Kong, Shirley Rosario | Interview findings and assumptions that should change the backlog |
+| [Define diner JTBD + behavior hypotheses](https://app.clickup.com/t/90141746115/86bcex5rr) | Complete | Adam H | Explain diners' needs and testable behavior hypotheses; observations are not proof of intent |
+| [Map the end-to-end PeekaPlate product system](https://app.clickup.com/t/90141746115/86bcex5qb) | Complete | Vivien Kong | Map content, processing, review, diner experience and measurement; this is a system specification |
+| [Create current-state + future-state diner journey map](https://app.clickup.com/t/90141746115/86bcex99f) | Complete | Rania, Amr Hussien | Separate researched behavior from proposed improvements |
+| [Create end-to-end diner UX flow](https://app.clickup.com/t/90141746115/86bcex5t5) | Complete | Amr Hussien | Define browsing, dish details, exploration and fallback states |
+| [Design clickable interactive menu MVP](https://app.clickup.com/t/90141746115/86bcex5te) | Complete | Amr Hussien | Prototype the core diner path for testing and engineering handoff |
+| [Interactive Diner Experience](https://app.clickup.com/t/90141746115/86bcexf9r) | Complete | Rania, Adam H, Amr Hussien | Describe dish interactions; the repository's diner is still a shell |
+| [Restaurant owner receives a lightweight summary / report](https://app.clickup.com/t/90141746115/86bcexfw4) | Complete | Amr Hussien, Rania | Specify report content and useful actions; no live report is implemented here |
+| [Refine prototype layout + finalize brand palette](https://app.clickup.com/t/90141746115/86bchyk6t) | To do | Amr Hussien, Rania | Refine the existing structure and accessible palette with Vivien's review |
+| [Recreate prototype in shared Figma + establish design system](https://app.clickup.com/t/90141746115/86bchyk6w) | To do | Rania, Amr Hussien | Prepare editable shared screens, reusable styles/components and a complete diner screen |
+| [Map the complete diner and owner flows](https://app.clickup.com/t/90141746115/86bchyk71) | To do | Amr Hussien, Rania | Connect screens, review/approval, owner actions, failures and tracking points |
+| [Design Agent MVP + human-review workflow](https://app.clickup.com/t/90141746115/86bcex9a1) | In progress | Eirene Woo, Shirley Rosario, Vivien Kong | Specify source-to-draft processing, confidence, correction and human review |
+| [Specify multimodal dish-processing pipeline](https://app.clickup.com/t/90141746115/86bcex5tt) | In progress | Eirene Woo, Shirley Rosario, Vivien Kong | Define source fields, structured outputs, validation and fallback; not a running pipeline |
+| [Define AI evaluation rubric + guardrails](https://app.clickup.com/t/90141746115/86bcex5vm) | To do | Unassigned | Define accuracy, severity, confidence and mandatory human-review rules |
+| [Implement minimum human-review / approval path](https://app.clickup.com/t/90141746115/86bcexenj) | Complete | Sai Hemanth Kilaru | Board status requires reconciliation: the repo creates draft revisions, but does not implement approval or publication |
+| [Implement 2D → 3D / spatial dish generation slice](https://app.clickup.com/t/90141746115/86bcexezr) | To do | Vivien Kong, Adam H | Investigate asset feasibility, quality and fallback; older generation wording needs alignment with the visual ADR |
+| [Define diner behavior event taxonomy + measurement plan](https://app.clickup.com/t/90141746115/86bcex5w6) | In progress | Adam H | Define event names, fields and what can be measured versus inferred |
+| [Behavioral events capture](https://app.clickup.com/t/90141746115/86bcexfnc) | To do | Eirene Woo, Vivien Kong | Specify event properties and funnels; the ingest/queue/archive path still needs implementation |
+| [Agent analyzes event data and identifies basic patterns](https://app.clickup.com/t/90141746115/86bcexfrx) | To do | Eirene Woo, Vivien Kong, Shirley Rosario | Specify allowed signals, patterns and uncertainty; no analysis agent runs in this repo |
+| [Create technical risk + QA readiness plan](https://app.clickup.com/t/90141746115/86bcex5wx) | To do | Vivien Kong, Shirley Rosario | Prioritize latency, cost, truthful output, device performance and event-reliability risks |
 
-## 11. What to do next, in order
+JTBD means “jobs to be done”: what a diner is trying to accomplish. PBI means “product backlog item”: a proposed piece of product work. Adam H and Amr Hussien are separate people; matching initials on board cards are not reliable identification.
 
-This is the repository's dependency order. Use the recorded handoffs above and confirm a person for each selected task; this table does not assign new responsibilities.
+The seven subtasks below refine the sprint goal. They are additional scope work, not seven extra implemented features.
 
-| Order | Concrete work | Evidence to require |
+| Scope subtask | Status | Assigned people | Decision needed |
+| --- | --- | --- | --- |
+| [Agent Workflow + Orchestration](https://app.clickup.com/t/90141746115/86bcexdce) | In progress | Eirene Woo, Shirley Rosario, Vivien Kong | Inputs, outputs, step sequence, states, handoffs and failures |
+| [Users Review + Approval](https://app.clickup.com/t/90141746115/86bcexkyh) | To do | Unassigned | What needs review and the exact approval boundary before publication |
+| [Spatial Generation](https://app.clickup.com/t/90141746115/86bcexkyy) | To do | Unassigned | Eligible representations, asset format, quality bar and fallback |
+| [Diner Experience](https://app.clickup.com/t/90141746115/86bcexkzb) | To do | Unassigned | Minimum journey and loading/error/fallback states |
+| [Behavioral Instrumentation](https://app.clickup.com/t/90141746115/86bcexkzx) | To do | Shirley Rosario, Eirene Woo, Vivien Kong | Minimum observations and fields, distinct from inferred intent |
+| [Restaurant Intelligence](https://app.clickup.com/t/90141746115/86bcexm04) | To do | Eirene Woo, Vivien Kong | Allowed aggregated signals and interpretations without causal overclaims |
+| [Owner Insight / Report](https://app.clickup.com/t/90141746115/86bcexm0h) | To do | Unassigned | Example report, supporting evidence, limitations and useful next actions |
+</details>
+
+## Reference: verification and remaining limits
+
+<details>
+<summary>Open the exact test evidence and CI explanation</summary>
+
+PR #9 merged into `main` at `413be96`. Its final reviewed commit `fc08808` passed [PR CI run 38642140834](https://github.com/vivienk/peekaplate_staging/actions/runs/38642140834), and the merged commit passed [main CI run 38642528971](https://github.com/vivienk/peekaplate_staging/actions/runs/38642528971). The ClickUp/Discord additions to this guide are a subsequent documentation update, not additional runtime functionality.
+
+| Evidence | What it establishes | What it does not establish |
 | --- | --- | --- |
-| 1 | Recover Windows Docker after saving work and restarting; check `docker version` and `docker info`, then rerun the local backend demo | Engine is reachable and the demo creates a synthetic revision |
-| 2 | Confirm Vivien's provider/API decision, then supply staging access through protected configuration: Cloudflare account/scoped token and the selected database/identity project; prepare separate migration/runtime credentials | Recorded decision, least-privilege access and no secrets in Git or chat |
-| 3 | Verify real staff identity and membership, migrations under the real provider role, and the restricted connection through Hyperdrive | Real-provider isolation, retry, concurrency, rollback, revocation semantics and pooled-context checks; measured latency |
-| 4 | Use the latest design and processing/review specifications to finish staff screens and PR 2 capture, review and publication with approved assets | Reviewers approve exact revisions; unauthorized approval and publication races fail; published T0 content is reproducible |
-| 5 | Connect Adam's event taxonomy and the approved diner flow to the real T0 menu and durable observation flow in PR 3 | Useful menu without analytics/WebGL; offline/retry/partial receipt and archive-recovery tests |
-| 6 | When selected for the pilot, build ticket linkage in PR 4 and selected T1/T2 in PR 5 after their prerequisites | Correct permitted POS mapping; truthful visual assets, payload budgets and real-phone checks |
-| 7 | Owner readout, controlled experiment and pilot recovery in PRs 6–7 | Understandable evidence, explicit unknowns, backup/restore drill and operational ownership |
+| 35 application, contract and local-tool tests | Tested parsing, token checks, HTTP behavior, replay rules and shutdown-error cleanup | Every possible input or hosted provider behavior |
+| 20 repository-script tests | Tested bundle, documentation, PR, context, database-output and verification-runner safeguards | That every written explanation is factually correct |
+| 43 SQL assertions | Tested schema constraints, restricted-role behavior and row policies | Correct permissions for accounts not yet created at the provider |
+| 13 real Worker/PostgreSQL cases | Signed local tokens, atomic writes, concurrency, retry conflicts, rollback, revocation and replay | Real Supabase login or Hyperdrive pooling |
+| Local CLI smoke flow on Linux | Actual local setup, demo command and normal cleanup path | Recovery of this Windows machine's Docker installation |
+| Four browser tests | Shell visibility, no-JavaScript diner content, accessibility scans, narrow layout and health behavior | A completed menu, login, order flow or real-phone viewer |
+| Builds and bundle check | Apps build, Worker bundles, initial diner JavaScript stays within its configured budget | Real diner loading speed on a phone/network |
+| Independent review | Architecture and correctness reviewers examined a fixed code version and rechecked fixes | Infallibility or automatic permission to deploy |
 
-PRs 4 and 5 can progress in parallel once their respective prerequisites are ready. The exact acceptance criteria stay in `docs/delivery.md`; do not remove a safety or evidence requirement to protect a date. Reconcile original pilot dates and sprint numbering with actual progress during planning. Research, design tokens, source-data preparation and event definitions can proceed alongside the cloud-access checkpoint.
+Review caught a mismatched SQL test count and a shutdown failure that skipped cleanup. Both were corrected. The cleanup test failed before its fix and passed afterward.
 
-The immediate cloud step is **staff identity and the database connection**. Queue/R2 event ingestion comes with the diner-evidence feature. There is no reason to provision every planned service before the code that uses it exists.
+### Why there are five CI jobs
 
-Developers can continue local feature work without cloud credentials, but cannot claim hosted readiness until the real-provider checks pass. No cloud deployment or credentials were used for the completed local slice.
+| Job | Specific purpose |
+| --- | --- |
+| `changes` | Decide whether changed paths need database and browser tests |
+| `quality` | Check formatting/imports, types, unit/script tests, builds, context, document links and the PR explanation |
+| `database` | Test migrations, SQL policies, real Worker/database behavior and the local demo |
+| `browser` | Exercise the existing browser shells and their accessibility/layout checks |
+| `ci` | Give one final result that fails if a required job failed |
 
-## 12. Current limits to keep visible
+The database and browser jobs run when relevant files change. The current Biome setup enforces formatting/import organization; it is not a broad security or correctness ruleset. Types, tests and review serve different purposes.
 
-- Windows Docker recovery is still open. Linux CI passed; that does not repair a local Windows installation. Images and volumes were preserved during diagnosis.
-- Real Supabase authentication, managed database roles, Hyperdrive connection reuse and hosted latency are unverified. Synthetic local identities are not a working staff sign-in product.
-- GitHub branch-protection/admin settings are an owner responsibility. CODEOWNERS and written policy do not prove enforcement is enabled.
-- The separate security workbench scan captured an earlier snapshot and was marked failed without a verdict. The independent pinned code reviews and auth/tenant tests are separate evidence; there is no completed security-tool certificate.
-- The 65-repository research was a bounded layout/pattern survey. It was not a complete license, security or supply-chain audit of every project.
-- Agent profiles have selected behavior evidence, but native client discovery and tool restrictions remain unverified.
-- Publication, approvals, live diner analytics, order linkage, visuals, deletion/restore drills and the owner readout remain feature work. Their documented designs are not implemented behavior.
+Routine dependency updates are monthly and grouped, with at most one open version-update PR per ecosystem. Security updates can arrive sooner. No automatic dependency merge is configured. A past full passing run took about 72 seconds of runner time, excluding the GitHub queue; that is a measurement, not a timing guarantee.
+</details>
 
-For a short team update: **the repository and first local backend flow are ready to build on; the customer and staff product screens, real cloud integration and full restaurant measurement loop remain the next work.**
+The repository survey covered 65 public projects' metadata and folder patterns. It was not 65 complete code or security audits. The [research notes](research/README.md) explain what was adopted and why.
+
+Real Supabase authentication, managed database permissions, Hyperdrive connection reuse and hosted latency remain unverified. GitHub review enforcement depends on repository settings; a policy file alone does not enable it. A separate security workbench scan failed without a verdict on an earlier snapshot, so it is not passing evidence for this release. The reviewed code and tests are separate evidence.
+
+The board review covered descriptions, assignments and scope subtasks. The Discord review covered recent visible messages in general, design, daily-updates, product and dev; the last two contained no messages at the time. It did not audit every attachment, linked PRD, interview record or full chat history. Private conversation text and personal details are not reproduced. Workspace links may require access.
+
+## What needs to happen next: order and parallel work
+
+This sequence follows the [V1 architecture artifact](https://claude.ai/artifact/LUJ4ggBXpF7korJWbg4u8f), rechecked October 14, and its engineering breakdown in [delivery.md](delivery.md). The artifact allows overlapping work; the delivery steps describe when complete flows can be integrated and accepted. The step numbers below are delivery-plan numbers, not GitHub PR numbers. GitHub PR #9 delivered the local part of step 1.
+
+### Start these in parallel now
+
+| Work | What can happen now | What it must not claim yet |
+| --- | --- | --- |
+| Local setup and provider decision | Recover Docker without deleting existing data; confirm Vivien's database/API choices and the access required | Real cloud integration or online staging readiness |
+| Design handoff | Continue from the latest prototype; prepare shared tokens, diner/staff states and accessible layouts | Working login, menu or approval features |
+| Dish content and capture preparation | Agree a small authorized dish set, accurate text, photo rights, capture method and review criteria; use manual structured entry first | Approved public assets before actual review; generated food as evidence |
+| Event definitions and local plumbing | Agree Adam's event names and exact exposure fields; develop browser retry storage, ingest/queue/archive components with synthetic inputs | A complete measured diner journey before publication and the real menu exist |
+| Restaurant and order-data feasibility | Confirm venue participation and whether a code can survive a permitted test ticket/export; prepare the sample-data mapping | A working production POS integration or verified sales impact |
+| QA and recovery preparation | Define failure cases, device targets, backup requirements and evidence to collect | Passed recovery drills before the integrated system exists |
+
+Keep each implementation assignment bounded and avoid two people changing the same files without coordination. Local work can continue without cloud keys. **Stop before provisioning or exercising real Cloudflare/database services until the provider decision and protected credentials are available.** The [October 14 setup update](https://discord.com/channels/1556028660832673885/1556115536243589212/1560031592410521641) still leaves that decision with Vivien. Never place credentials in the guide, Git or chat.
+
+### Build and accept the connected flows in this order
+
+| Step | Outcome to deliver | Must exist first | Work that can overlap / proof needed |
+| --- | --- | --- | --- |
+| **0 — Repository foundation** | Shared code structure, checks, docs and agent instructions | None | Done for local development. Shared cloud environments are still pending. |
+| **1 — Safe staff changes** | A permitted staff member can save a dish revision without cross-restaurant access, duplicate changes or silent overwrites | Step 0 | Local code is merged. Complete real identity, restricted database-account and Hyperdrive connection tests at the cloud checkpoint. Design and step-2 local work can continue meanwhile; hosted acceptance cannot be claimed. |
+| **2 — Capture, review and publication** | Staff review the exact source/asset revision; only approved content becomes a published photo/text menu; withdrawn content becomes unavailable | Step 1's command/permission rules | Content preparation and staff UI can progress together against agreed data rules. Prove unauthorized approval fails, competing publications cannot both win, and rebuilding history sends no uploads or notifications. |
+| **3 — Real T0 menu and durable observations** | Diners browse approved content; the system records what they actually saw and safely accepts observations | Step 2 for real published content and version references | Diner layout and event plumbing can be developed earlier with fixtures. Accept the combined flow only after testing offline/reload/reconnect, partial receipts, duplicates, queue failure, archive-before-index ordering, failed-message recovery and deletion/retention. The menu must work without tracking or WebGL. |
+| **4 — Link sessions to order tickets** | A short-lived restaurant-specific code connects a browsing session to a permitted order record; repeated imports do not duplicate it | Step 3 for a real session and exposure trail; a verified usable export | Can run alongside step 5. Test wrong-restaurant codes, expiry, duplicate tickets, refunds/voids and time zones. Unlinked sessions remain unknown. |
+| **5 — T1, then selected T2** | Optional, truthful richer views of approved dishes | Step 2's approved content/assets; step 3 to record actual visual exposure | Build alongside step 4. T1 comes first; add T2 only for dishes with the required real plating captures. Prove phone performance, size limits, keyboard/reduced-motion support and photo fallback. Failed optional visuals are switched off, not allowed to block the ordinary menu. |
+| **6 — Owner readout and one experiment** | An owner can understand the evidence and choose one action; any experiment has its comparison plan fixed before results | Step 4's validated linkage and underlying step-3 observations | Report layout and synthetic calculations can start earlier. Real readout acceptance needs reconciled data, linkage coverage, visible unknowns and small-group privacy protection. Do not claim browsing caused a sale. |
+| **7 — Pilot release and recovery** | A named venue can use the full loop and recover from failures | Required outcomes from steps 3–6, with failed optional visuals disabled | Plan recovery throughout; complete the integrated outage/restore/replay and device/accessibility drills before release. Confirm permission, retention, backups, monitoring and who responds to failures. |
+
+The practical dependency is:
+
+```text
+Safe staff changes → approved, published content → real menu + reliable observations
+                               │                              │
+                               └→ T1 → selected T2            └→ order linkage → owner readout
+                                   (record exposure through the real menu)
+
+Required flows + recovery/device/venue checks → pilot release
+```
+
+**Do not wait for 3D to build the ordinary menu or evidence path.** Equally, do not treat a mocked screen or isolated event collector as the finished integrated flow. Capture preparation, design, venue work and test planning are parallel activities; publishing, actual exposure and order-linked conclusions have real dependencies.
+
+### The checkpoints before a pilot
+
+The artifact's original targets were G1 October 19, G2 October 24, G3 October 28, G4 October 29 and readout November 1, 2026. It planned capture for October 20–22 with October 23 as a recapture buffer. These are source-plan targets, not a refreshed team commitment. Reconcile them with available people, venue readiness and the remaining cloud work before relying on them.
+
+- **G1 — Content can be trusted:** capture/truthfulness rules agreed and approved ordinary menu content available. No invented edible surfaces.
+- **G2 — The useful flow works:** demonstrate menu-to-ticket linkage and measure the selected visuals on actual phones. Remove optional visuals that fail.
+- **G3 — Failures can be recovered:** demonstrate interruption handling, duplicate handling, restoration and safe history replay. Broken restaurant isolation, approval, withdrawal or linkage blocks the pilot.
+- **G4 — The venue can operate it:** confirm the operator, permissions, privacy wording, retention and a usable runbook, including who can stop the pilot.
+- **Readout — Explain what happened honestly:** show the sample, linkage coverage, limitations and a useful owner action. Do not promise causal sales growth or no company loss.
+
+The artifact's $375 figure is a staged pilot cash target, not a current vendor quote or total company cost; labor and other costs are separate. Confirm costs before spending. Python processing and GPU services are added for a demonstrated job, not as a prerequisite for manual content preparation. Full 3D/AR, glasses, SMS/CRM and additional POS integrations remain outside the first launch path.
+
+For the immediate work selection: finish the local/cloud foundation checkpoint, take the latest design and research into the capture/review/publication slice, and develop the agreed event components alongside it. Then connect those pieces through a real published T0 menu before accepting order linkage, reporting or a pilot launch.
