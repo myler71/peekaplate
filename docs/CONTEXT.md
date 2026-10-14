@@ -133,7 +133,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "paths": [
         "README.md",
         "SECURITY.md",
-        "docs/team-lead-guide.md",
+        "docs/team_guide.md",
         "package.json",
         "pnpm-workspace.yaml",
         ".github/dependabot.yml",
@@ -161,7 +161,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "5d412d924cf714959f04b15334e2d9372a620585d78bf959b6a84ac0842f51d4"
+      "sourceFingerprint": "2de7ade9e585d6730b1fe67c31d65c031ec0d216ceabdca569f4eebce1fef549"
     },
     {
       "id": "agents",
@@ -194,7 +194,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
   ],
   "handoffs": [
     {
-      "summary": "Added a plain-language team-lead guide covering the product, current local command flow, every tracked file, verification, research and agent limits, and ordered next steps. Corrected the stale health-only security overview. Runtime behavior is unchanged.",
+      "summary": "Added a plain-language team guide covering the product, current local command flow, every tracked file, verification, research and agent limits, and ordered next steps. Corrected the stale health-only security overview. Runtime behavior is unchanged.",
       "modules": [
         "delivery"
       ],

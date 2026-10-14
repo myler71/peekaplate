@@ -4,7 +4,7 @@
 
 PeekaPlate is a restaurant menu and measurement platform designed to connect diner menu exposure with linked order outcomes and controlled menu experiments. The [V1 planning baseline](https://claude.ai/artifact/LUJ4ggBXpF7korJWbg4u8f) defines the product scope; [Architecture Decision Records](docs/adr/README.md) define the accepted technical decisions.
 
-The [team lead walkthrough](docs/team-lead-guide.md) explains the system and each tracked file's purpose in plain language, distinguishes working features from plans, and gives the next steps.
+The [team guide](docs/team_guide.md) explains the system and each tracked file's purpose in plain language, distinguishes working features from plans, and gives the next steps.
 
 ## Implementation status
 

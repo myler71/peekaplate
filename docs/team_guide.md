@@ -1,4 +1,4 @@
-# PeekaPlate: team lead walkthrough
+# PeekaPlate: team guide
 
 Updated October 14, 2026. This guide covers the repository foundation and the local staff-command work in [PR #9](https://github.com/vivienk/peekaplate_staging/pull/9). The PR records its merge status, review and CI results. This is an explanation of the current code, not a replacement for the accepted [architecture decisions](adr/README.md).
 
@@ -309,7 +309,7 @@ The profiles and selected prompt behaviors were evaluated. The builder initially
 
 | File | Purpose |
 | --- | --- |
-| [docs/team-lead-guide.md](team-lead-guide.md) | This plain-language walkthrough and next-step guide |
+| [docs/team_guide.md](team_guide.md) | This plain-language walkthrough and next-step guide |
 | [docs/architecture.md](architecture.md) | System boundaries, data flows and what remains unimplemented |
 | [docs/delivery.md](delivery.md) | Ordered feature slices, dependencies, responsibilities and acceptance gates |
 | [docs/operations.md](operations.md) | Local commands, API use, cloud setup, release controls and recovery work |
