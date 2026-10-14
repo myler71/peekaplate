@@ -11,7 +11,7 @@ flowchart LR
   B[backend] --> C
   D -->|HTTP| B
   S -->|HTTP| B
-  B -->|planned transaction boundary| PG[(Postgres)]
+  B -->|staff command transaction| PG[(Postgres)]
   M[migrations] --> PG
   B -->|planned evidence| Q[Queue → R2 → Postgres]
 ```
@@ -32,6 +32,10 @@ T0 is a complete photo/text menu. T1 is shallow parallax using reviewed cutouts.
 
 A redeem code links a browsing session to a POS ticket, not to an individual's thoughts. Unlinked means unknown. Initial readouts show sample units, linkage coverage, suppressed small cells and directional uncertainty. Owner changes are tested with a frozen blocked-switchback plan.
 
-## Foundation boundary
+## Implemented boundary
 
-Current code has shells, health response and initial dish-event validation. Migrations establish private storage constraints; no domain write API or production role grants exist yet. Queue/R2/Hyperdrive and staff authentication are not silently mocked or configured with invented IDs. [PR sequencing](delivery.md) supplies the next complete slices.
+Current code has shells, health and dish-revision contracts, signed JWT verification and a staff-authorized write API. The command locks current membership, assigns transaction-local actor/venue context and serializes command identity and dish versions. Its event, live projection, receipt and pending outbox row commit together. A pure reducer reconstructs the dish projection; it never dispatches outbox work.
+
+PostgreSQL provides a restricted runtime group role. Membership's narrowly granted update privilege exists only to permit a share lock; its update policy denies every mutation. Runtime credentials remain server-only. JWT verification proves signed claims; active restaurant permission is checked in the database on every command, including retries. Provider session revocation behavior remains part of the real Supabase integration checkpoint.
+
+Local integration uses synthetic signed tokens, real PostgreSQL and workerd. It does not establish hosted Supabase/Hyperdrive compatibility, cloud latency or recovery. Queue/R2 ingestion, publication and the staff login UI remain planned. [PR sequencing](delivery.md) supplies subsequent slices.

@@ -13,7 +13,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "contracts",
       "status": "foundation",
-      "summary": "Strict health and initial dish-intent schemas. Intent pins actual publication/dish/tier/renderer/manifest/availability/experiment exposure. Server authority is rejected in client payloads; ingest, tokens, assignment verification and broader event types are not implemented.",
+      "summary": "Strict health, staff dish-revision command/result and initial dish-intent schemas. HTTP command authority fields are rejected; ingest and broader diner events remain planned.",
       "paths": [
         "packages/contracts/src/index.ts",
         "packages/contracts/src/index.test.ts"
@@ -22,7 +22,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "docs/adr/0003-intent-evidence.md"
       ],
       "dependsOn": [],
-      "sourceFingerprint": "d0ab8f65deef6ad4dc4f2cfeca1b4086d2f8355011335803d3c3c32483dabce6"
+      "sourceFingerprint": "802e422cbe5d2c067e0933be29976bde9777e35bc2fc8799c6e7feefa2952725"
     },
     {
       "id": "diner",
@@ -66,11 +66,18 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "backend",
       "status": "foundation",
-      "summary": "Hono Worker exposes only GET /health. Unknown routes return 404; there are no ingestion, staff, publication or database endpoints. Staging configuration names a health-only Worker; account and external bindings are not provisioned.",
+      "summary": "Hono Worker verifies configured staff JWTs and restaurant membership, then executes atomic dish revision commands under a restricted database role. Pure dish replay is effect-free. Local JWT/real Postgres/workerd tests cover the slice; genuine Supabase auth and Hyperdrive pooling remain a cloud checkpoint. No ingestion or publication endpoint.",
       "paths": [
         "backend/src/index.ts",
         "backend/src/index.test.ts",
-        "backend/wrangler.jsonc"
+        "backend/wrangler.jsonc",
+        "backend/src/auth.ts",
+        "backend/src/auth.test.ts",
+        "backend/src/dish-command.ts",
+        "backend/src/dish-command.test.ts",
+        "backend/src/dish.integration.ts",
+        "backend/local.mjs",
+        "backend/package.json"
       ],
       "adrs": [
         "docs/adr/0002-selective-event-sourcing.md",
@@ -81,25 +88,27 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "contracts",
         "database"
       ],
-      "sourceFingerprint": "c10f4816c3b2ddb44c2c90908caaab621da2b9d59557d60f91ad93508aafc278"
+      "sourceFingerprint": "538f4e3eebae69ecbf059023f08ce2a17c9426e72587f6389c66cb2c565a1a95"
     },
     {
       "id": "database",
       "status": "foundation",
-      "summary": "Private Postgres venue/event/command/outbox foundation. Real tests cover append-only events, constraints and no-context/own-tenant/cross-tenant event, command and outbox access under a restricted test role. No runtime grants or command/projection API. PR 1 must bind verified authority transaction-locally and prove concurrent commands, atomicity and safe connection reuse; identity allocation is not commit order.",
+      "summary": "Private Postgres venue/event/command/outbox, actor-scoped memberships and tenant-scoped dish projections. Runtime grants cannot modify membership; share locks serialize revocation. Forward migration validates safe existing runtime-role attributes. Tests cover prior-schema upgrade, RLS, atomic commands and direct connection reuse; managed-provider role/pool verification remains required.",
       "paths": [
         "migrations/202610130001_foundation.sql",
         "tests/db/foundation.sql",
         "tests/db/Dockerfile",
         "scripts/test-db.mjs",
-        "scripts/test-db.test.mjs"
+        "scripts/test-db.test.mjs",
+        "migrations/20261014210000_staff_commands.sql",
+        "tests/db/staff.sql"
       ],
       "adrs": [
         "docs/adr/0002-selective-event-sourcing.md",
         "docs/adr/0005-tenancy-and-privacy.md"
       ],
       "dependsOn": [],
-      "sourceFingerprint": "324527aaebb7619c38ebe1c0eb4781383dd2212e3ee70a61b7c9c76e60010686"
+      "sourceFingerprint": "aa2a73d801e4916dca7ea2465ac87c837475d31bd5bd878f4871ac80099a4ed0"
     },
     {
       "id": "measurement",
@@ -114,12 +123,12 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "backend"
       ],
-      "sourceFingerprint": "1b098535a4fb3a5952912bbb6cc819a9ab1956c06cb45ac5c0b3716f203b007b"
+      "sourceFingerprint": "d76eaa82864d5199b795343e502786f38e2dc6ebe90ad70d3db9312c3205c2c3"
     },
     {
       "id": "delivery",
       "status": "foundation",
-      "summary": "README documents implementation status, architecture, the TypeScript stack and accepted but unimplemented Python/uv/pytest processing scope, prerequisites, verification and agent roles. Monthly grouped updates and one ci gate cover path-selected checks. Verification records sanitized observations locally or in CI summaries. Human review/comment policy applies; owner must configure protections and cloud resources.",
+      "summary": "Local staff-command development starts disposable Postgres, synthetic JWT issuance and workerd without cloud credentials. Existing purposeful CI jobs include real database/Worker integration; no extra CI job. Docs distinguish local evidence from the hosted auth/roles/pooling checkpoint. Monthly grouped updates and human review/comment policy remain.",
       "paths": [
         "README.md",
         "package.json",
@@ -138,7 +147,8 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "docs/operations.md",
         "scripts/verify.mjs",
         "scripts/verify.test.mjs",
-        "docs/verification.md"
+        "docs/verification.md",
+        "vitest.db.config.ts"
       ],
       "adrs": [
         "docs/adr/0007-delivery-and-recovery.md"
@@ -148,7 +158,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "5e51365ad08740d7d961e0920fe3f26aa7cc3ff2dd1572d6c2cf1fb93f86cb6f"
+      "sourceFingerprint": "93c535bd2b6914f10749ed78898db0a410b934709f912b9c532b939e9a9879fb"
     },
     {
       "id": "agents",
@@ -180,6 +190,16 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     }
   ],
   "handoffs": [
+    {
+      "summary": "Implemented the local PR 1 staff/dish command slice: strict contracts, signed JWT verification, current membership authorization, atomic events/projection/receipt/outbox, effect-free replay and local Worker/Postgres tooling. Cloud provisioning and live-provider checks remain explicitly blocked on credentials; no cloud resources created.",
+      "modules": [
+        "contracts",
+        "backend",
+        "database",
+        "delivery"
+      ],
+      "next": "Finish review and local acceptance evidence, obtain human review on the pinned PR, then verify real Supabase identity/roles and Hyperdrive connection reuse before calling PR 1 cloud-ready."
+    },
     {
       "summary": "Evaluated all five role prompts before rewriting README as professional repository documentation. Builder initially exceeded assigned ownership in its plan and bypassed the recorder in a proposed command; paired profiles were corrected and the same case passed in a fresh session. Published cases, outcomes and native-client limits; runtime and ADRs are unchanged.",
       "modules": [
