@@ -1,6 +1,8 @@
 # Frontend design handoff
 
-The current direction is the [PeekaPlate Flow Prototype](https://claude.ai/artifact/LjkRVm78VioRB2FrVSauwJ), inspected October 14, 2026. It is a Claude prototype, not a Figma file or frozen design specification. The team is still designing it. The [architecture plan](https://claude.ai/artifact/LUJ4ggBXpF7korJWbg4u8f) and [visual-tier ADR](adr/0004-visual-tiers.md) govern behavior, truthfulness and performance.
+The current reference is the [PeekaPlate Flow Prototype](https://claude.ai/artifact/LjkRVm78VioRB2FrVSauwJ), inspected and confirmed as the latest design progress on October 14, 2026. The supplied URL hosts the prototype in Claude; the shared Figma/design-system handoff is tracked separately in ClickUp. Use this design progress while the team continues refining it. The [architecture plan](https://claude.ai/artifact/LUJ4ggBXpF7korJWbg4u8f) and [visual-tier ADR](adr/0004-visual-tiers.md) govern behavior, truthfulness and performance.
+
+The dated [team task map](team_guide.md#reference-the-clickup-task-snapshot) records Amr Hussien and Rania's layout, palette, shared-design and flow tasks. The current direction is to iterate on the existing structure, develop reusable tokens/components and specify accessible light/dark treatments adaptable to restaurant branding. Open board tasks do not establish that no design progress exists, and prototype progress does not establish implementation in the repository.
 
 Observed direction: QR entry, menu loading, category filters, a featured dish, photo-led cards with description/category/price and progressive browsing. The visible treatment uses a light cream/marble background, dark serif titles and warm brand accents. Sample food, prices and imagery are demonstration content; they are not approved venue data or evidence of asset rights.
 
