@@ -42,4 +42,4 @@ For Claude's enforced coordinator type allowlist, launch `claude --agent review-
 
 Runnable staging shells, a health-only Worker, initial dish-exposure contracts, database foundations, tests, CI and grounded review guidance. **There is no live restaurant menu, authentication, event ingestion, publication command, POS adapter or Three.js viewer yet.** The [delivery plan](docs/delivery.md) orders those PRs and defines completion evidence. A schema or passing shell test does not complete L0 or the pilot.
 
-Read the [architecture](docs/architecture.md), [ADR index](docs/adr/README.md), [operations runbook](docs/operations.md) and [research record](docs/research/README.md). Keep PRs small enough to review and complete enough to run.
+Read the [architecture](docs/architecture.md), [ADR index](docs/adr/README.md), [design handoff](docs/frontend-design.md), [verification map](docs/verification.md), [operations runbook](docs/operations.md) and [65-repository research record](docs/research/README.md). Keep PRs small enough to review and complete enough to run.

@@ -33,3 +33,9 @@ test('rejects initial renderer imports, missing entry and budget overruns', () =
   assert.throws(() => checkInitialBundle({}), /No diner/);
   assert.throws(() => checkInitialBundle({ 'index.js': chunk('index.js', true) }, 1), /exceeds/);
 });
+
+test('rejects unaccounted initial imports instead of silently undercounting JavaScript', () => {
+  const entry = chunk('index.js', true);
+  entry.imports = ['https://cdn.example/viewer.js'];
+  assert.throws(() => checkInitialBundle({ 'index.js': entry }), /Missing initial JS chunk/);
+});

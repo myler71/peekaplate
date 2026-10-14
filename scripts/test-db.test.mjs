@@ -10,6 +10,17 @@ test('ensureSuccess rejects failed command exits', () => {
   );
 });
 
+test('failed database commands retain bounded stderr needed to diagnose SQL errors', () => {
+  assert.throws(
+    () => ensureSuccess({ status: 3, stderr: 'ERROR: column does not exist' }, 'pgTAP'),
+    /pgTAP: exited 3.*column does not exist/s,
+  );
+  assert.throws(
+    () => ensureSuccess({ status: 1, stderr: 'x'.repeat(3000) }, 'docker'),
+    (error) => error.message.length < 2100,
+  );
+});
+
 test('validateTap accepts a complete passing plan', () => {
   assert.equal(validateTap('1..2\nok 1 - first\nok 2 - second\n'), 2);
 });

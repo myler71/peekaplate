@@ -35,6 +35,7 @@ jobs:
               - 'tests/db/**'
               - 'packages/contracts/**'
               - 'scripts/test-db*'
+              - 'scripts/verify*'
               - 'package.json'
               - 'pnpm-lock.yaml'
               - 'pnpm-workspace.yaml'
@@ -47,6 +48,7 @@ jobs:
               - 'packages/contracts/**'
               - 'tests/e2e/**'
               - 'scripts/check-bundle*'
+              - 'scripts/verify*'
               - 'playwright.config.ts'
               - 'package.json'
               - 'pnpm-lock.yaml'
@@ -69,17 +71,17 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - name: Code quality and unit tests
-        run: pnpm lint && pnpm typecheck && pnpm test
-      - run: pnpm build
+        run: pnpm verify lint typecheck test
+      - run: pnpm verify build
       - name: Context freshness
         if: ${{ !cancelled() }}
-        run: pnpm context:check
+        run: pnpm verify context:check
       - name: Documentation links
         if: ${{ !cancelled() }}
-        run: pnpm docs:check
+        run: pnpm verify docs:check
       - name: PR documentation
         if: ${{ !cancelled() }}
-        run: node scripts/check-pr.mjs
+        run: pnpm verify pr:check
 
   database:
     needs: changes
@@ -96,7 +98,7 @@ jobs:
           node-version: 24.16.0
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm test:db
+      - run: pnpm verify test:db
 
   browser:
     needs: changes
@@ -114,7 +116,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm test:e2e
+      - run: pnpm verify test:e2e
 
   ci:
     if: always()

@@ -21,7 +21,7 @@ export function checkInitialBundle(bundle, limit = 150_000) {
         throw new Error(`Renderer in initial diner graph: ${module}`);
     }
     gzipBytes += gzipSync(chunk.code).length;
-    pending.push(...chunk.imports.filter((name) => name in bundle));
+    pending.push(...chunk.imports);
   }
   if (!visited.size) throw new Error('No diner entry chunk found');
   if (gzipBytes > limit)

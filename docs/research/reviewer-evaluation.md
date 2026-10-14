@@ -12,3 +12,16 @@ Static checklist exercise, October 13, 2026 (America/Phoenix). This is not a run
 | False-positive guard | A label reads `reapply migrations`; actual command arguments end in `up` | Do not report the label alone as a destructive migration command; inspect actual parsed arguments | Required reviewer evidence discipline |
 
 The prior injection observation was a **defense-in-depth gap**, not a demonstrated exploit: root `AGENTS.md` already instructed agents to treat untrusted content as data. Adapter-level repetition now makes that control explicit when a reviewer runs with only its profile context.
+
+## Foundation hardening, October 14
+
+The five Claude/Codex profile bodies were compared after parsing the TOML profiles and matched exactly. The shared skill now defines one review result contract; profiles supply only their bounded role. This checks adapter consistency, not model judgment.
+
+| Scenario | Expected result | Evidence boundary |
+| --- | --- | --- |
+| Dirty checkout after a pinned review | Inspect both relevant tracked changes and untracked files before declaring the reviewed snapshot current | Explicit shared-skill rule; no automatic GitHub enforcement |
+| Evolving design prototype | Cite the inspected source/state, label unavailable details, and avoid inventing approved content or pixel-perfect completion | Design handoff and guide/builder instructions |
+| Failed verification | Record a sanitized observation, confirm the cause, add regression evidence, then resolve; never infer the cause from an exit code | Runner unit/integration tests; human/agent diagnosis remains required |
+| Unsupported defect hypothesis | Try to disprove it against the actual caller and tests; report missing evidence separately from a finding | Shared skill evidence contract; this is a checklist exercise, not a measured model accuracy score |
+
+Future reviewer evaluation should use known defects and clean controls from real feature PRs, record false positives and misses, and rerun after prompt changes. There is no defensible "100/100" reviewer guarantee.

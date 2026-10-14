@@ -17,9 +17,9 @@ Describe the user or operator result.
 Replace this paragraph with entries like: - PASS: `pnpm check` — results. Use FAIL or NOT RUN as appropriate, including a reason for checks not run. Do not claim checks passed when they were not run.
 
 - [ ] `pnpm check`
-- [ ] `pnpm build`
-- [ ] `pnpm test:db` (when runtime, migration, or database paths changed)
-- [ ] `pnpm test:e2e` (when diner, console, contracts, or runtime paths changed)
+- [ ] `pnpm verify build`
+- [ ] `pnpm verify test:db` (when runtime, migration, or database paths changed)
+- [ ] `pnpm verify test:e2e` (when diner, console, contracts, or runtime paths changed)
 - [ ] Manual flow checked, or N/A:
 
 ## Deferred / future work

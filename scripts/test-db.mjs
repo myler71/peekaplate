@@ -11,8 +11,12 @@ const databaseUrl = 'postgres://postgres:peekaplate_test@db:5432/peekaplate?sslm
 
 export function ensureSuccess(result, label) {
   if (result.error) throw new Error(`${label}: ${result.error.message}`);
-  if (result.status !== 0)
-    throw new Error(`${label}: exited ${result.status ?? 'without a status'}`);
+  if (result.status !== 0) {
+    const detail = result.stderr?.trim().slice(-2000);
+    throw new Error(
+      `${label}: exited ${result.status ?? 'without a status'}${detail ? `\n${detail}` : ''}`,
+    );
+  }
 }
 
 export function validateTap(output) {

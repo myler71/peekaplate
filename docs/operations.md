@@ -16,7 +16,7 @@ pnpm --filter @peekaplate/backend dev
 
 `pnpm test:db` builds a PostgreSQL 16 test image with pgTAP, creates an isolated temporary Docker network/database, applies migrations twice, runs constraint tests, then removes its containers/network. The fixed test password belongs only to this disposable service, which exposes no host port. Never point this harness at a shared database. A Docker daemon and image downloads are required. Image tags are pinned to versions; they are not immutable digest pins.
 
-`pnpm test:e2e` starts local apps itself. Install Chromium once with `pnpm exec playwright install chromium`. CI installs system dependencies too. Two smoke flows cover no-JavaScript diner content and the console/real local Worker health path. Traces are retained on failure; there is no routine DOM dump. They do not exercise a live restaurant, staff login, queue or GPU viewer.
+`pnpm test:e2e` starts local apps itself. Install Chromium once with `pnpm exec playwright install chromium`. CI installs system dependencies too. Four tests cover no-JavaScript diner content, the console/real local Worker health path, and axe accessibility plus narrow-screen overflow on both shells. Traces are retained on failure; there is no routine DOM dump. They do not exercise a live restaurant, staff login, queue or GPU viewer. Use `pnpm verify test:e2e` and `pnpm verify test:db` to record failed-check observations as described in [contributing](../CONTRIBUTING.md#local-checks).
 
 ## Database change procedure
 
