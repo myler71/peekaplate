@@ -139,7 +139,7 @@ Read this map first, then the relevant source paths and ADRs. It is navigation, 
         "console",
         "backend"
       ],
-      "sourceFingerprint": "01ce4943e277cb3bcdedc39f36d0d1e0f455dcfea1e2ee7bebbcf5365b7b105f"
+      "sourceFingerprint": "330cf466fc78c6ae422fcfea4c237266b193e834cd40502f56c5d88f45bea1da"
     },
     {
       "id": "agents",
