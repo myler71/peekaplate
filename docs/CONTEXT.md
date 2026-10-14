@@ -153,7 +153,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "agents",
       "status": "implemented",
-      "summary": "Paired Claude/Codex profiles share one evidence/JSON review contract. Five bounded behavior cases met expectations after correcting and retesting builder ownership/verification instructions. Native role discovery and tool enforcement remain unverified due to client/environment limits. Reviewers pin source; builders hand off dependencies outside ownership and source fingerprint updates. Prompt parity and these cases do not prove general model accuracy.",
+      "summary": "Paired Claude/Codex review roles share an evidence/JSON review contract; repo-guide returns task briefs and task-builder returns implementation handoffs. Five bounded behavior cases met expectations after correcting and retesting builder ownership/verification instructions. Native role discovery and tool enforcement remain unverified due to client/environment limits. Builders hand off dependencies outside ownership and source fingerprint updates. Prompt parity and these cases do not prove general model accuracy.",
       "paths": [
         "AGENTS.md",
         "CLAUDE.md",
