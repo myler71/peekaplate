@@ -13,7 +13,7 @@ Observed October 13, 2026 (America/Phoenix; activity timestamps below are UTC). 
 
 ## Source inventory
 
-Activity is repository push time, not proof of quality or compatibility. Layout observations support the choices above; large-project folder counts were not copied. 
+Activity is repository push time, not proof of quality or compatibility. Layout observations support the choices above; large-project folder counts were not copied.
 
 | Repository | Latest observed push (UTC) | Layout/pattern considered | Daily trending sample |
 | --- | --- | --- | --- |

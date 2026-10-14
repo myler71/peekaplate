@@ -139,12 +139,12 @@ Read this map first, then the relevant source paths and ADRs. It is navigation, 
         "console",
         "backend"
       ],
-      "sourceFingerprint": "551f7e8bbe43b6ce51baaceafd038f9e08db37455b6cb356a4e9531da31209f2"
+      "sourceFingerprint": "01ce4943e277cb3bcdedc39f36d0d1e0f455dcfea1e2ee7bebbcf5365b7b105f"
     },
     {
       "id": "agents",
       "status": "implemented",
-      "summary": "Repository guidance and Claude/Codex coordinator, architecture, correctness and guide profiles. Review requires pinned head, source evidence, uncertainty and separate ADR intent from implemented behavior. Context tooling checks links/freshness, not semantic correctness; models are not infallible or permission boundaries.",
+      "summary": "Repository guidance and Claude/Codex coordinator, architecture, correctness, guide and task-builder profiles. Reviewers stay read-only; builders own explicitly assigned files. Review requires pinned head, source evidence, uncertainty and separate ADR intent from implemented behavior. Context tooling checks links/freshness, not semantic correctness; models are not infallible or permission boundaries.",
       "paths": [
         "AGENTS.md",
         "CLAUDE.md",
@@ -153,10 +153,12 @@ Read this map first, then the relevant source paths and ADRs. It is navigation, 
         ".claude/agents/architecture-reviewer.md",
         ".claude/agents/correctness-reviewer.md",
         ".claude/agents/repo-guide.md",
+        ".claude/agents/task-builder.md",
         ".codex/agents/review-coordinator.toml",
         ".codex/agents/architecture-reviewer.toml",
         ".codex/agents/correctness-reviewer.toml",
         ".codex/agents/repo-guide.toml",
+        ".codex/agents/task-builder.toml",
         "scripts/context.mjs",
         "scripts/context.test.mjs"
       ],
@@ -164,7 +166,7 @@ Read this map first, then the relevant source paths and ADRs. It is navigation, 
         "docs/adr/0008-agent-context-and-review.md"
       ],
       "dependsOn": [],
-      "sourceFingerprint": "c9371eb6c1d60f2be1feec38dba71ac12ccaef8ebda7de572bc9cf5fd0193fb2"
+      "sourceFingerprint": "fd64b81a593e5482c913fa613d80c935313b9730ff29846497ecb7f9ededdbaa"
     }
   ],
   "handoffs": [

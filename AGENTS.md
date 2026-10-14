@@ -1,6 +1,6 @@
 # PeekaPlate contributor and agent guide
 
-Read this file, `docs/CONTEXT.md`, then only the paths and accepted ADRs relevant to the task. Start with `pnpm context:show -- <module-id>` if a module is known. Context is an index, not proof: verify implementation claims against code and tests.
+Read this file, `docs/CONTEXT.md`, then only the paths and accepted ADRs relevant to the task. Review `.learnings/LEARNINGS.md` before major changes. Start with `pnpm context:show -- <module-id>` if a module is known. Context is an index, not proof: verify implementation claims against code and tests.
 
 ## Sources and scope
 
@@ -31,7 +31,7 @@ When sources conflict, name the conflict. An ADR edited in the same PR does not 
 
 ## Agents and review
 
-Use `.agents/skills/peekaplate-review/SKILL.md` for material changes. The review coordinator uses separate architecture and correctness reviewers only when independent coverage helps. Keep leaf reviewers read-only, bound their files/risk, and do not recursively delegate. The `repo-guide` explains code paths and plans tasks. It does not silently edit or deploy.
+Use `.agents/skills/peekaplate-review/SKILL.md` for material changes. The review coordinator uses separate architecture and correctness reviewers only when independent coverage helps. Keep leaf reviewers read-only, bound their files/risk, and do not recursively delegate. The `repo-guide` explains code paths and plans tasks. The `task-builder` implements one explicitly assigned slice with tests and a context handoff; assign non-overlapping ownership. Neither silently deploys.
 
 Review a pinned base/head. Findings require a path/line, violated requirement, reachable failure and evidence or a clearly labelled uncertainty. Stop or re-pin when the head changes. Automated checks and agents support human review; neither establishes infallibility.
 

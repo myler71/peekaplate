@@ -12,7 +12,7 @@ Reject stale publication commands.
 ## Changes
 Check expected version inside the transaction.
 ## Verification
-- PASS: pnpm test (regression included)
+- PASS: \`pnpm test\` (regression included)
 ## Deferred / future work
 N/A
 `;
@@ -20,6 +20,10 @@ N/A
 test('accepts a populated PR and rejects missing evidence, empty fields and untouched template', async () => {
   assert.doesNotThrow(() => checkPullRequest(body));
   assert.throws(() => checkPullRequest(body.replace('PASS:', 'Maybe:')), /Verification/);
+  assert.throws(
+    () => checkPullRequest(body.replace('PASS: `pnpm test` (regression included)', 'PASS green')),
+    /Verification/,
+  );
   assert.throws(() => checkPullRequest(body.replace('ADR 0002\n', '\n')), /field/);
   assert.throws(() => checkPullRequest(body.replace('## Outcome', '## Missing')), /section/);
   const template = await readFile(

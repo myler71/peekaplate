@@ -40,8 +40,17 @@ export function checkPullRequest(body) {
     if (!value || /\[ \]|why:\s*$/.test(value) || /^N\/?A\s*$/i.test(value))
       throw new Error(`Explain PR field: ${label}`);
   }
-  if (!/\b(PASS|FAIL|NOT RUN)\b[^\n]*\S/.test(sections.get('Verification')))
-    throw new Error('Verification needs an exact command and PASS / FAIL / NOT RUN with context');
+  const entries = [
+    ...sections
+      .get('Verification')
+      .matchAll(/^\s*-\s*(PASS|FAIL|NOT RUN):\s*`([^`\n]+)`([^\n]*)$/gm),
+  ];
+  if (
+    !entries.some(
+      ([, status, command, detail]) => command.trim() && (status !== 'NOT RUN' || detail.trim()),
+    )
+  )
+    throw new Error('Verification needs - PASS|FAIL|NOT RUN: `exact command`; explain NOT RUN');
 }
 
 async function main() {

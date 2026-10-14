@@ -14,7 +14,7 @@ Describe the user or operator result.
 
 ## Verification
 
-Replace this paragraph with exact commands and PASS / FAIL / NOT RUN, including a reason for checks not run. Do not claim checks passed when they were not run.
+Replace this paragraph with entries like: - PASS: `pnpm check` — results. Use FAIL or NOT RUN as appropriate, including a reason for checks not run. Do not claim checks passed when they were not run.
 
 - [ ] `pnpm check`
 - [ ] `pnpm build`

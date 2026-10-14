@@ -34,6 +34,10 @@ docs/                Architecture, decisions, delivery and context
 
 Agent entry points are [AGENTS.md](AGENTS.md), [CONTEXT.md](docs/CONTEXT.md) and the [review skill](.agents/skills/peekaplate-review/SKILL.md). Claude and Codex role definitions live in their standard hidden agent folders.
 
+Start a fresh agent session from this repository. Use `repo-guide` to map a task, `task-builder` for one assigned implementation slice, and `review-coordinator` to combine `architecture-reviewer` and `correctness-reviewer` findings. Give reviewers base/head SHAs; give builders responsibility and owned files. Runtime permissions remain controlled by your client.
+
+For Claude's enforced coordinator type allowlist, launch `claude --agent review-coordinator` from the repository. The [official agent documentation](https://code.claude.com/docs/en/sub-agents#restrict-which-subagents-can-be-spawned) limits that allowlist to main-thread agents. For Codex, use the repo's named agent profiles or invoke `$peekaplate-review`. The [reviewer exercise](docs/research/reviewer-evaluation.md) records what was checked and its limits.
+
 ## What exists today
 
 Runnable staging shells, a health-only Worker, initial dish-exposure contracts, database foundations, tests, CI and grounded review guidance. **There is no live restaurant menu, authentication, event ingestion, publication command, POS adapter or Three.js viewer yet.** The [delivery plan](docs/delivery.md) orders those PRs and defines completion evidence. A schema or passing shell test does not complete L0 or the pilot.
