@@ -77,6 +77,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "backend/src/dish-command.test.ts",
         "backend/src/dish.integration.ts",
         "backend/local.mjs",
+        "backend/local.test.mjs",
         "backend/package.json"
       ],
       "adrs": [
@@ -88,7 +89,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "contracts",
         "database"
       ],
-      "sourceFingerprint": "274d4217f999ea59717ca56be69f30a0f3e382d69a92df6b4fbfd0506b641e37"
+      "sourceFingerprint": "bb81da3c697f544c38f64e287ae9b4767204ba5a20625f399b38a17be05f7e3c"
     },
     {
       "id": "database",
@@ -158,7 +159,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "1e6fcdff58ecd9492b6c5d97da384df8e24863239964ecece849bc9d2309e3e9"
+      "sourceFingerprint": "80178bb9dda29c6d7dd15c42413e351b87aaede74db12fbae9e31c1ee11bc1f3"
     },
     {
       "id": "agents",
@@ -198,7 +199,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "database",
         "delivery"
       ],
-      "next": "Finish review and local acceptance evidence, obtain human review on the pinned PR, then verify real Supabase identity/roles and Hyperdrive connection reuse before calling PR 1 cloud-ready."
+      "next": "PR 9 has passing Linux CI for 43 SQL assertions, 13 Worker/Postgres integration tests, the local CLI flow and 4 browser checks, plus 35 unit and 20 script tests. Two independent review lanes closed their findings. Obtain human review on the current head. Windows Docker still needs restart/readiness verification; real Supabase identity, provider roles and Hyperdrive pooling are the next credential boundary."
     },
     {
       "summary": "Evaluated all five role prompts before rewriting README as professional repository documentation. Builder initially exceeded assigned ownership in its plan and bypassed the recorder in a proposed command; paired profiles were corrected and the same case passed in a fresh session. Published cases, outcomes and native-client limits; runtime and ADRs are unchanged.",
