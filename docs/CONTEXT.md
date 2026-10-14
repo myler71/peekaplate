@@ -132,6 +132,8 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "summary": "Local staff-command development starts disposable Postgres, synthetic JWT issuance and workerd without cloud credentials. Existing purposeful CI jobs include real database/Worker integration; no extra CI job. Docs distinguish local evidence from the hosted auth/roles/pooling checkpoint. Monthly grouped updates and human review/comment policy remain.",
       "paths": [
         "README.md",
+        "SECURITY.md",
+        "docs/team-lead-guide.md",
         "package.json",
         "pnpm-workspace.yaml",
         ".github/dependabot.yml",
@@ -159,7 +161,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "80178bb9dda29c6d7dd15c42413e351b87aaede74db12fbae9e31c1ee11bc1f3"
+      "sourceFingerprint": "5d412d924cf714959f04b15334e2d9372a620585d78bf959b6a84ac0842f51d4"
     },
     {
       "id": "agents",
@@ -191,6 +193,13 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     }
   ],
   "handoffs": [
+    {
+      "summary": "Added a plain-language team-lead guide covering the product, current local command flow, every tracked file, verification, research and agent limits, and ordered next steps. Corrected the stale health-only security overview. Runtime behavior is unchanged.",
+      "modules": [
+        "delivery"
+      ],
+      "next": "Complete documentation review and exact-head CI, merge PR 9 under the owner instruction, then resolve local Docker readiness and the real Supabase/Hyperdrive credential-bound checks."
+    },
     {
       "summary": "Implemented the local PR 1 staff/dish command slice: strict contracts, signed JWT verification, current membership authorization, atomic events/projection/receipt/outbox, effect-free replay and local Worker/Postgres tooling. Cloud provisioning and live-provider checks remain explicitly blocked on credentials; no cloud resources created.",
       "modules": [
