@@ -111,3 +111,11 @@ These records describe local validation limits, not application failures.
 ```json
 {"kind":"resolution","references":{"check":"context:check","timestamp":"2026-10-15T05:50:07.099Z"},"cause":"The check ran while documentation edits were still in progress and before the required context fingerprint refresh.","prevention":"Refresh and inspect affected context nodes after completing source edits, then run the final recorded check. This observation does not indicate an application regression."}
 ```
+
+```json
+{"id":"ERR-20261015-001","status":"resolved","area":"source-review-tooling","cause":"A downloaded Markdown export with a temporary extension was initially treated as a ZIP; a browser download wait also timed out although the file was present. Neither failure changed product data.","prevention":"Inspect file content/signature before choosing a parser; after a download timeout verify the specific download before retrying. Preserve source coverage and report unreadable material explicitly.","regression":"The export was read as UTF-8 Markdown and its first/last pages and 34-page inventory were reconciled. DOCX inputs were separately parsed as ZIP/XML. No runtime regression test applies to this read-only research operation."}
+```
+
+```json
+{"id":"ERR-20261015-002","status":"resolved","area":"documentation-edit-tooling","cause":"A patch attempted delete and add operations for the same path and was rejected before applying that patch.","prevention":"Use one update operation per existing file in a patch, then inspect the actual diff.","regression":"The design handoff was applied as an update; the rejected patch made no changes. Documentation/context verification covers the final references; no application behavior changed."}
+```

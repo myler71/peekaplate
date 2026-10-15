@@ -6,6 +6,8 @@ PeekaPlate is a restaurant menu and measurement platform designed to connect din
 
 The [team guide](docs/team_guide.md) explains the system and each tracked file's purpose in plain language, distinguishes working features from plans, and gives the next steps.
 
+The [implementation plan](docs/implementation_plan.md) reconciles the current team documents into diner and owner experiences, a dummy-menu interaction/event map, dashboard measures, photo-grounded preparation for the proposed 20 dishes, unresolved decisions and parallel delivery work. It is a planning handoff, not implemented product behavior.
+
 ## Implementation status
 
 The repository contains diner and staff-console shells and a local staff-command slice: signed staff-token verification, restaurant membership checks, and atomic dish-revision writes with tenant isolation. Local verification uses synthetic identities, real PostgreSQL and the Workers runtime. Hosted Supabase authentication, Hyperdrive connection behavior and cloud resource provisioning remain unverified. Console login, menu publication, intent ingestion, POS integration and visual rendering are not implemented. Feature and pilot acceptance criteria are tracked in the [verification map](docs/verification.md).

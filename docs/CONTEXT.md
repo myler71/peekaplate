@@ -27,7 +27,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "diner",
       "status": "foundation",
-      "summary": "Static TypeScript/Vite shell usable without JavaScript. The supplied prototype is confirmed as latest design progress; shared Figma/tokens and flows are separately tracked, not implemented here. Build checks initial JS gzip budget and renderer boundaries. Viewer, analytics and device performance remain planned.",
+      "summary": "Static TypeScript/Vite shell usable without JavaScript. Figma V1 is diner design direction; QR/link must open the menu directly with a small owner sign-in link. The October 15 plan specifies synthetic UI states, event definitions and photo-grounded assets; none are implemented. Build checks initial JS gzip budget and renderer boundaries; viewer, analytics and real-device evidence remain planned.",
       "paths": [
         "frontend/diner/index.html",
         "frontend/diner/src/main.ts",
@@ -43,12 +43,12 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "contracts"
       ],
-      "sourceFingerprint": "09b3c416fc96e33d0e645d05ae270d004ad699983df725bef4f62d6165b3471f"
+      "sourceFingerprint": "59deaee0e82561567b5b89d4c5b36ef0cd10d010c48b22139d5a39180e5b5a47"
     },
     {
       "id": "console",
       "status": "foundation",
-      "summary": "React/Vite staff shell. Authentication, review, approval, publication, experiments and readouts remain planned. No real staff data or mutation control is exposed.",
+      "summary": "React/Vite staff shell. The Claude owner dashboard artifact is distinct from the Figma diner menu. Authentication, review, approval, publication, experiments and secured readouts remain planned; the public owner link will not grant private access. No real staff data or mutation control is exposed.",
       "paths": [
         "frontend/console/src/main.tsx",
         "frontend/console/src/style.css",
@@ -114,9 +114,10 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "measurement",
       "status": "planned",
-      "summary": "Venue-bound redeem codes will link sessions to POS tickets. Unknown linkage stays unknown. Planned owner readout reports coverage and suppresses cells under ten sessions; frozen blocked-switchback assignment precedes causal claims. No POS or experiment implementation exists.",
+      "summary": "Venue-bound redeem codes will link sessions to POS tickets. The October 15 plan reconciles draft diner events, attention versus consideration, dashboard denominators and evidence limits. A browsing-only demo may precede linkage with orders unavailable; the accepted full pilot still needs linkage. Unknown outcomes and small-cell suppression remain; no ingestion, POS or experiment implementation exists.",
       "paths": [
-        "docs/delivery.md"
+        "docs/delivery.md",
+        "docs/implementation_plan.md"
       ],
       "adrs": [
         "docs/adr/0006-orders-and-measurement.md"
@@ -124,16 +125,17 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "backend"
       ],
-      "sourceFingerprint": "d76eaa82864d5199b795343e502786f38e2dc6ebe90ad70d3db9312c3205c2c3"
+      "sourceFingerprint": "4ebe732a134d52a01bd5f1031e99c0dab1016100b73bb936a3b611add6176b48"
     },
     {
       "id": "delivery",
       "status": "foundation",
-      "summary": "Local staff-command development uses disposable Postgres, synthetic JWTs and workerd. Windows Docker was recovered with Desktop 4.95 and the real database/local demo checks passed. The team guide separates research/design from implemented code; hosted-provider checks and owner-controlled GitHub enforcement remain pending. Monthly grouped updates and human review/comment policy remain.",
+      "summary": "Local staff-command development uses disposable Postgres, synthetic JWTs and workerd. Windows Docker and real database/local demo checks passed previously. The October 15 team guide and implementation plan reconcile 34 exported Team Docs pages, diner drafts and processing supplements, separate diner/owner designs and order parallel work. Twenty-dish asset preparation has not started; hosted-provider checks and owner-controlled GitHub enforcement remain pending.",
       "paths": [
         "README.md",
         "SECURITY.md",
         "docs/team_guide.md",
+        "docs/implementation_plan.md",
         "package.json",
         "pnpm-workspace.yaml",
         ".github/dependabot.yml",
@@ -161,7 +163,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "8ace74c2d287765ee2016cb7676c0a9fd91344e5599b942204c5046c7fb5996a"
+      "sourceFingerprint": "2006c7f348d1b6d0029d92c8d038e086938f29c8dab77931fcc2593f96a65507"
     },
     {
       "id": "agents",
@@ -193,6 +195,16 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     }
   ],
   "handoffs": [
+    {
+      "summary": "Reconciled Team Docs, diner scope/taxonomy, processing supplements and the owner dashboard into one proposed implementation plan. Updated team_guide and design handoff: QR opens the diner menu directly, owner sign-in leads to a private console, and the 20-dish photo-grounded batch is planned rather than completed. Named OCR, approval/allergen, event-vocabulary and outcome-scope decisions; preserved accepted ADRs and actual local-only code status.",
+      "modules": [
+        "delivery",
+        "diner",
+        "console",
+        "measurement"
+      ],
+      "next": "Agree bounded ClickUp assignments and open product decisions. Build local capture/review/publication while synthetic diner UI, event contracts and photo preparation proceed in parallel. Complete pinned documentation review and recorded checks; stop at protected provider credentials before hosted integration. Fresh Figma frame inspection remains limited by account terms acceptance."
+    },
     {
       "summary": "Recovered Windows Docker after checksummed offline disk backups and an official Desktop 4.95 upgrade. Real testing exposed a pnpm.mjs launcher rejection; the DB harness now invokes installed Vitest directly, with a failing-then-passing launcher regression. All 43 SQL assertions, 13 Worker/Postgres cases and local startup/demo/cleanup passed on Windows. Contributor Claude/Codex setup is independently owned.",
       "modules": [
@@ -264,13 +276,6 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "agents"
       ],
       "next": "Use the exact setup PR CI evidence, then start PR 1 staff authority and atomic command transaction. Confirm owner merge controls and staging resources; real menu/device/restore performance remains future gate evidence."
-    },
-    {
-      "summary": "Dependabot PRs failed the required narrative gate and version changes also stale the delivery fingerprint. Retained both safeguards, documented collaborator preparation and human review comments, grouped monthly updates, and placed documentation checks after build verification without adding CI jobs.",
-      "modules": [
-        "delivery"
-      ],
-      "next": "Review the maintenance PR and its exact CI results before merging; owner enables required ci and human approval rules plus Dependabot security settings. Prepare subsequent monthly bot PRs using CONTRIBUTING.md."
     }
   ]
 }

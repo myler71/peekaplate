@@ -2,6 +2,8 @@
 
 The foundation is PR 0. It establishes a place to build and verify PeekaPlate; it does not claim the pilot is complete. The product line stays: **3D is the hook. The loop is the product.**
 
+The October 15 [implementation plan](implementation_plan.md) reconciles the team scope/taxonomy, processing documents and diner/owner design references against these gates. Synthetic diner UI, local tracking components, report examples and the proposed 20-dish photo preparation can proceed in parallel. A browsing-only demonstration may precede order linkage with outcome measures unavailable; it does not replace the outcome-linked pilot acceptance below. The current planning update does not change accepted ADRs or implement these features.
+
 ## The first sprint
 
 One venue, one useful owner decision, a complete T0 menu and carefully selected T1/T2 dishes. T0 means normal photos and text. T1 adds shallow movement to reviewed photo cutouts. T2 separates real captured plating stages; it does not invent ingredients or unseen food. See [visual tiers](adr/0004-visual-tiers.md).
