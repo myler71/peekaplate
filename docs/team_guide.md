@@ -24,7 +24,7 @@ The visual experience is one part of this loop. Accurate food information, a usa
 
 ## 2. Where we are today
 
-**Research and design:** the team has worked on diner needs, restaurant interviews, journeys, screen designs, processing requirements and measurement ideas. The [design shared earlier](https://claude.ai/artifact/LjkRVm78VioRB2FrVSauwJ) is the latest design progress confirmed on October 14. It should guide the upcoming screens. The shared Figma/design-system tasks are a separate handoff; an open task does not mean the design work has not happened.
+**Research and design:** the team has worked on diner needs, restaurant interviews, journeys, screen designs, processing requirements and measurement ideas. The [design shared earlier](https://github.com/vivienk/peekaplate_staging/blob/main/docs/team_guide.md) is the latest design progress confirmed on October 14. It should guide the upcoming screens. The shared Figma/design-system tasks are a separate handoff; an open task does not mean the design work has not happened.
 
 **Code foundation:** the repository now has separate places for the diner app, staff app, server rules, database changes, tests and documentation. It also has instructions for coding assistants and checks that run when someone proposes a change.
 

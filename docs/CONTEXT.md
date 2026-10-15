@@ -161,7 +161,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "829d61ea6df2b19e2b72cc740679ebb8ad9cb68c3a97092d0ec2f7edc5f11c17"
+      "sourceFingerprint": "55bf4f148dfd20c984d29247b74b19c6951922920b7f775c976239d5cfd0d6cb"
     },
     {
       "id": "agents",
@@ -193,6 +193,13 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     }
   ],
   "handoffs": [
+    {
+      "summary": "Updated the design hyperlink in docs/team_guide.md to the exact team-guide URL supplied by the owner. The link points back to the guide itself; no design or runtime behavior changed.",
+      "modules": [
+        "delivery"
+      ],
+      "next": "Use the owner-supplied destination; a separate design URL can replace it if provided."
+    },
     {
       "summary": "Updated the final team_guide plan from the dated Team Interests & Responsibilities document. Proposed bounded contributions and explicit handoffs, distinguished preferences from confirmed assignments, and kept reported capacity and unfilled engineering work visible. Existing delivery dependencies and runtime behavior are unchanged.",
       "modules": [
