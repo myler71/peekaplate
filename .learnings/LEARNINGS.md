@@ -60,4 +60,6 @@ Related files: `README.md`, `docs/adr/0001-scope-and-repository.md`.
 
 A task titled “implement” or marked complete may represent research or a design deliverable. Record the task's actual assignment and dated status separately from verified repository behavior. Use confirmed design progress as the current reference even when its handoff ticket is still open. Reconcile mismatches explicitly; do not invent staffing titles or credit planned features as working code.
 
+Follow-up, October 15: when a contributor says a design reference was updated in the repository, inspect recent commits and the affected document before requesting another URL. A loosely named document is not evidence that the source is missing. Record the commit provenance separately from whether the external design can currently be opened.
+
 Related files: `docs/team_guide.md`, `docs/frontend-design.md`.

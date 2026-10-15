@@ -43,7 +43,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "contracts"
       ],
-      "sourceFingerprint": "59deaee0e82561567b5b89d4c5b36ef0cd10d010c48b22139d5a39180e5b5a47"
+      "sourceFingerprint": "ace3aee345492de87b4aa6689a8553c17f09dca07d9a7e2dde3303e1725dda0a"
     },
     {
       "id": "console",
@@ -125,7 +125,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "backend"
       ],
-      "sourceFingerprint": "f05eeadd7a8afec96b3580cebd480737f8b70cd64f7e79a6cd74dcb47f4670c1"
+      "sourceFingerprint": "49e756d90d895212f26b0a466aad311efa5c7c144059d024b982e2eb1c8aff5c"
     },
     {
       "id": "delivery",
@@ -163,7 +163,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "669d3ea30218020ca0ea9245ecfea019fd43ff690de41cf768bc24384ad5b566"
+      "sourceFingerprint": "9cdbf10a8f89f154bc500f8d2331423e4f2b537087a900fde63ea7905cabe0e9"
     },
     {
       "id": "agents",
@@ -196,7 +196,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
   ],
   "handoffs": [
     {
-      "summary": "Reconciled Team Docs, diner scope/taxonomy, processing supplements and the owner dashboard into one proposed implementation plan. Updated team_guide and design handoff: QR opens the diner menu directly, owner sign-in leads to a private console, and the 20-dish photo-grounded batch is planned rather than completed. Named OCR, approval/allergen, event-vocabulary and outcome-scope decisions; preserved accepted ADRs and actual local-only code status.",
+      "summary": "Reconciled Team Docs, diner scope/taxonomy, processing supplements and the owner dashboard into one proposed implementation plan. Updated team_guide and design handoff: QR opens the diner menu directly, owner sign-in leads to a private console, and the 20-dish photo-grounded batch is planned rather than completed. Confirmed the Figma V1 source in Vivien's commit 36052d3. Named OCR, approval/allergen, event-vocabulary and outcome-scope decisions; preserved accepted ADRs and actual local-only code status.",
       "modules": [
         "delivery",
         "diner",
