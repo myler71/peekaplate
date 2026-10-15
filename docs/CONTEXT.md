@@ -109,7 +109,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "docs/adr/0005-tenancy-and-privacy.md"
       ],
       "dependsOn": [],
-      "sourceFingerprint": "ad4e133ee486879b734d426b09fb277233ac139f9f32b3e9c7d89d38a54d88ff"
+      "sourceFingerprint": "59f97389cbaa95e02e355b4aaad030f9decd1701006f69fc09d83efcecbe487e"
     },
     {
       "id": "measurement",
@@ -129,7 +129,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "delivery",
       "status": "foundation",
-      "summary": "Local staff-command development uses disposable Postgres, synthetic JWTs and workerd. PR 9 merged with passing PR/main CI. The team guide maps dated research/design assignments separately from code and records provider choice as pending confirmation before provisioning. Monthly grouped updates and human review/comment policy remain.",
+      "summary": "Local staff-command development uses disposable Postgres, synthetic JWTs and workerd. Windows Docker was recovered with Desktop 4.95 and the real database/local demo checks passed. The team guide separates research/design from implemented code; hosted-provider checks and owner-controlled GitHub enforcement remain pending. Monthly grouped updates and human review/comment policy remain.",
       "paths": [
         "README.md",
         "SECURITY.md",
@@ -161,7 +161,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "b1a2cafebf3ec0bd3ae67f0713baf67bb8b14b98f5613ac956a91dd005fe42c6"
+      "sourceFingerprint": "8ace74c2d287765ee2016cb7676c0a9fd91344e5599b942204c5046c7fb5996a"
     },
     {
       "id": "agents",
@@ -193,6 +193,14 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     }
   ],
   "handoffs": [
+    {
+      "summary": "Recovered Windows Docker after checksummed offline disk backups and an official Desktop 4.95 upgrade. Real testing exposed a pnpm.mjs launcher rejection; the DB harness now invokes installed Vitest directly, with a failing-then-passing launcher regression. All 43 SQL assertions, 13 Worker/Postgres cases and local startup/demo/cleanup passed on Windows. Contributor Claude/Codex setup is independently owned.",
+      "modules": [
+        "database",
+        "delivery"
+      ],
+      "next": "Finish exact-head review and CI for the local recovery PR. Keep the GitHub protection policy in a separate owner-action PR; stop before Cloudflare/Supabase integration until protected credentials are supplied."
+    },
     {
       "summary": "Corrected the design hyperlink in docs/team_guide.md to the owner-supplied Figma Make diner-menu V1 URL. No design or runtime behavior changed.",
       "modules": [
@@ -263,19 +271,6 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "delivery"
       ],
       "next": "Review the maintenance PR and its exact CI results before merging; owner enables required ci and human approval rules plus Dependabot security settings. Prepare subsequent monthly bot PRs using CONTRIBUTING.md."
-    },
-    {
-      "summary": "Repository foundation established; implementation status is deliberately separated from the accepted V1 plan. Exact bootstrap checks and review evidence belong to its PR.",
-      "modules": [
-        "contracts",
-        "diner",
-        "console",
-        "backend",
-        "database",
-        "delivery",
-        "agents"
-      ],
-      "next": "Start delivery PR 1: scoped staff authority plus expected-version command transaction, with real Postgres concurrency and cross-venue tests. Confirm GitHub main rules and staging account settings with the owner."
     }
   ]
 }

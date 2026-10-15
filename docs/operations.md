@@ -18,6 +18,14 @@ pnpm --filter @peekaplate/backend dev
 
 `pnpm dev:backend` uses that disposable database setup with a loopback JWKS service and the actual Worker. It writes a synthetic owner session to ignored `work/local-session.json`; the private signing key stays in memory. Run `pnpm local:demo` in another terminal to create a dish revision. Stop with Ctrl+C; local data is intentionally discarded. Do not run it alongside the plain backend dev process on port 8787. A forcibly terminated process can leave its uniquely named `peekaplate-db-*` container/network and session file; inspect ownership before removing those exact resources. Restart after the one-hour fixture token expires.
 
+### Windows Docker startup recovery
+
+If Docker fails before the Linux engine starts with an inaccessible `dockerInference` or `engine.sock` file, check the installed Desktop version and current [Docker release notes](https://docs.docker.com/desktop/release-notes/) first. Docker's maintainer reports a fix in 4.92 and later in [the startup incident](https://github.com/docker/desktop-feedback/issues/460). Repeated socket-directory renames are not a durable repair.
+
+Quit Docker and confirm its WSL distribution is stopped before making an offline backup of the existing Docker disk files at the configured data location. Verify the backup checksums, then use the official installer to upgrade in the existing installation mode. Preserve the data directory; do not factory-reset, unregister the WSL distribution or prune volumes as a startup workaround. The [Windows installation guide](https://docs.docker.com/desktop/setup/install/windows-install/) distinguishes per-user and machine-wide installs.
+
+After the upgrade, `docker version` must report both client and server, and `docker info` must reach the Linux engine. Then run `pnpm verify test:db`; it also checks the local startup/demo/cleanup flow. An installer success or a running window alone does not close the incident. Keep the backup until existing workloads and the project test run are verified. Record the actual version and test outcome in the PR and `errors.md`; do not commit machine backups or diagnostic logs.
+
 ## Staff command contract
 
 `POST /venues/{venueId}/dishes/{dishId}/revisions` requires `Authorization: Bearer <staff JWT>` and `Content-Type: application/json`:

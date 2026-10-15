@@ -185,6 +185,24 @@ export async function startDatabase() {
   }
 }
 
+export function runIntegrationTests(database, run = spawnSync) {
+  const vitest = fileURLToPath(new URL('vitest.mjs', import.meta.resolve('vitest/package.json')));
+  ensureSuccess(
+    run(process.execPath, [vitest, 'run', '--config', 'vitest.db.config.ts'], {
+      cwd: root,
+      encoding: 'utf8',
+      stdio: 'inherit',
+      timeout: 120_000,
+      env: {
+        ...process.env,
+        PEEKAPLATE_DB_TEST_URL: database.runtimeUrl,
+        PEEKAPLATE_DB_ADMIN_URL: database.adminUrl,
+      },
+    }),
+    'real database integration tests',
+  );
+}
+
 export async function main() {
   try {
     const database = await startDatabase();
@@ -212,27 +230,7 @@ export async function main() {
       const count = validateTap(tap.stdout);
       process.stdout.write(`pgTAP ${file}: ${count} assertions passed\n`);
     }
-    const pnpm = process.env.npm_execpath;
-    if (!pnpm || !/pnpm(?:\.c?js)?$/i.test(pnpm))
-      throw new Error('Run this check through pnpm verify test:db');
-    ensureSuccess(
-      spawnSync(
-        process.execPath,
-        [pnpm, 'exec', 'vitest', 'run', '--config', 'vitest.db.config.ts'],
-        {
-          cwd: root,
-          encoding: 'utf8',
-          stdio: 'inherit',
-          timeout: 120_000,
-          env: {
-            ...process.env,
-            PEEKAPLATE_DB_TEST_URL: database.runtimeUrl,
-            PEEKAPLATE_DB_ADMIN_URL: database.adminUrl,
-          },
-        },
-      ),
-      'real database integration tests',
-    );
+    runIntegrationTests(database);
     ensureSuccess(
       spawnSync(process.execPath, ['backend/local.mjs', 'check'], {
         cwd: root,
