@@ -1,6 +1,38 @@
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import test from 'node:test';
-import { ensureSuccess, validateTap } from './test-db.mjs';
+import { ensureSuccess, runIntegrationTests, validateTap } from './test-db.mjs';
+
+test('integration launcher accepts pnpm mjs entry points and preserves failure reporting', (t) => {
+  const originalExecPath = process.env.npm_execpath;
+  process.env.npm_execpath = 'C:\\tools with spaces\\pnpm.mjs';
+  t.after(() => {
+    if (originalExecPath === undefined) delete process.env.npm_execpath;
+    else process.env.npm_execpath = originalExecPath;
+  });
+  const database = { runtimeUrl: 'runtime-fixture', adminUrl: 'admin-fixture' };
+  let launched = false;
+  runIntegrationTests(database, (command, args, options) => {
+    assert.deepEqual(args.slice(1), ['run', '--config', 'vitest.db.config.ts']);
+    assert.equal(options.env.PEEKAPLATE_DB_TEST_URL, database.runtimeUrl);
+    assert.equal(options.env.PEEKAPLATE_DB_ADMIN_URL, database.adminUrl);
+    const result = spawnSync(command, [args[0], '--version'], {
+      cwd: options.cwd,
+      env: options.env,
+      encoding: 'utf8',
+      timeout: 30_000,
+    });
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /vitest\//);
+    launched = true;
+    return result;
+  });
+  assert.equal(launched, true);
+  assert.throws(
+    () => runIntegrationTests(database, () => ({ status: 1, stderr: 'runner failure' })),
+    /real database integration tests: exited 1.*runner failure/s,
+  );
+});
 
 test('ensureSuccess rejects failed command exits', () => {
   assert.throws(() => ensureSuccess({ status: 1 }, 'migration'), /migration: exited 1/);

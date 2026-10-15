@@ -133,7 +133,7 @@ The current browser and backend code use **TypeScript**, so they can share rules
 
 **PostgreSQL** stores the restaurant data and enforces database rules. **Supabase** is the provider in the accepted repository plan because it combines PostgreSQL with staff identity services. The October 14 project update says Vivien is still finalizing Supabase versus Neon. Confirm that decision before setting up accounts. If Neon is chosen, record the change and decide how staff identity will work too.
 
-**Docker** runs a temporary PostgreSQL database for tests. It does not provide restaurant isolation by itself. The backend's permission checks and database rules do that. This Windows machine still needs Docker recovery and a successful local demo; passing Linux CI does not repair the laptop.
+**Docker** runs a temporary PostgreSQL database for tests. It does not provide restaurant isolation by itself. The backend's permission checks and database rules do that. The Windows startup issue was recovered with Desktop 4.95 on October 14 after backing up the existing data. The local database tests and dish-save demo now pass; each contributor still needs a working Docker engine on their own machine.
 
 **Python is part of the accepted plan for processing or analysis work.** When there is a real job to implement, it should come with its own environment and pytest tests. No Python service exists yet because that processing job has not been built. We have not added a second language just to create an empty folder.
 
@@ -409,10 +409,10 @@ PR #9 merged into `main` at `413be96`. Its final reviewed commit `fc08808` passe
 | Evidence | What it establishes | What it does not establish |
 | --- | --- | --- |
 | 35 application, contract and local-tool tests | Tested parsing, token checks, HTTP behavior, replay rules and shutdown-error cleanup | Every possible input or hosted provider behavior |
-| 20 repository-script tests | Tested bundle, documentation, PR, context, database-output and verification-runner safeguards | That every written explanation is factually correct |
+| 21 repository-script tests | Tested bundle, documentation, PR, context, database-output and verification-runner safeguards, including pnpm launcher compatibility | That every written explanation is factually correct |
 | 43 SQL assertions | Tested schema constraints, restricted-role behavior and row policies | Correct permissions for accounts not yet created at the provider |
 | 13 real Worker/PostgreSQL cases | Signed local tokens, atomic writes, concurrency, retry conflicts, rollback, revocation and replay | Real Supabase login or Hyperdrive pooling |
-| Local CLI smoke flow on Linux | Actual local setup, demo command and normal cleanup path | Recovery of this Windows machine's Docker installation |
+| Local CLI smoke flow on Windows and Linux | Actual local setup, demo command and normal cleanup path | Hosted identity, database pooling or other contributors' machine setup |
 | Four browser tests | Shell visibility, no-JavaScript diner content, accessibility scans, narrow layout and health behavior | A completed menu, login, order flow or real-phone viewer |
 | Builds and bundle check | Apps build, Worker bundles, initial diner JavaScript stays within its configured budget | Real diner loading speed on a phone/network |
 | Independent review | Architecture and correctness reviewers examined a fixed code version and rechecked fixes | Infallibility or automatic permission to deploy |
@@ -450,7 +450,7 @@ The [Team Interests & Responsibilities document](https://app.clickup.com/9014174
 
 | Work | Suggested contribution, based on interests | Start with this small piece | Hand it over when |
 | --- | --- | --- | --- |
-| Local setup and provider decision | Sai continues the existing code/setup work; Vivien continues the recorded provider/API coordination | Recover Docker without deleting existing data; confirm the provider, access and real identity/database test plan | Local demo works; the provider decision and protected access are available. Hosted readiness still needs real-provider tests. |
+| Local setup and provider decision | Sai continues the existing code/setup work; Vivien continues the recorded provider/API coordination | Docker recovery and the local demo are verified; confirm the provider, access and real identity/database test plan | The provider decision and protected access are available. Hosted readiness still needs real-provider tests. |
 | Diner journey and event meaning | Adam, whose interest is the diner experience, continues the assigned event-taxonomy work | Walk through menu entry, dish details and return/exit. State which action produces each event and what it does—and does not—tell us. | Event examples are agreed with the person implementing collection, and tracking points are ready for the screen annotations. This does not assign frontend coding to Adam. |
 | Design handoff | Amr could develop the visual-menu screens and research questions; Rania could take a bounded flow/component task using her UX and design-system experience | Proposed split: Amr works from the current prototype on the next agreed diner screen; Rania specifies its reusable styles, transitions and loading/error/fallback states. Confirm the split first so both are not redrawing the same screen. | The shared designs explain behavior as well as appearance, and the person implementing the UI can identify each required state. |
 | Event collection in code | Eirene can contribute to backend/event capture and could pair with Sai on the existing code and restaurant-security rules if both agree | After agreeing Adam's definitions and the request format, select one local component and its tests—for example validating an incoming event batch. Then tackle retry storage, queue delivery and archive processing as separate complete tasks. | The selected component passes its tests and has a clear connection to the next component. Real exposure still waits for approved publication and the diner flow. |

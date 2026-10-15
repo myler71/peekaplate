@@ -105,6 +105,8 @@ Routine npm and GitHub Actions dependency updates are grouped monthly, with one 
 
 The manual staging workflow deploys the Worker, but its staff routes fail closed until real authentication and database bindings are supplied. No hosted integration has been activated. Repository administrators must configure branch protections, required `ci`, review rules, staging credentials and cloud resources. Configuration and release procedures are documented in [operations](docs/operations.md).
 
+Each contributor installs and authenticates their own Claude or Codex client and verifies its role/tool support. Native-client setup is separate from repository and cloud readiness.
+
 ## Project documentation
 
 - [Delivery plan](docs/delivery.md): ordered feature slices, beginning with verified staff/venue authority and an atomic dish-revision command.
