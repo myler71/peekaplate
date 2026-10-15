@@ -161,7 +161,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "55bf4f148dfd20c984d29247b74b19c6951922920b7f775c976239d5cfd0d6cb"
+      "sourceFingerprint": "b1a2cafebf3ec0bd3ae67f0713baf67bb8b14b98f5613ac956a91dd005fe42c6"
     },
     {
       "id": "agents",
@@ -194,11 +194,11 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
   ],
   "handoffs": [
     {
-      "summary": "Updated the design hyperlink in docs/team_guide.md to the exact team-guide URL supplied by the owner. The link points back to the guide itself; no design or runtime behavior changed.",
+      "summary": "Corrected the design hyperlink in docs/team_guide.md to the owner-supplied Figma Make diner-menu V1 URL. No design or runtime behavior changed.",
       "modules": [
         "delivery"
       ],
-      "next": "Use the owner-supplied destination; a separate design URL can replace it if provided."
+      "next": "Use the linked Figma Make diner-menu V1 as the referenced design handoff."
     },
     {
       "summary": "Updated the final team_guide plan from the dated Team Interests & Responsibilities document. Proposed bounded contributions and explicit handoffs, distinguished preferences from confirmed assignments, and kept reported capacity and unfilled engineering work visible. Existing delivery dependencies and runtime behavior are unchanged.",
