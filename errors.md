@@ -111,3 +111,7 @@ These records describe local validation limits, not application failures.
 ```json
 {"kind":"resolution","references":{"check":"context:check","timestamp":"2026-10-15T05:50:07.099Z"},"cause":"The check ran while documentation edits were still in progress and before the required context fingerprint refresh.","prevention":"Refresh and inspect affected context nodes after completing source edits, then run the final recorded check. This observation does not indicate an application regression."}
 ```
+
+```json
+{"id":"ERR-20261014-017","status":"open","area":"github-main-protection","observation":"The repository effective-rules API returned no rules and the protection flag was false. Applying the prepared ruleset returned HTTP 404 with the authenticated write-only collaborator account.","cause":"The personal-account repository owner has administration access; collaborator write permission cannot apply repository rulesets.","prevention":"Treat a committed policy as a proposal until an authorized owner applies it and effective-rule readback confirms enforcement.","sources":[".github/main-ruleset.json","docs/operations.md"],"resolutionRequired":"Owner imports or updates the reviewed ruleset, verifies its active rules on main and confirms the next PR requires ci and independent code-owner approval. Shared Admin access requires an organization-owned repository."}
+```

@@ -151,7 +151,8 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "scripts/verify.mjs",
         "scripts/verify.test.mjs",
         "docs/verification.md",
-        "vitest.db.config.ts"
+        "vitest.db.config.ts",
+        ".github/main-ruleset.json"
       ],
       "adrs": [
         "docs/adr/0007-delivery-and-recovery.md"
@@ -161,7 +162,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "8ace74c2d287765ee2016cb7676c0a9fd91344e5599b942204c5046c7fb5996a"
+      "sourceFingerprint": "73026482c00c597631de98ca4f89e1044e19eb28c5763a8822e211910ef22bad"
     },
     {
       "id": "agents",
@@ -193,6 +194,13 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     }
   ],
   "handoffs": [
+    {
+      "summary": "Prepared a separate importable main-branch ruleset using the existing ci check and independent code-owner approval, with stale-review dismissal, resolved conversations, strict up-to-date checks, no bypasses and deletion/force-push protection. This is a versioned proposal; live rules remain empty because the collaborator account lacks administration permission. No permissions or ownership changed.",
+      "modules": [
+        "delivery"
+      ],
+      "next": "The authorized owner applies the reviewed policy and verifies effective main rules and PR merge requirements. Keep this owner action separate from the merged local Docker/database verification repair; cloud integration remains deferred."
+    },
     {
       "summary": "Recovered Windows Docker after checksummed offline disk backups and an official Desktop 4.95 upgrade. Real testing exposed a pnpm.mjs launcher rejection; the DB harness now invokes installed Vitest directly, with a failing-then-passing launcher regression. All 43 SQL assertions, 13 Worker/Postgres cases and local startup/demo/cleanup passed on Windows. Contributor Claude/Codex setup is independently owned.",
       "modules": [
@@ -264,13 +272,6 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "agents"
       ],
       "next": "Use the exact setup PR CI evidence, then start PR 1 staff authority and atomic command transaction. Confirm owner merge controls and staging resources; real menu/device/restore performance remains future gate evidence."
-    },
-    {
-      "summary": "Dependabot PRs failed the required narrative gate and version changes also stale the delivery fingerprint. Retained both safeguards, documented collaborator preparation and human review comments, grouped monthly updates, and placed documentation checks after build verification without adding CI jobs.",
-      "modules": [
-        "delivery"
-      ],
-      "next": "Review the maintenance PR and its exact CI results before merging; owner enables required ci and human approval rules plus Dependabot security settings. Prepare subsequent monthly bot PRs using CONTRIBUTING.md."
     }
   ]
 }

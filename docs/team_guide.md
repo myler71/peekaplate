@@ -189,7 +189,7 @@ For the next demo, be precise about what can be shown: a tested draft-save backe
 
 ## Reference: the project files
 
-Start with the code walkthrough above. Open this list when you need to find a particular file; it covers all 99 tracked files at this handoff.
+Start with the code walkthrough above. Open this list when you need to find a particular file; it covers all 100 tracked files at this handoff.
 
 <details>
 <summary>Open the complete file-by-file guide</summary>
@@ -300,6 +300,7 @@ The six current tables have simple jobs: `venues` identifies restaurants; `staff
 | File | Purpose |
 | --- | --- |
 | [.github/CODEOWNERS](../.github/CODEOWNERS) | Names review owners; enforcement still depends on GitHub settings |
+| [.github/main-ruleset.json](../.github/main-ruleset.json) | Proposed main-branch protections; an authorized owner must activate them in GitHub |
 | [.github/PULL_REQUEST_TEMPLATE.md](../.github/PULL_REQUEST_TEMPLATE.md) | Prompts authors to explain outcome, contract changes, verification and deferred work |
 | [.github/dependabot.yml](../.github/dependabot.yml) | Monthly grouped routine updates and separate security-update grouping |
 | [.github/workflows/ci.yml](../.github/workflows/ci.yml) | The five purposeful CI jobs described above |
