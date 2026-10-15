@@ -12,3 +12,4 @@ Accepted decisions express intent, not proof of completed implementation. Review
 | [0006](0006-orders-and-measurement.md) | POS linkage and honest metrics |
 | [0007](0007-delivery-and-recovery.md) | Staging, migration, rollout and recovery gates |
 | [0008](0008-agent-context-and-review.md) | Small grounded context and evidence-led review |
+| [0009](0009-agentic-crm-integration.md) | Agentic architecture connecting LLMs to CRM systems |

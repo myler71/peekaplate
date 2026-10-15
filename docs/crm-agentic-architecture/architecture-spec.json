@@ -1,0 +1,221 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "PeekaPlate Agentic CRM Architecture",
+    "output": "architecture-diagram.html",
+    "quality_profile": "showcase",
+    "animation": "trace",
+    "views": [
+      {
+        "id": "menu-intelligence",
+        "label": "Menu Intelligence Loop",
+        "focus": ["core_db", "intel_agent", "crm_mcp", "crm_platform"],
+        "note": "Transactional outbox events trigger the Menu Intelligence Agent to summarize empirical conversion lift in the CRM."
+      },
+      {
+        "id": "onboarding-hitl",
+        "label": "Onboarding & Staged Mutations",
+        "focus": ["users", "ingress", "supervisor", "onboarding_agent", "hitl_engine", "crm_mcp"],
+        "note": "Prospective venue menus are parsed, verified against POS capabilities, and staged with HMAC approval tokens before database commit."
+      },
+      {
+        "id": "full-topology",
+        "label": "Complete System Flow",
+        "focus": [
+          "users",
+          "ingress",
+          "supervisor",
+          "onboarding_agent",
+          "intel_agent",
+          "crm_mcp",
+          "hitl_engine",
+          "core_db",
+          "crm_platform"
+        ],
+        "note": "End-to-end integration between external restaurant actors, multi-agent AI layer, MCP servers, and enterprise CRMs."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "users",
+      "type": "external",
+      "label": "Restaurant Staff",
+      "sublabel": "Console / Email / Leads",
+      "pos": [40, 240],
+      "size": [130, 60]
+    },
+    {
+      "id": "ingress",
+      "type": "backend",
+      "label": "Edge API Gateway",
+      "sublabel": "Hono on Workers",
+      "pos": [230, 240],
+      "size": [130, 60],
+      "tag": "HMAC + JWT"
+    },
+    {
+      "id": "supervisor",
+      "type": "backend",
+      "label": "Supervisor Agent",
+      "sublabel": "Intent & Tenancy Router",
+      "pos": [430, 240],
+      "size": [140, 60],
+      "tag": "Vercel AI SDK"
+    },
+    {
+      "id": "onboarding_agent",
+      "type": "backend",
+      "label": "Onboarding Agent",
+      "sublabel": "Menu & POS Setup",
+      "pos": [430, 90],
+      "size": [140, 60]
+    },
+    {
+      "id": "intel_agent",
+      "type": "backend",
+      "label": "Intelligence Agent",
+      "sublabel": "Empirical QBR & Lift",
+      "pos": [430, 390],
+      "size": [140, 60]
+    },
+    {
+      "id": "hitl_engine",
+      "type": "security",
+      "label": "HITL Staging Gate",
+      "sublabel": "HMAC Approval Token",
+      "pos": [670, 90],
+      "size": [140, 60],
+      "tag": "48h Expiry"
+    },
+    {
+      "id": "crm_mcp",
+      "type": "cloud",
+      "label": "CRM MCP Server",
+      "sublabel": "HubSpot & Salesforce",
+      "pos": [670, 240],
+      "size": [140, 60]
+    },
+    {
+      "id": "core_db",
+      "type": "database",
+      "label": "PostgreSQL Store",
+      "sublabel": "Event Store & Outbox",
+      "pos": [670, 390],
+      "size": [140, 60],
+      "tag": "RLS Isolated"
+    },
+    {
+      "id": "crm_platform",
+      "type": "external",
+      "label": "CRM Cloud",
+      "sublabel": "HubSpot / Salesforce",
+      "pos": [890, 240],
+      "size": [130, 60]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "PeekaPlate Platform Boundary",
+      "wraps": [
+        "ingress",
+        "supervisor",
+        "onboarding_agent",
+        "intel_agent",
+        "hitl_engine",
+        "core_db"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "users-to-ingress",
+      "from": "users",
+      "to": "ingress",
+      "label": "HTTPS",
+      "variant": "emphasis"
+    },
+    {
+      "id": "ingress-to-supervisor",
+      "from": "ingress",
+      "to": "supervisor",
+      "label": "dispatch",
+      "variant": "emphasis"
+    },
+    {
+      "id": "supervisor-to-onboarding",
+      "from": "supervisor",
+      "to": "onboarding_agent",
+      "label": "spawn lead"
+    },
+    {
+      "id": "supervisor-to-intel",
+      "from": "supervisor",
+      "to": "intel_agent",
+      "label": "spawn readout",
+      "labelDy": 24
+    },
+    {
+      "id": "onboarding-to-hitl",
+      "from": "onboarding_agent",
+      "to": "hitl_engine",
+      "label": "stage draft",
+      "variant": "dashed"
+    },
+    {
+      "id": "onboarding-to-crm-mcp",
+      "from": "onboarding_agent",
+      "to": "crm_mcp",
+      "label": "sync pipeline"
+    },
+    {
+      "id": "intel-to-db",
+      "from": "intel_agent",
+      "to": "core_db",
+      "label": "read metrics"
+    },
+    {
+      "id": "intel-to-crm-mcp",
+      "from": "intel_agent",
+      "to": "crm_mcp",
+      "label": "post QBR note",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "crm-mcp-to-crm",
+      "from": "crm_mcp",
+      "to": "crm_platform",
+      "label": "REST API",
+      "variant": "emphasis"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Edge & Orchestration",
+      "items": [
+        "Hono edge gateway validates HMAC signatures and derives tenant authority",
+        "Supervisor agent dynamically binds immutable venue_id context to subagents"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Model Context Protocol",
+      "items": [
+        "CRM MCP Server exposes typed Zod tool contracts for HubSpot & Salesforce",
+        "Outbox-driven Menu Intelligence Agent posts empirical QBR lift metrics"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Security & Governance",
+      "items": [
+        "PostgreSQL Row-Level Security (app.tenant_id) prevents cross-venue data leaks",
+        "HITL Staging Gate requires signed staff verification for menu mutations"
+      ]
+    }
+  ]
+}
