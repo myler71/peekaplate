@@ -65,3 +65,15 @@ Follow-up, October 15: when a contributor says a design reference was updated in
 Source-coverage follow-up: a multi-page design board needs a per-page record distinguishing full text review, visual inspection, empty pages and inaccessible content. Listing page names is not reviewing them. Preserve conflicting draft versions and their provenance; resolve their implementation impact explicitly rather than silently selecting whichever version was read last.
 
 Related files: `docs/team_guide.md`, `docs/frontend-design.md`.
+
+## LRN-20261015-001 · Validate diagrams in their target renderer
+
+**Logged**: 2026-10-15
+**Priority**: medium
+**Status**: resolved
+**Area**: docs
+**Category**: correction
+
+An implementation-plan diagram passed document-link and arithmetic checks but failed on GitHub because Mermaid treats an unescaped semicolon as a statement separator. Verify rendered diagrams separately from prose, links and example calculations. The failing GitHub revision and corrected render of all three diagrams are recorded in `errors.md` as ERR-20261015-008. Commit-pinned URLs remain immutable; use a branch URL when readers need later corrections at the same address.
+
+Related file: `docs/implementation_plan.md`. Fix: `dc7e430`.

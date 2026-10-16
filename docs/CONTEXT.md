@@ -196,7 +196,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
   ],
   "handoffs": [
     {
-      "summary": "Expanded planning clarity with built/next/done, a glossary and pipeline/lifecycle diagrams. Reviewed all eight FigJam pages: five complete text exports, Cover/Inspiration visuals and blank Logo; preserved source priorities, research discrepancies and historical ideas. Added exact period anchors, Trends/operational/feedback formulas, sample diner actions/calculations, fast-tap/visit proposals, public GET handoff and D8 decisions. Two Astra lanes reviewed technical and nontechnical clarity. Follow-up fixes an unescaped semicolon in the sequence diagram; GitHub rendering needs verification independently of document-link checks. No runtime features or external source edits.",
+      "summary": "Expanded planning clarity with built/next/done, a glossary and pipeline/lifecycle diagrams. Reviewed all eight FigJam pages: five complete text exports, Cover/Inspiration visuals and blank Logo; preserved source priorities, research discrepancies and historical ideas. Added exact period anchors, Trends/operational/feedback formulas, sample diner actions/calculations, fast-tap/visit proposals, public GET handoff and D8 decisions. Two Astra lanes reviewed technical and nontechnical clarity. Follow-up replaced an unescaped semicolon and verified all three diagrams render on GitHub, independently of document-link checks. No runtime features or external source edits.",
       "modules": [
         "delivery",
         "diner",
