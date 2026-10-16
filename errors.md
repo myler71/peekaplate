@@ -131,3 +131,7 @@ These records describe local validation limits, not application failures.
 ```json
 {"id":"ERR-20261015-005","status":"resolved","area":"planning-metric-example","cause":"A synthetic example linked a comparison to a dish outside its displayed pair, mixed raw card exposures with a unique-visit numerator and omitted ingredient-control eligibility. Passing arithmetic assertions alone did not validate those relationships.","prevention":"Validate same-visit and dish-in-pair origins, matched card references, deduplicated opportunity denominators and explicit ingredient exposure. Include adversarial links and repeated exposures in future projection tests.","regression":"The revised isolated planning fixture asserts rejected wrong-pair, cross-visit and wrong-dish links, deduplicated repeat exposure and ingredient opportunities. This validates the documented example only; production projections are not implemented."}
 ```
+
+```json
+{"id":"ERR-20261015-006","status":"resolved","area":"source-output-encoding","cause":"PDF text was successfully saved as UTF-8, but printing a private-use design glyph to the default Windows console encoding failed afterward.","prevention":"Save source text as UTF-8 and print bounded status metadata; use an explicit UTF-8 reader for inspection rather than streaming arbitrary extracted glyphs through the default console.","regression":"The saved 64-page wireframe text was read explicitly as UTF-8 and selected PDF frames were rendered for visual confirmation. No source or product data was changed."}
+```

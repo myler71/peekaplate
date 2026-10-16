@@ -27,7 +27,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "diner",
       "status": "foundation",
-      "summary": "Static TypeScript/Vite shell usable without JavaScript. Figma Make V1 is diner design direction; the FigJam Product Structure page adds workflow evidence. Plan requires direct QR/menu entry, owner sign-in link, functional ingredient panel and truthful viewer fallback; these are not implemented. Build checks initial JS gzip budget and renderer boundaries; actual viewer, analytics and device evidence remain planned.",
+      "summary": "Static TypeScript/Vite shell usable without JavaScript. Rania's new Figma Design file is current diner visual direction; its wireframe export and selected frames were inspected, and FigJam supplies workflow context. Plan requires direct QR/menu entry, owner link, functional ingredient panel and truthful viewer fallback; none implemented. Initial JS/renderer checks exist; actual viewer, analytics and device evidence remain planned.",
       "paths": [
         "frontend/diner/index.html",
         "frontend/diner/src/main.ts",
@@ -43,7 +43,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "contracts"
       ],
-      "sourceFingerprint": "b257480afb7a196ad8859c3ea58ccd2b9bb5ec88afe350a598acdba093459a48"
+      "sourceFingerprint": "e69bfcf12bd19b3dd33027365da3d022c41b41e7c0c470b49a2efe84e3184dff"
     },
     {
       "id": "console",
@@ -125,7 +125,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "backend"
       ],
-      "sourceFingerprint": "7d080b16c5ffa99e0324f8a756ca345c742d7c5780c4477b749e835bcb3f510d"
+      "sourceFingerprint": "2e125841e4b50872066b092bbd8678b9e067d41844dceee6f758a4fa8de57845"
     },
     {
       "id": "delivery",
@@ -163,7 +163,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "487dc166e292daceb35ea5c3da4dfbba72725f7236f3e30e7fae1c436c7ec275"
+      "sourceFingerprint": "779065f459dfe3c2f1eb80064a0514f5b3113ac7e87fb84316beababf45f189f"
     },
     {
       "id": "agents",
@@ -196,7 +196,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
   ],
   "handoffs": [
     {
-      "summary": "Expanded the source-linked implementation plan with observed FigJam DIN/OWN controls, ingredient opportunity/activation tracking, proposed v2 contracts/defaults, logical database facts, exact dashboard formulas, a corrected synthetic example and explicit parallel/dependent PR flow. Both diner DOCX redownloads match reviewed sources. Four bounded source/metric/platform/review lanes include Astra for the final independent review. Actual analytics and cloud capabilities remain unimplemented.",
+      "summary": "Expanded the source-linked implementation plan with observed FigJam DIN/OWN controls, ingredient opportunity/activation tracking, proposed v2 contracts/defaults, logical database facts, exact dashboard formulas, a corrected synthetic example and explicit parallel/dependent PR flow. Both diner DOCX redownloads match reviewed sources. Four bounded source/metric/platform/review lanes include Astra for the final independent review. Actual analytics and cloud capabilities remain unimplemented. Added Rania's newly shared Design file as the current diner reference after inspecting exported wireframes and selected rendered frames; listed token/frame/interaction handoff gaps and draft copy conflicts.",
       "modules": [
         "delivery",
         "diner",
