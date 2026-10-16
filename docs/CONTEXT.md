@@ -125,18 +125,17 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "backend"
       ],
-      "sourceFingerprint": "b3b63b95679cc631278b774b3c406f231658f0ffccc4a52f33e8f424752c91d6"
+      "sourceFingerprint": "c566869ff4049b059c92741d3b623132a220d1454bdaefa63d80f3ba523b5a9b"
     },
     {
       "id": "delivery",
       "status": "foundation",
-      "summary": "Local staff-command development uses disposable Postgres, synthetic JWTs and workerd. Windows Docker and real database/local demo checks passed previously. The implementation plan records reviewed team sources and parallel delivery. October 16 sprint tickets propose 24 bounded results over 15–20 days, reconcile Adam's updated taxonomy/scope and require staffing, source-contract and venue/provider decisions. Assignments are not confirmed; no board changes or new runtime features. Twenty-dish preparation and hosted-provider checks remain pending.",
+      "summary": "Local staff-command development uses disposable Postgres, synthetic JWTs and workerd. Windows Docker and real database/local demo checks passed previously. The October 15 team guide and implementation plan reconcile 34 exported Team Docs pages, diner drafts and processing supplements, separate diner/owner designs and order parallel work. Twenty-dish asset preparation has not started; hosted-provider checks and owner-controlled GitHub enforcement remain pending.",
       "paths": [
         "README.md",
         "SECURITY.md",
         "docs/team_guide.md",
         "docs/implementation_plan.md",
-        "docs/sprint_tickets.md",
         "package.json",
         "pnpm-workspace.yaml",
         ".github/dependabot.yml",
@@ -164,7 +163,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "1dc328e7684b44207cc94654a7f96a7754ccb7190eb5460a6bddb0fc7429cfd5"
+      "sourceFingerprint": "1cfd22d507e0f36f5c5af68d161f9787f04dc32bd97edb7bcab26523541a4b84"
     },
     {
       "id": "agents",
@@ -196,13 +195,6 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     }
   ],
   "handoffs": [
-    {
-      "summary": "Prepared a Markdown ticket pack from the implementation plan and full updated Adam taxonomy/scope exports. Proposed owners follow recorded interests; coding invitations require a day-1 readiness/capacity decision. Three five-day sprints and a release window retain source, privacy, order-linkage and provider gates. Source conflicts are explicit reconciliation work, not silently accepted schema changes. No live tasks, assignments or runtime changes.",
-      "modules": [
-        "delivery"
-      ],
-      "next": "Confirm T01 commitments and T04 definitions with the team before assigning ClickUp work. Stop cloud work at the protected-access checkpoint; the ticket pack does not change live assignments."
-    },
     {
       "summary": "Expanded planning clarity with built/next/done, a glossary and pipeline/lifecycle diagrams. Reviewed all eight FigJam pages: five complete text exports, Cover/Inspiration visuals and blank Logo; preserved source priorities, research discrepancies and historical ideas. Added exact period anchors, Trends/operational/feedback formulas, sample diner actions/calculations, fast-tap/visit proposals, public GET handoff and D8 decisions. Two Astra lanes reviewed technical and nontechnical clarity. Follow-up replaced an unescaped semicolon and verified all three diagrams render on GitHub, independently of document-link checks. No runtime features or external source edits.",
       "modules": [
@@ -274,6 +266,16 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "delivery"
       ],
       "next": "Implement the delivery plan's first feature slice: verified staff/venue authority and an atomic dish-revision command. Introduce a Python job with its own tests only when its processing/analysis feature is implemented."
+    },
+    {
+      "summary": "Foundation hardening adds source-to-check traceability, evolving design handoff, command/outbox RLS coverage, shell accessibility checks, fail-closed bundle imports, actionable DB diagnostics and automatic sanitized verification observations. Role adapters share evidence and task handoff rules; no product or cloud capability is invented.",
+      "modules": [
+        "diner",
+        "database",
+        "delivery",
+        "agents"
+      ],
+      "next": "Use the exact setup PR CI evidence, then start PR 1 staff authority and atomic command transaction. Confirm owner merge controls and staging resources; real menu/device/restore performance remains future gate evidence."
     }
   ]
 }

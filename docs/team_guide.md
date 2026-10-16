@@ -10,8 +10,6 @@ This guide starts with the product and progress, then follows the code behind on
 
 For the next sprint, start with the plan's [parallel-work and PR sequence](implementation_plan.md#9-delivery-flow-parallel-work-dependencies-and-the-next-pr). Design, a dummy menu, photo preparation and event definitions can progress together. Real tracking joins the published menu; owner reports join verified observations; order measures wait for validated order evidence. The plan includes the screen buttons first, then events, database records, every dashboard formula and a worked example.
 
-The October 16 [sprint ticket pack](sprint_tickets.md) turns that sequence into proposed assignments for a 15–20-day delivery. Each ticket explains the result, dependencies and evidence needed to finish. It also reconciles Adam's updated diner documents. Names and dates become commitments only after the team confirms capacity in T01; no ClickUp assignment has been changed by this document.
-
 ## 1. What a restaurant should eventually be able to do
 
 Imagine a restaurant wants to add Tomato Soup to its digital menu. This is an example, not a real restaurant record.
