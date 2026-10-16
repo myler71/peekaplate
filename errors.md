@@ -111,3 +111,19 @@ These records describe local validation limits, not application failures.
 ```json
 {"kind":"resolution","references":{"check":"context:check","timestamp":"2026-10-15T05:50:07.099Z"},"cause":"The check ran while documentation edits were still in progress and before the required context fingerprint refresh.","prevention":"Refresh and inspect affected context nodes after completing source edits, then run the final recorded check. This observation does not indicate an application regression."}
 ```
+
+```json
+{"id":"ERR-20261016-003","status":"resolved","area":"python-draft-schema","cause":"DishDraft declared Pydantic fields but did not inherit BaseModel, so constructing it with extracted values raised TypeError: DishDraft() takes no arguments.","prevention":"Inherit BaseModel and validate required source fields, unknowns, decimal prices, unexpected keys and the needs-review state. Keep these checks separate from factual human review and backend publication authority.","sources":["processing/src/peekaplate_processing/schemas.py","processing/tests/test_schemas.py"],"regression":".venv/bin/python -m unittest discover -s tests -p test_schemas.py -k test_minimal_draft_preserves_unknown_fields reproduced the constructor failure before the fix. The full schema suite passes 10 tests after implementation, including JSON price precision and validation of normal attribute assignments."}
+```
+
+```json
+{"id":"ERR-20261016-004","status":"resolved","area":"menu-source-grounding","cause":"Normalized substring checks accepted an ingredient appearing only inside a longer word in the source excerpt.","prevention":"Escape extracted literal text and require lexical boundaries around the normalized value. Human review still establishes dish association and completeness.","sources":["processing/src/peekaplate_processing/extract_menus.py","processing/tests/test_extract_menu.py"],"regression":"test_review_rejects_ingredients_supported_only_by_partial_words failed before the correction, then rejected ham supported only by champignon while accepting standalone ham and sea salt. Full schema/extraction suite passes 31 tests."}
+```
+
+```json
+{"id":"ERR-20261016-005","status":"resolved","area":"menu-price-evidence","cause":"The decimal evidence boundary rejected sentence punctuation after valid prices while preventing partial comma-price matches.","prevention":"Distinguish punctuation from a separator followed by a digit; preserve whole-number boundaries.","sources":["processing/src/peekaplate_processing/extract_menus.py","processing/tests/test_extract_menu.py"],"regression":"test_review_accepts_sentence_punctuation_without_partial_numeric_matches reproduced rejected period/comma suffixes before the correction. It now accepts those suffixes and rejects a partial amount from 1,000; the 8,50 partial-match regression also passes."}
+```
+
+```json
+{"id":"ERR-20261016-006","status":"resolved","area":"menu-unknown-ingredients","cause":"An empty AI ingredient array passed validation without an unknown warning, implying a known-empty list despite absent declarations.","prevention":"Normalize empty extracted ingredient arrays to None before constructing the draft and add the unknown warning.","sources":["processing/src/peekaplate_processing/extract_menus.py","processing/tests/test_extract_menu.py"],"regression":"test_review_normalizes_unknown_empty_ingredient_lists failed before normalization and now verifies null plus an Ingredients-unknown warning."}
+```

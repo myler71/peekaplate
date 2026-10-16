@@ -112,6 +112,29 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "sourceFingerprint": "59f97389cbaa95e02e355b4aaad030f9decd1701006f69fc09d83efcecbe487e"
     },
     {
+      "id": "processing",
+      "status": "foundation",
+      "summary": "Python menu-text extraction supports a documented local record format and a configurable OpenAI-compatible AI JSON mode. Both return source-grounded, validated needs_review DishDraft objects; source identity is caller-controlled, missing ingredients stay unknown, and output is atomic/create-only JSON. Input/dish/response/time limits and sanitized one-attempt provider failures are enforced. Thirty-one schema/extraction tests pass, including mocked provider transport and reviewed evidence regressions. Package/CLI checks pass. No live provider, OCR, image mapping, durable jobs or backend review/publication integration is implemented or verified.",
+      "paths": [
+        "processing/.gitignore",
+        "processing/.python-version",
+        "processing/README.md",
+        "processing/pyproject.toml",
+        "processing/uv.lock",
+        "processing/src/peekaplate_processing/__init__.py",
+        "processing/src/peekaplate_processing/schemas.py",
+        "processing/src/peekaplate_processing/extract_menus.py",
+        "processing/tests/test_schemas.py",
+        "processing/tests/test_extract_menu.py",
+        "processing/tests/fixtures/menu.txt"
+      ],
+      "adrs": [
+        "docs/adr/0001-scope-and-repository.md"
+      ],
+      "dependsOn": [],
+      "sourceFingerprint": "33285d331f566b42937b384457d78fe755042f9a5204d2a0c0cb3203958b39b2"
+    },
+    {
       "id": "measurement",
       "status": "planned",
       "summary": "Venue-bound redeem codes will link sessions to POS tickets. Unknown linkage stays unknown. Planned owner readout reports coverage and suppresses cells under ten sessions; frozen blocked-switchback assignment precedes causal claims. No POS or experiment implementation exists.",
@@ -161,7 +184,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "8ace74c2d287765ee2016cb7676c0a9fd91344e5599b942204c5046c7fb5996a"
+      "sourceFingerprint": "70f390e0b607e5f12cb377f41cc781e845bd5ae098a87f0d2d4204e0d7495487"
     },
     {
       "id": "agents",
@@ -193,6 +216,14 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     }
   ],
   "handoffs": [
+    {
+      "summary": "Added the Python processing package: validated DishDraft, local and configurable AI menu-text extraction, source-evidence checks, atomic create-only JSON saving, synthetic fixtures and 31 unit tests. CI quality now installs the frozen Python lock, runs those tests and builds the package. No live AI or OCR service was exercised; backend integration remains planned.",
+      "modules": [
+        "processing",
+        "delivery"
+      ],
+      "next": "Review this processing slice and its CI evidence. Select and verify a live model/provider, then agree the backend ingestion contract and human-review handoff before integrating draft JSON."
+    },
     {
       "summary": "Recovered Windows Docker after checksummed offline disk backups and an official Desktop 4.95 upgrade. Real testing exposed a pnpm.mjs launcher rejection; the DB harness now invokes installed Vitest directly, with a failing-then-passing launcher regression. All 43 SQL assertions, 13 Worker/Postgres cases and local startup/demo/cleanup passed on Windows. Contributor Claude/Codex setup is independently owned.",
       "modules": [
@@ -264,13 +295,6 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "agents"
       ],
       "next": "Use the exact setup PR CI evidence, then start PR 1 staff authority and atomic command transaction. Confirm owner merge controls and staging resources; real menu/device/restore performance remains future gate evidence."
-    },
-    {
-      "summary": "Dependabot PRs failed the required narrative gate and version changes also stale the delivery fingerprint. Retained both safeguards, documented collaborator preparation and human review comments, grouped monthly updates, and placed documentation checks after build verification without adding CI jobs.",
-      "modules": [
-        "delivery"
-      ],
-      "next": "Review the maintenance PR and its exact CI results before merging; owner enables required ci and human approval rules plus Dependabot security settings. Prepare subsequent monthly bot PRs using CONTRIBUTING.md."
     }
   ]
 }

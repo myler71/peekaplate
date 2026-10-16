@@ -19,7 +19,7 @@ The repository contains diner and staff-console shells and a local staff-command
 | Backend | Hono, TypeScript, Cloudflare Workers | Health and authenticated dish-revision commands; hosted bindings remain unconfigured |
 | Shared contracts | Zod, TypeScript | Health, dish revision and initial dish-intent schemas |
 | Database | PostgreSQL, SQL, dbmate | Private venues, staff memberships, dish projections, events, receipts and outbox; restricted runtime role |
-| Processing and analysis | Python, uv, pytest | Accepted scope in [ADR 0001](docs/adr/0001-scope-and-repository.md); no job, package or runtime dependency implemented |
+| Processing and analysis | Python, uv, Pydantic | [Menu-text extraction](processing/README.md) in local/configurable AI modes, validated drafts and JSON output with standard-library tests. Live-provider checks, OCR and backend integration remain pending. |
 
 Frontends and backend share contracts. Frontends do not import backend internals or hold database credentials. Authorization belongs to the backend; venue authority must derive from verified identity and membership. Database policies support this boundary; they do not authenticate callers.
 
@@ -39,6 +39,7 @@ frontend/diner/      Public diner application
 frontend/console/    Staff application
 backend/             Worker API
 packages/contracts/  Shared runtime schemas and types
+processing/          Python menu-text extraction and draft validation
 migrations/          Ordered SQL migrations
 tests/               Database and browser integration tests
 scripts/             Repository checks and local test tools
@@ -48,6 +49,8 @@ docs/                Architecture, decisions, delivery and context
 ## Local development
 
 Prerequisites: Node **24.16.0** and pnpm **11.25.0**. The current applications require neither Python nor cloud credentials. Database tests additionally require Docker; browser tests require Playwright Chromium.
+
+The independent [processing package](processing/README.md) requires Python **3.12+** and uv. Its local extraction mode requires no API credentials; AI mode requires an explicitly configured provider and model.
 
 ```sh
 pnpm install --frozen-lockfile
