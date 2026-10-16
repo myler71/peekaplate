@@ -1,6 +1,10 @@
 # Error ledger
 
 ```json
+{"id":"ERR-20261016-002","status":"resolved","area":"planning-document-validation","cause":"The focused ticket-pack check found T20's existing source links grouped under Continue instead of the required Reference field.","prevention":"Check every ticket for its owner, reviewer, timing, dependencies, completion evidence and source/handoff fields before export.","regression":"The existing links now have the explicit Reference field; check_sprint_pack.py passed for all 24 tickets. This checks document structure, not implementation or schedule feasibility."}
+```
+
+```json
 {"id":"ERR-20261016-001","status":"resolved","area":"documentation-edit-tooling","cause":"A context-handoff removal patch used text that did not exactly match the current file and was rejected before modification.","prevention":"Build removal patches from the current bounded file excerpt, then verify the context graph and diff.","regression":"The corrected patch removed only the oldest handoff; pnpm verify context:check docs:check passed with eight modules and ten handoffs. No runtime behavior changed."}
 ```
 

@@ -287,7 +287,7 @@ The shortlist, waitlist-specific integration, full 3D/AR, inferred nutrition/por
 
 **Done:** actual Auth/JWKS, current membership/revocation, TLS/runtime DB role and pooled-connection reuse checks pass. Real Worker/Queue/R2 and owner/diner staging endpoints complete the journey. Anonymous reads and private reports have correct access/cache boundaries. Local success and a deploy configuration alone do not satisfy this ticket. Missing access blocks hosted acceptance and the release date visibly; it does not block earlier local work.
 
-**Continue:** child of QA/readiness, linked to [operations](operations.md) and [ADR 0007](adr/0007-delivery-and-recovery.md). **Handoff:** staging URLs, protected runbook references and exact provider evidence to T21/T22. No credentials belong in the handoff.
+**Continue:** child of QA/readiness. **Reference:** [operations](operations.md) and [ADR 0007](adr/0007-delivery-and-recovery.md). **Handoff:** staging URLs, protected runbook references and exact provider evidence to T21/T22. No credentials belong in the handoff.
 
 ## 7. Release window tickets
 
