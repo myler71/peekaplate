@@ -43,7 +43,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "contracts"
       ],
-      "sourceFingerprint": "e69bfcf12bd19b3dd33027365da3d022c41b41e7c0c470b49a2efe84e3184dff"
+      "sourceFingerprint": "7fc349638eded801e3f71abcc4f0a571c23cadcbe814118d68b9e1fbf07ce921"
     },
     {
       "id": "console",
@@ -114,7 +114,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "measurement",
       "status": "planned",
-      "summary": "Planned venue-bound CSV/code linkage and observation pipeline. The October 15 implementation plan specifies DIN/OWN controls, versioned event proposals including ingredient exposures/activations, logical fact projections, exact dashboard formulas and ordered parallel PR lanes. Consideration, unknown outcomes and small-cell suppression follow ADRs. Local draft saves exist; ingestion, reports, imports and experiments do not.",
+      "summary": "Planned venue-bound CSV/code linkage and observation pipeline. The source-linked implementation plan specifies screens, ingredient opportunities/activations, proposed v2 contracts/period anchors, database facts, every owner metric family, worked arithmetic and ordered parallel PRs. All eight FigJam pages are accounted for with precise review limits. Draft saves exist; ingestion, reports, imports and experiments do not.",
       "paths": [
         "docs/delivery.md",
         "docs/implementation_plan.md"
@@ -125,7 +125,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "backend"
       ],
-      "sourceFingerprint": "d7e2f5f7738118057a966ca49f814c7431c16643d7542c352c55d85420a41815"
+      "sourceFingerprint": "8767fb3946f500f75760e17b5bd961a3ff4dda5cd6d7d21b64d4b16d048e0213"
     },
     {
       "id": "delivery",
@@ -163,7 +163,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "df5ec216c49339e3201fc02de3c2de7fa71e1113f6c6aa775f103114cbc009ad"
+      "sourceFingerprint": "13d9f219247c7ecc15d65e71f206f99c91886c4cc26a1b2949673061bc9770e3"
     },
     {
       "id": "agents",
@@ -196,14 +196,14 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
   ],
   "handoffs": [
     {
-      "summary": "Expanded the source-linked implementation plan with observed FigJam DIN/OWN controls, ingredient opportunity/activation tracking, proposed v2 contracts/defaults, logical database facts, exact dashboard formulas, a corrected synthetic example and explicit parallel/dependent PR flow. Both diner DOCX redownloads match reviewed sources. Four bounded source/metric/platform/review lanes include Astra for the final independent review. Actual analytics and cloud capabilities remain unimplemented. Added Rania's newly shared Design file as the current diner reference after inspecting exported wireframes and selected rendered frames; listed token/frame/interaction handoff gaps and draft copy conflicts.",
+      "summary": "Expanded planning clarity with built/next/done, a glossary and pipeline/lifecycle diagrams. Reviewed all eight FigJam pages: five complete text exports, Cover/Inspiration visuals and blank Logo; preserved source priorities, research discrepancies and historical ideas. Added exact period anchors, Trends/operational/feedback formulas, sample diner actions/calculations, fast-tap/visit proposals, public GET handoff and D8 decisions. Two Astra lanes review technical and nontechnical clarity; no runtime features or external source edits.",
       "modules": [
         "delivery",
         "diner",
         "console",
         "measurement"
       ],
-      "next": "Resolve listed product/measurement release decisions and visual handoff gaps. Begin local T0 approval/publication alongside synthetic diner UI, event contracts and photo preparation. Review the pinned docs and recorded checks; use protected provider access only at the managed-service checkpoint."
+      "next": "Complete final pinned two-lane review and documentation/arithmetic checks. Agree D1-D8 decisions at their gates, then build P1 approved T0 publication/public read/withdrawal alongside the synthetic diner UI; stop at the protected provider-access checkpoint."
     },
     {
       "summary": "Recovered Windows Docker after checksummed offline disk backups and an official Desktop 4.95 upgrade. Real testing exposed a pnpm.mjs launcher rejection; the DB harness now invokes installed Vitest directly, with a failing-then-passing launcher regression. All 43 SQL assertions, 13 Worker/Postgres cases and local startup/demo/cleanup passed on Windows. Contributor Claude/Codex setup is independently owned.",

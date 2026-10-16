@@ -8,6 +8,29 @@ Read sections 1–4 for the product, current progress, screens and data flow. Se
 
 ## 1. The product we are building
 
+**Built today:** developers can save a dish draft locally, with permission checks, safe retries and protection against conflicting edits. The diner and owner interfaces are starting shells. A live menu and the analytics journey are not built.
+
+**Build next:** make one reviewed photo-and-text dish publishable, readable from a local public menu and withdrawable. Build the sample diner screens alongside that backend work.
+
+**Done for this first milestone:** the approved version appears, drafts stay private, unauthorized changes fail, repeat requests do not duplicate changes, and withdrawal prevents fresh public reads. Later milestones connect diner observations, checked owner reports and hosted services. This first local milestone is not pilot readiness.
+
+### Words used in this plan
+
+| Term | Plain meaning |
+| --- | --- |
+| UI | The screens and controls people use. |
+| Backend / API | Server-side rules, and the agreed requests screens use to reach them. |
+| Contract / fixture | An agreed data format and meaning / an invented example used for development and tests. |
+| Event / visit | A record that something happened / a temporary group of menu activity, not an identified person. |
+| Projection | Recorded facts arranged for a current view or a quick report. |
+| T0 / T1 / T2 | Original photo/text / limited movement of reviewed photo cutouts / limited separation supported by real plating-stage captures. Section 7 explains the evidence each needs. |
+| WebGL | Browser graphics used by the optional preview. Menu photos and text must work without it. |
+| KPI / cohort | A reported measure / the explicitly defined group of visits or records used in a calculation. |
+| JTBD | “Jobs to be done”: what diners are trying to accomplish. |
+| PR / CI / ADR | A reviewable code change / automated checks / a recorded architecture decision. |
+
+The linked team documents remain the source of the product and research work. This plan translates them into implementation steps; it does not replace or edit their originals. Source wording is retained where its meaning is clear. A proposed change needs a stated reason, a source link and a decision before it becomes the collection contract.
+
 **Menu → Visual Intelligence → Diner Intent → Demand Intelligence → Restaurant Action**
 
 In everyday language: show food clearly, observe how people explore it, turn those observations into a useful restaurant report, and let the restaurant choose an action. “Intent” and “demand intelligence” describe the questions we want to investigate. A click alone does not tell us someone's preference, order or reason for leaving.
@@ -42,6 +65,8 @@ The two inspected ClickUp tasks—[Design Agent MVP + human-review workflow](htt
 The [interests document](https://app.clickup.com/90141746115/v/dc/2kydvry3-94/2kydvry3-434) helps choose contributions; its agreed-responsibility fields are blank. Adam's diner/JTBD work, Amr and Rania's design work, Eirene and Shirley's processing/requirements work, Vivien's venue/product coordination and Sai's code work can feed the lanes below. These descriptions do not assign new engineering tasks or presume anyone's availability. Confirm one bounded deliverable per person in ClickUp.
 
 Research is directional. The survey has 24 respondents, includes team members and is not representative. Some interview records are unverified or machine-transcribed. They support testing clearer photos, descriptions and ingredients; they do not prove willingness to pay, forecasting accuracy or reduced waste. Private interviews and contact information stay outside this repository.
+
+**Source-version difference:** the FigJam Diner Flow journey reports **23 respondents, October 7–9**; the team research summary reports **24**. Reconcile the source version and inclusion rules before reusing counts or percentages. Neither number is silently substituted for the other.
 
 ## 3. Start with a useful dummy diner UI
 
@@ -128,9 +153,61 @@ The workflow board calls its owner mapping **V2 Simplified, October 14**. The su
 
 The owner navigation has six main destinations: **Restaurant Setup, Overview, AI Insight Report, Dish performance, Menu, Actions**. Review, publish and dish detail are child flows. Avoid extra pages merely to mirror every database entity.
 
+### Owner Flow V3: preserve the team's decisions and open questions
+
+The [Restaurant Owner Flow page](https://www.figma.com/board/ZkbklvZUkAmhr9suuNTHxW/PeekaPlate?node-id=350-1205) contains both Journey V3 and User Flow V3. Its feelings and pain points are labelled assumptions, and it reports zero owner-survey responses; the separate owner interviews remain useful inputs. “Confirmed by Vivien” is the board's attribution to relayed feedback, not fresh confirmation from this review.
+
+| Source requirement or question | Implementation treatment and reason |
+| --- | --- |
+| Lightweight AI report is product P0, dashboard P1; report chat is in MVP scope with priority open | This plan proposes deterministic, human-reviewed report evidence first and Ask AI later, following the current request. Reconcile that delivery sequence with product before promising the full MVP. It does not silently remove the AI report/chat from the team's roadmap. Product priority P0/P1 is unrelated to the P1–P7 code-package labels below. |
+| Add/edit is described as confirmed, but Add Dish MVP scope/priority is also open | Existing-dish edit/review/publication can proceed. Add Dish is a proposed control whose release priority needs D8 agreement; its presence in OWN-06 is not approval of the unresolved scope. |
+| First and returning owner visits differ | Design a first-visit welcome using the existing setup/overview: current dishes, statuses, where reports appear and one clear first action. Returning visits open the selected restaurant overview. Do not invent a separate onboarding product. |
+| Report frequency, delivery channel and report/dashboard relationship are open | Proposed first delivery: checked reports inside the secured dashboard. Scheduled email/messages need a separate cadence/channel decision. Five-minute observation freshness is a processing target, not report-delivery frequency. |
+| Track Improvements is proposed | Preserve action history and evidence versions. A separate before/after improvement screen remains uncommitted; a Done date is owner-reported completion, not independently verified improvement. |
+| “Considered” described as an inferred guess | Our ten-second/linked-comparison measure is a defined behavioral rule, not access to a diner's thoughts. Show its definition with the label. |
+| Human review drawn as Proposed in one flow | The accepted architecture and Agent Workflow require approval before public release. This diagram does not make that control optional. |
+
+One diner visit does not unlock report figures: collection, evidence checks and the privacy threshold must all pass. Keep unavailable and suppressed states understandable in both welcome and returning views.
+
+The **Draft** page also proposes a report card with its period, publication date and unread status. Agree whether read/unread belongs to each staff member or the restaurant before implementing it; returning should retain the selected report version and context. Rating a report, dismissing a recommendation and taking no action are separate decisions. The historical “PeekaPlate reviews output” step needs a named report reviewer and release criteria before live AI reports. Earlier Request Order/Order confirmed screens, profile/notification sketches and AI-led tracking are design history, not current approved controls. Preserve the useful research question: does 2.5D improve confidence **beyond good photographs and descriptions**? It is a future comparison to test, not an established benefit.
+
 ## 4. What an event is, and how it reaches a dashboard
 
 An event is a record that something happened. For example: “this visit opened the soup details.” It records an action, not the person's thoughts. A random session ID groups one visit without creating a diner account; it does not identify a unique person or prove that a human performed the action.
+
+### Why each part is here
+
+| Part | Its job, in ordinary words | Why we need it |
+| --- | --- | --- |
+| Browser retry store | Holds a small number of unsent observations on the phone | A short connection failure should not immediately lose every recorded action. Storage is bounded and best effort. |
+| Cloudflare Worker | Checks incoming requests and applies server rules | A public browser must not choose a restaurant's permissions or send arbitrary fields into storage. |
+| Cloudflare Queue | Holds accepted work until a consumer processes it | The diner does not wait for all database/report work. Retries require duplicate-safe processing. |
+| Cloudflare R2 | Keeps the permitted original accepted observation as evidence | An index can be rebuilt and a result traced to its inputs within the agreed retention period. |
+| PostgreSQL, hosted by Supabase | Stores authorized records and answers bounded questions efficiently | Reports need searchable facts and checked sums, not a scan of every archived file on every page load. |
+| Report API | Returns only the signed-in restaurant's permitted results | Private owner reports must not be available through the public menu or a guessed restaurant ID. |
+
+These are responsibilities, not six new repositories. Only the local staff draft-save path exists today; the observation delivery path is planned.
+
+**Follow one action:** a diner opens Soup, then taps Onion. The UI records the approved ingredient ID and exact dish opening, sends the observation when connected, and keeps it if delivery is uncertain. The Worker validates it; the Queue accepts it; the consumer archives and indexes it once. A query counts that activation and its eligible ingredient opportunity. The owner receives a checked aggregate, or an “insufficient data” state when it is too small to reveal safely. The owner never receives that diner's private activity trail.
+
+```mermaid
+sequenceDiagram
+  participant Phone as Diner browser
+  participant Worker as Receiving Worker
+  participant Queue as Queue
+  participant Consumer as Consumer
+  participant R2 as R2 evidence archive
+  participant DB as PostgreSQL
+  Phone->>Worker: Observation with stable ID and published references
+  Worker->>Queue: Validated work
+  Queue-->>Worker: Accepted
+  Worker-->>Phone: Accepted IDs only
+  Queue->>Consumer: Deliver, possibly more than once
+  Consumer->>R2: Create or verify identical evidence
+  Consumer->>DB: Commit duplicate-safe facts and pending calculations
+  Consumer-->>Queue: Acknowledge this message after both succeed
+  Note over Phone,DB: Receipt means queued; it does not mean a dashboard is already updated
+```
 
 PeekaPlate needs two separate paths:
 
@@ -155,6 +232,21 @@ Event sourcing means keeping the history of important changes and deriving the c
 Today the local dish-save flow writes history, current dish, request receipt and pending follow-up together. A failure rolls them all back. Repeating the same request returns its saved result; two editors cannot silently overwrite each other's versions. Only this draft-save slice is implemented.
 
 Extend that existing pattern to capture revisions, exact approvals, publication, withdrawal and experiments. A model can suggest content; it cannot grant permission, approve its own output or publish a menu. Approval and publication remain separate authorized commands. New outputs require a new review; background retries cannot replace an approved asset.
+
+**Three different decisions:** approving a suggested restaurant action means “I plan to do this”; approving content accepts an exact dish/asset version; publishing makes that approved version visible to diners. None automatically performs the next decision. Owner final content approval is the proposal pending the O04 permission decision, not an already agreed delegation policy.
+
+```mermaid
+flowchart LR
+  D[Draft content and source evidence] --> R[Human review of exact version]
+  R --> A[Approved bundle]
+  A --> P[Separate authorized Publish command]
+  P --> L[Live public version]
+  L --> W[Withdraw: stop fresh public reads]
+  L --> N[Create a newer draft]
+  N --> R
+```
+
+A newer draft does not remove or replace the existing live version. It must pass review and publication separately. A report's Planned action is outside this publication path until someone actually edits and submits content.
 
 Rebuilding projections from history is **replay**. Replay must never upload assets, run a model, publish again or send messages. Background work must claim durable pending rows; the largest numeric event ID is not proof that every earlier transaction has committed. See [ADR 0002](adr/0002-selective-event-sourcing.md).
 
@@ -254,6 +346,23 @@ Use strict per-event schemas, not a generic free-form properties bag. No names, 
 
 Derive revisits from later accepted openings, and session end from inactivity. Do not emit an independent derived `dish_revisited` or trust `pagehide` as proof of departure. No `menu_entry_viewed` for the direct-entry product. Shortlist/save, review, order CTA, nutrition and portion events remain deferred with their absent controls. Menu navigation and picker cancellation do not become invented intent events.
 
+### Respecting the team's event vocabulary
+
+The [FigJam Diner Flow](https://www.figma.com/board/ZkbklvZUkAmhr9suuNTHxW/PeekaPlate?node-id=350-1205) contains the following earlier names. The [draft taxonomy](https://t90141746115.p.clickup-attachments.com/t90141746115/aa670894-42ec-40b9-bc83-9335a0fbd502/PeekaPlate_Diner_Event_Taxonomy_and_Measurement_Plan_DRAFT.docx?view=open) and this proposal make their triggers more precise. Keep the originals in source references; approve one versioned collection vocabulary at D2, without sending two events for one action.
+
+| Team board name | Proposed contract treatment | Why clarification is needed |
+| --- | --- | --- |
+| `menu_opened` | `menu_viewed` after useful menu display | A request that fails to load is not a viewed menu. |
+| `dish_detail_opened` | Keep the name; readable detail must appear | A tap can fail before display. |
+| `dish_revisited` | Derive from valid opening history | Prevents duplicate counting and permits correction of late records. |
+| `preview_started` | `spatial_view_requested` where the original meaning is a load request | Request and successful display answer different questions. |
+| `preview_failed`, `fallback_shown` | `spatial_view_failed`, `spatial_fallback_shown` with attempt references | A failure alone does not prove the fallback photo appeared. |
+| `compare_started`, `compare_dish_replaced` | `dish_compared`, respectively `action=start` and `action=replace` | Keeps one comparison identity while preserving both original actions. |
+| `ready_to_order_tapped` | Deferred; the source itself marks the button unapproved | A static instruction to ask staff is not a tracked order button or an order. |
+| `session_ended` | Derive inactivity; record any delivered close checkpoint separately | Browser termination cannot be reliably observed. |
+
+This is a proposed semantic mapping, not permission to relabel incompatible old data. The board's paired before/after confidence study also remains a proposal: agree its question, scale, timing and sampling method before collecting it. It does not block the first menu prototype.
+
 ### Proposed defaults to freeze in the contract PR
 
 These are explicit engineering recommendations, not already approved settings or measured performance. Record the accepted values in one contract/config version and test at the exact boundaries.
@@ -261,7 +370,7 @@ These are explicit engineering recommendations, not already approved settings or
 | Question | Initial recommendation | Consequence |
 | --- | --- | --- |
 | Card/ingredient visibility | At least 50% of the control visible for 1 continuous second while document visible | A render offscreen is not exposure. Fast legitimate taps before the threshold need an atomic `activated_before_threshold` exposure fact so the click has a true opportunity; report that subtype separately. |
-| Visit window | New random visit after 30 minutes with no qualifying activity; no cross-day/person identity | A later return may be a new visit, not a repeat customer. Multi-tab producers are separate unless explicitly sharing the same visit safely. |
+| Visit window | New random visit after 30 minutes with no qualifying activity; no persistent person identity or automatic midnight reset | A later return may be a new visit, not a repeat customer. Multi-tab producers are separate unless explicitly sharing the same visit safely. |
 | Active detail time | Visible foreground detail or its preview; pause after 30 seconds without input; resume on deliberate input; checkpoint every 5 active seconds and on pause/close; cap at 5 minutes per opening | Exclude menu/picker/background time. Reading without interaction after 30s is unmeasured, not proof of disengagement. Include method and timed-opening coverage beside averages. |
 | Viewer interaction | One completed deliberate drag or arrow-key tilt after first frame; bounded drag threshold proposed as 8 CSS pixels | Ignore autoplay, hover and reset. Device testing must confirm accessibility and accidental-movement behavior before freeze. |
 | Browser buffer | At most 500 events or 1 MiB, whichever is reached first; retain at most 24 hours; batch at most 25 / 32 KiB | Evict oldest pending records predictably; record aggregate dropped counts when possible. Menu works if storage is denied/full. These limits are client safeguards; server enforces independent limits. |
@@ -270,6 +379,10 @@ These are explicit engineering recommendations, not already approved settings or
 | Token | Proposed 30-minute venue/publication-scoped collection token; renewal verifies the original allowed historical exposure | Unsent old events keep their original payload; renewal cannot relabel their publication. Whether withdrawn content may still report historical exposure needs the release policy below. |
 | Freshness | Pilot target: accepted online observations represented in summaries within 5 minutes | Measure acceptance-to-summary delay. This is a target, not current evidence or proof that all activity was collected. |
 | Archive retention | Inherit accepted privacy/retention ADR and venue agreement; do not choose an indefinite default here | Provider configuration, deletion/tombstones and restore behavior are release gates. Browser TTL is not server retention policy. |
+
+**Fast taps, proposed wire rule:** use `exposure_basis=threshold` or `activated_before_threshold`. A card-origin `dish_detail_opened` carries its `card_exposure_id`; a successful fast activation creates that same card opportunity and the opening atomically in the fact transaction. An `ingredient_viewed` carries its approved opening/ingredient/list revision and basis; it atomically creates the canonical opportunity `(venue, opening_id, ingredient_id)` if the control was activated before one second. The consumer validates publication, control and identity relationships first. A later threshold event unions into the same opportunity rather than adding another. Preserve both evidence types; do not claim a fast tap passed the one-second threshold. Test fast activation, duplicate handlers, lost receipts and shuffled deliveries: one opportunity and one fact per actual activation.
+
+**Visit rules to approve at D2:** qualifying activity is deliberate scrolling, a menu/control activation, keyboard navigation or a viewer drag/tilt while the menu is visible. Hover, autoplay, polling, network delivery and background heartbeats do not reset inactivity. The browser's visit coordinator uses those inputs locally; it does not send a pointer/keystroke stream. Untrusted client chronology remains bounded by the token, event-age and abuse rules. Thirty seconds without input pauses active-time measurement; thirty minutes ends the visit. If someone returns to an already open dish after 31 idle minutes, create a new visit, a usable-menu exposure and a new opening for the currently permitted version before recording new activity. Do not move old facts into the new visit. Token renewal alone does not create a visit. A visit crossing midnight retains its ID until expiry; the reporting rules below decide which day includes each measure.
 
 **Consideration stays stricter than an open.** Under ADR 0006, count a distinct visit/dish as considered after a valid opening with at least ten visible active seconds, or that opening participating in a qualifying displayed comparison. The opening must match the comparison's visit, dish and displayed pair. Merely appearing in a comparison does not manufacture an earlier opening. Portion qualification is retained only for compatible historical facts; no portion UI is added. An incomplete checkpoint can establish the ten-second lower bound but is excluded from the completed-opening average.
 
@@ -301,7 +414,25 @@ This is the calculation contract for the supplied [owner artifact](https://claud
 
 ### Rules shared by every calculation
 
+In plain words, select **which restaurant, which dates and which group** before calculating a percentage. `[start, end)` means include the start and exclude the end: Monday's daily bucket stops exactly when Tuesday starts. A cohort is that agreed group. If two of four eligible dish openings use the Onion control, its interaction rate is `2 / 4 × 100 = 50%`; tapping twice within one opening still contributes one opening to this particular numerator.
+
 Choose a restaurant-local, half-open period `[start, end)` and pin its timezone, selected publication/dish scope, metric version and inclusion policy. UTC storage does not mean UTC business-day reporting. A visit count belongs to the period of its first valid usable-menu observation; a visit spanning midnight can contribute later dish openings to another period, so do not divide those openings by unrelated visit cohorts. For exposure/visit rates, use one explicitly aligned cohort of visits first seen in the period, including their eligible observations within the configured visit window. Timing belongs to the opening's period; its later final checkpoint updates that opening's bucket. Distinguish day-chart event counts from visit-cohort rates.
+
+The following **proposed period anchors** must be frozen at D2. They prevent a numerator entering a day/week without its eligible denominator.
+
+| Metric family | Select this cohort or timestamp |
+| --- | --- |
+| Visits, card reach and card-to-detail rate | Visits first seen in the period, then their eligible exposures and linked openings within the visit. |
+| Opens, first/repeat opens, active time | Opening display time. Later final timing updates that opening's bucket. |
+| Preview Requests/Shown/Failure/Fallback counts and load success | Attempt request time; retain later outcomes on that attempt. Pending outcomes are shown separately. “Shown” is therefore shown outcomes of requests started in the period. |
+| Preview opening shares/adoption | Openings in the period with the stated actual offer; join their attempts. Numerator must be a subset of those openings. |
+| Comparison starts, participation, distinct pairs, replacements | Comparison start time; include valid later pair versions within that visit. A Sunday start with Monday replacement remains in Sunday's comparison cohort. |
+| Percentage of openings compared | Openings in the period, then their valid explicitly linked pairs. This can differ from the comparison-start cohort and must be labelled. |
+| Ingredient activation counts, opportunities, visitors and rates | Opening display time, then that opening's eligible ingredient opportunities/activations. A 23:59 opening with a 00:01 activation remains in the opening's day. |
+| Orders and order-source coverage | Corrected source business timestamp in the agreed restaurant timezone; not upload time. Linked-visit measures instead start with their declared visit cohort. |
+| Actions, content states and feedback | Current state as of a declared server time, or a separately named transition-time history. Do not silently mix these views. |
+
+Late accepted facts update the relevant bucket and create a new report version. Closed calendar periods may still be marked provisional until the agreed late-data reconciliation point. This does not change what an owner previously reviewed in an immutable snapshot.
 
 For the formulas below:
 
@@ -338,6 +469,8 @@ Under ADR 0006, fewer than ten contributing eligible sessions suppresses affecte
 | Detail **Opened again** share; sample **28%** | `count(R(d)) / count(O(d)) × 100` | Overall repeat share uses `sum R / count(O)`, not this dish denominator. Not a repeat-customer rate. |
 | Dish average versus **all-dish average** | Dish `A(d)/count(T(d))/1000` seconds versus `sum A(d)/sum count(T(d))/1000` seconds | Show both timed-opening counts and coverage. Longer time has no automatic psychological meaning. |
 | **Views** table: opens, opened again, average time, 2.5D, compared, verified orders, trend | Reuse corresponding metric IDs; no new table-specific formula | Define 2.5D column as shown attempts; separate photo-fallback count. “31 photo” is fallback evidence, not 31 shown previews. |
+
+**Trends tab — all four series from the owner artifact:** for each of four restaurant-local week buckets, show (1) `count(O_week)` opens, (2) `count(S_week)` shown outcomes of attempts requested that week, (3) `sum(final_active_ms_week) / count(completed_timed_openings_week) / 1000`, and (4) corrected eligible dish units with source coverage for that week. Use the period anchors above. Proposed week boundary: Monday 00:00 local time, approved at D2. Mark an unfinished week partial; do not draw missing order evidence as zero. The small per-dish mini-trend remains opens-only and must be labelled that way.
 
 ### Preview and comparison tabs, including every share
 
@@ -378,6 +511,8 @@ These are required by the current request or draft measurement plan, even though
 | **Collection/reconciliation health** | Accepted IDs reconciled to archive/index; oldest pending age; rejected/dropped counts; queue/DLQ backlog | Operational restricted view. Maximum timestamp is freshness evidence only, not proof no event is missing. |
 | **Confidence / found what you needed?** | Separate agreed explicit survey responses and sampling protocol | Not inferred from time or ingredient clicks. J1 visual confidence, J3 ingredient clarity and J4 comparison remain hypotheses to validate. |
 | J2 portion/value; J5 social proof; shortlist/return/saved-to-order/time-to-order | Deferred / not measurable under current scope | Require new UI, suitable lawful identity or valid outcome linkage, agreed denominators and tests. Do not leave fake zero cards. |
+
+The Diner Flow board also proposes invitation-based adoption: `usable menu visits / recorded eligible invitations × 100`, and `invited visits opening a detail / recorded eligible invitations × 100`. These require a real invitation definition and matching invitation records. Neither menu visits nor visible cards can stand in for invitations. Until that collection exists, show eligible counts and **Invitation rate unavailable**. A later paired-confidence study can calculate `sum(after_score - before_score) / complete matched response pairs`, with the agreed scale, paired-response coverage and selection limits; no response means missing, not zero confidence.
 
 ### Orders, coverage and report claims
 
@@ -420,6 +555,31 @@ The newer diner scope intentionally permits an **observation-only demonstration*
 
 Add stale/partial and order-coverage flags independently. Withhold affected claims while retaining unrelated verified data where safe. Do not expose suppressed figures through “insufficient data, counts only”: the FigJam Version B wording needs this privacy correction. Overview and report must use the same chosen period or visibly different labelled periods; the board identifies mismatched prototype dates. Provider failure is a load/error state, not No data.
 
+### Exact setup, operational and feedback definitions
+
+These proposed definitions complete the owner's setup/report feedback and the team's pilot evaluation. They need agreement at D8; they are not additional diner tracking buttons.
+
+| Label | Proposed calculation or predicate | Required evidence |
+| --- | --- | --- |
+| Report period ready | `period_closed AND required_inputs_reconciled AND report_computed AND evidence_checks_pass AND privacy_checked` | A privacy-safe report may explain suppressed/no-data cells. Readiness never promises every metric has a displayable number. Source delay or computation failure prevents a Ready badge. |
+| Live / in stock / preview available | Live = active approved publication; in stock = explicit restaurant availability at that time; preview available = eligible approved manifest offered for that publication/device policy | Three separate predicates. The prototype label **AVAILABLE** must be replaced by the specific meaning chosen by product; a saved draft proves none of them. |
+| Approved capture coverage | Distinct eligible dishes with all required approved capture / distinct dishes in the agreed capture set × 100 | Record the capture set and tier requirements. One good photo does not establish T2 capture. |
+| Publication-ready coverage | Distinct eligible dishes with exact approved content/asset bundle / distinct dishes in the agreed set × 100 | Distinct dish count; a dish with several revisions counts once. |
+| Human effort | Sum recorded person-minutes by capture, preparation and review; average = those person-minutes / completed dishes in that same batch | Two people working for 15 minutes = 30 person-minutes. Include failed work on the batch, and report unfinished work separately. Do not divide all calendar-period labor by an unrelated completion cohort. |
+| Elapsed turnaround | `completion_time - intake_ready_time` per job; mean = summed elapsed time / completed jobs | Waiting time and labor are different. Incomplete jobs have age, not a fabricated completion time. |
+| Preparation retries | `sum(max(attempts_per_job - 1, 0))`; job retry rate = jobs with >1 attempt / attempted jobs × 100 | Count an actual execution attempt, not a repeated status poll or redelivered message. |
+| Preparation fallback rate | Spatial jobs resolved to an approved T0-only result / resolved eligible spatial jobs × 100 | Separate from the diner's photo-fallback metric. Unresolved jobs remain pending. |
+| Attributed operating cost | Sum non-overlapping billed/estimated usage charges for the batch, plus explicitly allocated shared charges, in one declared currency | Include failed attempts. Separate measured bills from estimates; state taxes, labor and shared-cost exclusions. Never invent an allocation. |
+| Cost per completed dish | Attributed cost for the same declared batch / completed dishes | Unfinished batch costs remain provisional. Zero completed dishes means Not measurable. |
+| Owner feedback responses | Count current valid responses keyed by `(authorized respondent, report_version)` | A revised response replaces the current value but retains history. One response per person/report version, not per button press. |
+| Rating distribution / mean | For each agreed 1–5 rating: respondents at that rating / valid rating respondents × 100; optional mean = sum current ratings / valid rating respondents | Preserve distribution and count. Agreement on this scale and whether a mean is useful precedes implementation. |
+| Feedback response coverage | Respondents / eligible authorized recipients actually asked about that report version × 100 | Without a reliable invitation/request count, coverage is unavailable. Opening a dashboard is not automatically an invitation. |
+| Feedback reason share | Respondents choosing a reason / respondents answering the reason question × 100 | Proposed multi-select; shares may exceed 100% in total. Retain source options: **Clear and easy to follow**, **Evidence helpful**, **Too much detail**, **Suggestions not relevant**. Confirm wording and multi-select behavior. |
+
+Feedback and operational results remain within their authorized audiences; small examples below are internal arithmetic, not permission to expose individual responses. Public context files must never contain private feedback text.
+
+**Action transitions proposed for D8:** Not reviewed → Planned on Approve; Not reviewed or Planned → Dismissed on Dismiss; Undo restores the immediately preceding non-Done state only when its expected action version still matches; Planned → Done needs an explicit completion command plus a note or linked published change. Done is not automatically undone by editing a suggestion. Product must approve any reopening behavior before adding it. An action cannot approve content or publish it. Start with human-reviewed, versioned observations and at most three supported suggestions; an automated ranking rule is a later explicit choice. Assign approval, publication, imports and action permissions separately.
+
 ### Worked example to test before building the charts
 
 This is synthetic internal arithmetic. There are only two eligible visits, so **every behavioral presentation cell is suppressed**. The example proves definitions, not production privacy or analytics implementation.
@@ -438,6 +598,44 @@ Expected internal values: visits **2**; opens **3**; first opens **2**, repeats 
 Negative cases: attaching B/O3 to C1 fails the visit match; attaching B/O3 to an A/C pair fails pair membership; linking an A opening to B's card exposure fails dish match. A repeat card exposure or network delivery cannot change rates. An ingredient absent from an opening cannot enter its denominator. Late checkpoints must not be summed or downgrade a valid maximum. These cases belong in the actual contract/projection tests, not only this explanatory example.
 
 Separate attach-rate check: a complete synthetic source has three eligible tickets; only T1 contains A and only T1 is linked. A's all-ticket attach rate is **1/3 = 33.33%**; its linked-ticket attach rate is **1/1 = 100%**. Neither rate says what unlinked diners considered. This small internal example is not a privacy-safe owner report.
+
+### A complete sample run: what we set up, what diners do, what we calculate
+
+**First use invented data.** Configure one synthetic restaurant, one fixed timezone, one closed test period and approved fixture dishes A (Soup), B and C. Onion belongs to A's approved ingredient list. Offer valid previews for A and B; deliberately make B's test preview fail. All actions below occur within the same period and before visit expiry. These are rehearsals, not results from the team survey or restaurant customers.
+
+Run the earlier two-visit script **ten times**, assigning new visit/opening/activation/comparison IDs to each repetition. This produces 20 distinct synthetic visits. For each pair:
+
+1. Visit X sees A and B, opens A for 12 active seconds, then opens it again for 8 seconds. Onion is visible in both openings; X deliberately opens Onion twice in the first. Retry one delivery using its original ID.
+2. X requests two previews in the first opening; both show successfully. Add one qualifying interaction to one shown attempt. X compares A/B → A/C → A/B, linking A's first opening.
+3. Visit Y sees A/B/C, opens B for 5 active seconds, requests its preview, sees a failure and the approved photo fallback, then compares B/C linked to B's opening.
+4. Deliver duplicates and shuffled batches. Recompute the same facts. The totals below must remain unchanged.
+
+| Result family | Exact expected arithmetic |
+| --- | --- |
+| Visits and opens | 20 visits; 30 opens: A 20, B 10. First opens 20; repeats 10. Repeat share `10/30 = 33.33%`. A share of opens `20/30 = 66.67%`; B `10/30 = 33.33%`. A repeat share `10/20 = 50%`. |
+| Timing | Final active seconds `10 × (12+8+5) = 250`; mean `250/30 = 8.33s`; coverage `30/30 = 100%`. A mean `200/20 = 10s`; B `50/10 = 5s`. Weight by openings, not `(10+5)/2`. |
+| Card metrics | A and B each exposed in 20 visits, C in 10: reach 100%, 100%, 50%. Correctly linked opening visits A 10, B 10, C 0: detail-open rates `10/20=50%`, `10/20=50%`, `0/10=0%`, subject to suppression. |
+| Ingredients | Onion activations 20, used openings 10, eligible openings 20, ingredient visits 10. Interaction rate `10/20=50%`. With no other ingredient activated, activation share `20/20=100%`. The delivery retry adds nothing. |
+| Previews | Requests 30, shown 20, failed before first frame 10, photo fallbacks 10. Resolved load success `20/30=66.67%`. A's requesting and shown opening shares are each `10/20=50%`; they are not `20/20`. Interacted attempts 10; interacted openings 10 / shown openings 10 gives opening adoption 100%. |
+| Comparison | Starts 20, replacements 20. Participation A 10, B 20, C 20; distinct A/B, A/C, B/C pairs each 10. Linked compared-opening shares A `10/20=50%`, B `10/10=100%`; C is Not measurable because it has no opening. |
+| Consideration | 20 qualified visit/dish pairs (X/A and Y/B per repetition); `20/20 = 1 considered dish per visit`. B qualifies through its linked comparison, not its five seconds alone. |
+| Privacy and quality | Twenty menu visits do not automatically make every cell displayable. Count contributing visits separately for each cell and apply complementary suppression. If 100 distinct valid submitted IDs and 5 rejected IDs are known, valid-event rate is `100/105=95.24%`; retransmitting valid IDs does not change it. |
+
+**Missing timing companion:** add one new valid opening with only a four-second nonfinal checkpoint. Opens become 31, completed timed openings remain 30, timing coverage becomes `30/31=96.77%`, and the completed-opening mean remains 8.33 seconds. Keep the four seconds as an incomplete lower bound. This companion changes the inputs; it is not part of the 30-opening baseline above.
+
+**Complete order companion:** for each pair of visits, import three evidenced tickets: T1 contains A×2 and B×1 and links only to X; T2 contains B×1; T3 contains C×1. Across ten pairs there are 30 tickets, 50 units (A20/B20/C10), and complete coverage for 3/3 dishes. Linked-visit coverage is `10/20=50%`; linked-ticket coverage is `10/30=33.33%`. A's all-ticket attach rate is `10/30=33.33%`, while its linked-ticket attach rate is `10/10=100%`. For the ten considered A pairs with complete linked outcomes, the conditional association is `10/10=100%`; Y/B outcomes remain unknown. This neither establishes diner-level conversion nor a preview benefit. Keep the earlier incomplete-source example as a separate case showing Unknown.
+
+**Four-week companion:** use four complete weekly fixtures, independently eligible for their display cells. Their opens are `[20,25,30,35]`; shown attempts `[10,15,20,25]`; completed timed openings `[20,25,30,35]`; active seconds `[140,200,250,315]`; verified units `[30,40,50,60]`. The Trends time series is `[7,8,8.33,9]` seconds. Week 4 versus week 3 gives opens `(35-30)/30=16.67%`, shown `(25-20)/20=25%`, units `(60-50)/50=20%`, and time delta `9-250/30≈0.67s`. Across all four weeks the mean is `905/110≈8.23s`, not the unweighted mean of those four averages. Change the prior value to zero or missing in a separate case: show **No comparable baseline**. The artifact's `156/688≈23%` remains its own demonstration, not a value forced into this sample.
+
+**Menu-state companion:** A is live and has a newer draft; B is approved but unpublished; C is draft-only. Dishes listed = 3; live = 1; approved ready-to-publish dishes = 1; dishes with a draft = 2. These overlapping counts must not be added to claim five dishes. Separately set A in stock with an eligible preview, B unpublished and C incomplete. A publication, stock and preview flags come from their respective records. Test Ready only when every report-readiness predicate holds; change evidence validation to failed and it must stop being Ready.
+
+**Preparation and cost companion:** the eligible capture set has three dishes; all three have approved required captures, but only two exact bundles are approved. Capture coverage `3/3=100%`; publication-ready coverage `2/3=66.67%`. Three processing jobs completed; a separate approval can remain pending. Logged work totals 90 person-minutes; average `90/3=30` per completed dish. Their turnaround times are 30, 60 and 90 minutes: mean 60 minutes. Four executions across three jobs means one retry; job retry rate `1/3=33.33%`. If one resolved spatial job becomes approved T0-only, preparation fallback is `1/3=33.33%`. Declared provider charges of $1, $2 and $3 total $6, including failed attempts and with no shared allocation or labor: `$6/3=$2` per completed dish. Real invoices, currency and scope replace those invented values in production.
+
+**Action and feedback companion:** action A is Planned, B Done and C Dismissed: one in each state. Undo C restores its previous Not reviewed state, giving Planned1/Done1/Not reviewed1/Dismissed0; replay adds no action. Three authorized report recipients were asked for feedback. One updates a rating from 5 to 4, another gives 2, and the third does not respond. Current responses = 2; mean `(4+2)/2=3`; coverage `2/3=66.67%`; distribution is 50% at 2 and 50% at 4. If the first selects Clear and Evidence helpful, and the second selects Too much detail, each selected reason has `1/2=50%`; totals reach 150% because selection is multiple. Suggestions not relevant is 0/2, subject to the agreed feedback privacy/access policy. These are internal examples, not permission to publish tiny respondent groups.
+
+**Then try the real journey with people:** after publication, privacy wording, venue and device gates pass, invite participants through the agreed study process to open the actual menu and explore naturally. Record actual actions; do not instruct everyone to click a target ingredient and then present that scripted behavior as restaurant demand. Keep guided usability sessions explicitly tagged and excluded from natural-usage reports. Separately ask whether participants understood the dish/ingredient information and whether owners understood the report. The baseline experiment, sampling and outcome-linkage plan must be agreed before any causal comparison. The synthetic rehearsal proves arithmetic; real observation tests usability and feasibility, with selection limits stated.
+
+Not every proposed metric becomes available during this exercise: invitation adoption, paired confidence, readiness before reconciliation, no-asset taps under a hidden-button design and deferred features remain explicitly unavailable until their own required inputs and decisions exist. That is faithful measurement, not a missing chart implementation.
 
 ## 7. Prepare 20 dishes without making generation a diner dependency
 
@@ -511,6 +709,8 @@ flowchart TD
 
 The arrows describe integration dependencies. Work above the credential checkpoint can use synthetic records and local emulators. It is acceptable to request protected provider access once the local slice is ready rather than wait for every optional visual asset; real staging evidence still has to pass before pilot acceptance.
 
+There are three kinds of labels: **A–F are parallel work lanes; P1–P7 are reviewable code packages; M1–M4 are demonstrations joining several packages. G1–G4 are release acceptance gates from the original baseline.** They describe the same work at different levels, not four competing schedules.
+
 ### Work that can happen together
 
 | Lane | Deliverable now | Can proceed with | Must wait for |
@@ -524,18 +724,22 @@ The arrows describe integration dependencies. Work above the credential checkpoi
 
 These are responsibility lanes, not new job titles or unconfirmed personal assignments. Adam's diner/JTBD work, Amr/Rania's design work, Eirene/Shirley's processing work, Vivien's venue/product coordination and Sai's repository work supply inputs to them. The interests page does not establish engineering availability. Agree one bounded output, reviewer, owned paths and due point per contributor in ClickUp.
 
+**Observable finish for each lane:** A lets someone browse, inspect Onion and compare two fixture dishes without getting stuck; B provides a rights-cleared sample and a measured preparation record; C proves an approved dish can appear and be withdrawn while drafts stay private; D delivers each actual observation once despite retries; E shows the expected permitted result or a truthful missing/suppressed state; F proves the permitted ticket/export link and documents the remaining operating checks. Assignee and reviewer are **not yet assigned by this document**.
+
+Every handoff should say: “Input I used; output I produced; files/contracts changed; exact evidence that passed or failed; unresolved dependency; person/lane receiving it.” For example, C hands A a typed public-menu response and fixture plus publication/withdrawal tests; A then connects its already working dummy menu to that response. A screenshot alone does not complete the handoff.
+
 ### Ordered PR slices and acceptance evidence
 
 These are plan labels, not actual GitHub PR numbers. A/B/C can be developed on separate branches from the shared contract; merge only complete slices with their dependent tests/docs. Avoid one PR per folder or one huge all-feature PR.
 
 | Order | Slice / existing paths to extend | Depends on | Evidence before integration |
 | --- | --- | --- | --- |
-| P1 — next | Contracts and one T0 publication path: `packages/contracts/src/`, `backend/src/`, new forward migration, relevant DB tests | Decide initial content fields, O04/P06, source/approval bundle | Exact revision approved; draft not public; stale-version/retry conflicts; unauthorized approval/publish denied; withdrawal and effect-free replay tested. |
+| P1 — next | Contracts and one T0 publication path, including anonymous public-menu GET and typed response/fixture: `packages/contracts/src/`, `backend/src/`, new forward migration, relevant DB tests | Decide initial content fields, O04/P06, source/approval bundle | Exact revision approved; GET contains active publication/bundle references and availability; drafts stay private; stale-version/retry conflicts; unauthorized approval/publish denied; withdrawal blocks fresh GET; effect-free replay tested. |
 | P2 — parallel preparation | Dummy diner UI in `frontend/diner/`, owner entry and owner shell in `frontend/console/`; design handoff | Agreed controls and typed synthetic responses; may develop alongside P1 | Useful menu without analytics/WebGL; ingredient keyboard/panel behavior; compare start/replace/cancel; focus/return; narrow-screen loading/failure tests. Connect actual menu after P1. |
 | P3 — parallel preparation | Observation/report contract plus local ingestion/consumer in shared contracts/backend; bounded browser buffer | Section 5 contract and synthetic publications; final integration needs P1/P2 | Strict validation; accepted-ID receipts; lost/partial ack; offline reload; buffer limits; duplicate/conflicting event and semantic IDs; R2-before-DB; individual Queue ack; DLQ/recovery tests. |
 | P4 — first real dashboard | Typed fact queries/projections and secured report API; connect owner overview, tabs, dish detail, ingredients/evidence | P3 end-to-end actual UI facts; report contract can be built earlier | Synthetic expected totals; shuffled/late records; no double counts; real DB tenant/role/context isolation; suppression/complements; chart/table/report reconcile; missing states truthful. |
 | P5 — parallel asset/order work | Approved tap-loaded viewer and exact bundle publication; one item CSV/code adapter | Viewer: P1/P2 + reviewed B sample. Orders: F feasibility + relevant contracts | Viewer failure leaves photo usable; budgets and target devices; no invented layers. Import repeat/correction/void/refund/ambiguous/expired/cross-venue cases; all-ticket vs linked outcomes distinct. Each can be a separate complete PR. |
-| P6 — report/action flow | Deterministic report snapshots, evidence panel, plan/dismiss/undo and explicitly designed completion; menu edit/review/publish joins | P4; P5 only for order-backed claims | Immutable evidence version, same privacy on drill-down; owner permissions/version conflicts; planning an action cannot publish; missing/failed evidence withholds unsupported suggestions. |
+| P6 — report/action flow | Human-reviewed report snapshots, evidence panel, plan/dismiss/undo and explicitly designed completion; menu edit/review/publish joins | P4 and D8; P5 only for order-backed claims | Immutable evidence version, same privacy on drill-down; agreed transition matrix/permissions/version conflicts; planning an action cannot publish; missing/failed evidence withholds unsupported suggestions. |
 | P7 — provider/release gate | Existing staging/operations paths, no new platform by default | Integrated local path, agreed provider and protected credentials | Real Auth/JWKS + membership revocation; TLS/runtime role/pool reuse; managed Queue/R2/DLQ; recovery/delete/restore; real phone/a11y/latency; permitted restaurant data. |
 | Later | Ask AI endpoint and owner panel | Safe P4/P6 report access, cost/rate policy and eval cases | Tenant-restricted inputs, truthful missingness/citations, injection resistance, no arbitrary SQL or mutation tools. Not needed for the first deterministic dashboard. |
 
@@ -552,8 +756,11 @@ These are plan labels, not actual GitHub PR numbers. A/B/C can be developed on s
 | D5 source acquisition | Product/processing choose manual-first capacity versus adding bounded OCR/PDF/authorized-URL intake in this sprint | Automated acquisition scope; manual path can be complete without claiming OCR is done. |
 | D6 outcome scope | Venue/data prove item CSV and code workflow, source coverage and correction/linkage rules | Order/outcome cards and accepted full-pilot gate. Browsing-only demonstration can precede them. |
 | D7 provider access | Authorized account owner supplies protected Cloudflare and selected database access when local evidence is ready | Provisioning and managed integration tests, not local coding. Never put credentials in Markdown, Git or chat fixtures. |
+| D8 owner report/action contract | Product/design/data agree first-versus-returning view, Add Dish release priority, report/AI sequence, cadence/channel, report reviewer/readiness, read-status ownership, human-reviewed suggestion selection, action transitions/Undo/completion, capabilities, feedback identity/scale/reasons and operational job/cost units | P6 and the affected P4/setup displays. Synthetic layout/calculation work can continue with these choices visibly proposed. |
 
 G1 needs truthful content/capture rules and fixed T2 budget; G2 needs the defined menu-to-ticket demonstration and device budgets; G3 needs outage/restore/replay evidence; G4 needs venue/operator, privacy/retention wording and runbook. Missing a dependency changes the scope/date explicitly. Neither a passing planning review nor a screenshot waives these gates.
+
+The Diner Flow board also proposes keeping a standard or paper menu available when the digital menu cannot load. Confirm this operational fallback with the restaurant at G4; software cannot create that service arrangement automatically. In the technical checks, **RLS** means database row-level access rules; **JWT/JWKS** are the signed-login token and its verification keys; **DLQ** is the recovery queue for failed work; **a11y** means accessibility.
 
 **Verification allocation:** schema/unit tests cover typed payloads and arithmetic; real disposable Postgres covers transaction/RLS/rebuild/import rules; browser tests cover observable triggers, accessibility, buffering and fallback; staging checks cover provider behavior; target phones and venue evidence cover real operating conditions. Reuse the current quality/database/browser CI lanes and one aggregate `ci` result. Add no separate check for every button or metric. This documentation change itself runs document/context checks and the arithmetic example, not the future test suite above.
 
@@ -585,7 +792,7 @@ No folder reshuffle is needed. Add a Python job only for a real processing task,
 
 ## 12. Source coverage and remaining limits
 
-The October 15 review read the complete exported **Team Docs tree: 34 pages**, plus both diner DOCX files and both task attachments below. The current pass used four bounded lanes: source coverage, metric formulas, platform reliability/security and a final Astra review. Fresh downloads of both diner DOCX files matched the previously read copies byte-for-byte; the JTBD page was also reopened in Brave. These are source and planning checks, not runtime certification. The export included bodies and tables; task discussions supplied additional status/context. This is not a claim that every external citation, linked repository, embedded visual or private conversation was audited.
+The October 15 review read the complete exported **Team Docs tree: 34 pages**, plus both diner DOCX files and both task attachments below. The earlier source pass used four bounded lanes: source coverage, metric formulas, platform reliability/security and a final Astra review. Fresh downloads of both diner DOCX files matched the previously read copies byte-for-byte; the JTBD page was also reopened in Brave. These are source and planning checks, not runtime certification. The export included bodies and tables; task discussions supplied additional status/context. This is not a claim that every external citation, linked repository, embedded visual or private conversation was audited.
 
 | Team Docs group | Pages included in the export review |
 | --- | --- |
@@ -597,8 +804,26 @@ The October 15 review read the complete exported **Team Docs tree: 34 pages**, p
 
 Sources: [Team Docs / HQ](https://doc.clickup.com/90141746115/d/h/2kydvry3-94/5f81140bcd39944), [Team Docs tree](https://app.clickup.com/90141746115/v/dc/2kydvry3-94/2kydvry3-274), [JTBD](https://app.clickup.com/90141746115/v/dc/2kydvry3-94/2kydvry3-134), [multimodal scope](https://app.clickup.com/90141746115/v/dc/2kydvry3-94/2kydvry3-954), [Diner Experience Scope DOCX](https://t90141746115.p.clickup-attachments.com/t90141746115/a1c02596-e51a-4502-aef6-cde24b88a488/PeekaPlate_Diner_Experience_Scope_DRAFT.docx?view=open), [Diner Event Taxonomy DOCX](https://t90141746115.p.clickup-attachments.com/t90141746115/aa670894-42ec-40b9-bc83-9335a0fbd502/PeekaPlate_Diner_Event_Taxonomy_and_Measurement_Plan_DRAFT.docx?view=open), [Dish Processing Agent Design attachment](https://t90141746115.p.clickup-attachments.com/t90141746115/9dc9dc49-4352-4a04-8d8b-d985c003e1ee/01_Dish_Processing_Agent_Design.md), [AI Pipeline Spec attachment](https://t90141746115.p.clickup-attachments.com/t90141746115/e56ccc74-de9f-40e1-ac57-04c01311bb38/07_AI_Pipeline_Spec.docx).
 
-Private exports remain outside Git. DOCX paragraphs/tables were read; visual pagination was not verified. Brave blocked direct navigation to the scope attachment, so the matching downloaded source supplied its content. The extraction helper's default Python environment lacked its document package; no package was installed, and the byte-identical earlier extraction was used. Broken relative links inside the source and external references were not treated as read documents. Vivien's [commit `36052d3`](https://github.com/vivienk/peekaplate_staging/commit/36052d3823c58d30e9576b97d98df321bc42a8ac) supplies the Figma diner-menu V1 link through `docs/team_guide.md`; this is the confirmed design update referenced in this plan. The Make prototype's terms screen prevented a fresh frame-by-frame inspection. Separately, the new FigJam Product Structure page was read through an exported PDF in Brave. Its page selector lists Cover Page, Business Analysis, Diner Flow, Restaurant Owner Flow, Product Structure (Workflow), Inspiration, Logo and Draft. Only the workflow page received a complete textual inspection in this pass; the other seven pages are inventoried, not claimed as fully read. Subsequent page/export/browser timeouts and a still-loading Claude artifact prevented a fresh all-frame audit. The prior owner-artifact metric inventory remains the source for its numbers/labels, cross-checked against the accessible workflow. Source drafts, task completion labels and model reports do not establish working runtime behavior. Rania's later [Design file](https://www.figma.com/design/l7A9n8tACJic0FIhY49Zjw/PeekaPlate?node-id=0-1) now supplies a fresh visual reference: 64 exported wireframe pages were text-inspected, with selected menu/detail/comparison frames visually checked. Its Design System sections were inventoried; all tokens, prototype links and every frame were not functionally tested. This narrows the earlier diner access gap without claiming a full interaction audit.
+Private exports remain outside Git. Both diner DOCX paragraph/table sources were read and fresh downloads matched them; visual pagination was not verified. Broken source-relative links and external citations were not silently counted as reviewed documents. Vivien's [commit `36052d3`](https://github.com/vivienk/peekaplate_staging/commit/36052d3823c58d30e9576b97d98df321bc42a8ac) supplies the earlier Make V1 reference. Its terms screen prevented a fresh frame-by-frame inspection. The owner artifact's prior complete metric inventory remains the source for its example labels/numbers; its live refresh remained unavailable, so later revisions need comparison before UI acceptance.
 
+Rania's [Design file](https://www.figma.com/design/l7A9n8tACJic0FIhY49Zjw/PeekaPlate?node-id=0-1) supplies the current diner visual reference: all 64 exported Wireframe pages were text-inspected, with selected menu/detail/comparison frames visually checked. Design System sections were inventoried. This is not functional testing of every frame, token or prototype link.
+
+### FigJam page-by-page coverage
+
+All eight pages of the [PeekaPlate board](https://www.figma.com/board/ZkbklvZUkAmhr9suuNTHxW/PeekaPlate?node-id=350-1205) were visited in Brave during the review. Exports eventually completed after download waits timed out; their actual contents were read rather than treating the timeout or the page list as evidence of coverage. Screen-reader support was temporarily enabled with permission and restored afterward.
+
+| Page | What was inspected | What it contributes / how it is treated |
+| --- | --- | --- |
+| Cover Page | Complete visible cover | Research / User Insights / Discovery / Analysis branding; no new event or implementation requirements. |
+| Business Analysis | Complete exported text, canvas overview | MenuQ, Servision, Popmenu and SevenRooms comparison notes. They motivate photo-first browsing, manageable preparation and clear reports. Competitor capabilities, costs and usability were not independently verified. “Hesitation” and “almost ordered” remain hypotheses. A competitor's scanning-time claim is not our effort estimate. |
+| Diner Flow | Complete exported journey v2, user flow v2 and event-list text; page view | Seven journey stages, scope decisions, 23-response research version, invitation measures, optional confidence study, paper-menu fallback and event-name crosswalk. Newer source scope/current requests resolve the differences explicitly. |
+| Restaurant Owner Flow | Complete exported Journey V3 and User Flow V3 text; canvas overview | First/return visits, report and AI priority, evidence labels, Add Dish ambiguity, report delivery, human review and owner-reported action completion. Open questions remain decisions at D8. |
+| Product Structure (Workflow) | Complete exported text from the earlier pass | DIN/OWN screens, simplified owner workflow, six navigation tabs, review/publication, loading/error states, analytics links, date and privacy conflicts. Supplies the screen IDs used in this plan. |
+| Inspiration | Visual inspection of the whole palette/layout moodboard | Suggested colors and menu-layout references. These are inspiration, not approved tokens, licensed production assets or new product scope. |
+| Logo | Page opened and zoom-to-fit checked | Appeared blank at inspection. No logo specification inferred. |
+| Draft | Complete exported text plus canvas overview | Earlier diner/owner flows, discovery and journey variants, business assumptions, Owner.com/SevenRooms/Popmenu notes, report discovery and feedback proposals. Earlier ordering, personalization and notification ideas remain historical where newer scope excludes them. |
+
+Complete exported-text review does not establish every graphical arrow, image-only detail, external citation or prototype behavior. No source board/document was edited. The two final Astra review lanes check technical implementability and plain-language comprehension; these are model reviews, not a study proving every reader will understand the plan.
 
 ### Coverage checklist and what remains open
 
@@ -616,7 +841,7 @@ Private exports remain outside Git. DOCX paragraphs/tables were read; visual pag
 | Intelligence and Intent Framework | Attention/consideration/unknown outcomes, deterministic evidence before suggestions | Covered in sections 4/5/6/10. |
 | Pilot, Engineering, Team, Interests | Local current state, parallel lanes, dependencies, confirmations and release gates | Covered in sections 2/9/11; personal interests do not silently assign engineering work. |
 | Two processing task attachments | Source/agent-state/allergen/OCR conflicts and backend authority | Covered in sections 7/8, not replaced by a prompt-only agent. |
-| FigJam Product Structure | DIN/OWN IDs, six owner navigation items, ingredient visual-only gap, unsupported viewer state, missing owner auth, action transitions and date mismatch | Covered in sections 3/6/9. Remaining seven board pages/full Make frames are a visual handoff gap, not checked. |
+| All eight FigJam pages | Research/version differences, DIN/OWN IDs, owner V3 priorities, ingredient interactions, report discovery, action transitions and historical-scope reconciliation | Page-by-page review recorded below; source decisions feed sections 2/3/5/6/9. Full prototype behavior and embedded-image/external-source verification remain outside this review. |
 | Rania's new Design file | Current diner visual reference, seven-dish/menu/category/detail/ingredient/preview/comparison frames; design-system sections; draft copy/scope corrections | Wireframe export text and selected rendered frames checked. Final frame selection, token values, interactions and responsive acceptance still pending. |
 | Owner dashboard artifact | Every reviewed card, six tabs, detail/report example, evidence/menu/action/feedback/state requirement | Explicit formulas/statuses in section 6; current live frame refresh unavailable, so compare any later design revision before UI acceptance. |
 | Individual ingredient clicks | Visible opportunities, activation identity, repeated-click versus unique-opening counts, approved IDs and placement | Covered end to end in sections 3–6 and the worked example; implementation pending. |

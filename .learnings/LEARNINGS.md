@@ -62,4 +62,6 @@ A task titled “implement” or marked complete may represent research or a des
 
 Follow-up, October 15: when a contributor says a design reference was updated in the repository, inspect recent commits and the affected document before requesting another URL. A loosely named document is not evidence that the source is missing. Record the commit provenance separately from whether the external design can currently be opened.
 
+Source-coverage follow-up: a multi-page design board needs a per-page record distinguishing full text review, visual inspection, empty pages and inaccessible content. Listing page names is not reviewing them. Preserve conflicting draft versions and their provenance; resolve their implementation impact explicitly rather than silently selecting whichever version was read last.
+
 Related files: `docs/team_guide.md`, `docs/frontend-design.md`.

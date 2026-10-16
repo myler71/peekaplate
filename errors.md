@@ -135,3 +135,15 @@ These records describe local validation limits, not application failures.
 ```json
 {"id":"ERR-20261015-006","status":"resolved","area":"source-output-encoding","cause":"PDF text was successfully saved as UTF-8, but printing a private-use design glyph to the default Windows console encoding failed afterward.","prevention":"Save source text as UTF-8 and print bounded status metadata; use an explicit UTF-8 reader for inspection rather than streaming arbitrary extracted glyphs through the default console.","regression":"The saved 64-page wireframe text was read explicitly as UTF-8 and selected PDF frames were rendered for visual confirmation. No source or product data was changed."}
 ```
+
+```json
+{"kind":"verification","references":"ERR-20261015-003","evidence":"All eight FigJam pages are now accounted for: complete exported text from five substantive pages, Cover/Inspiration visual review and a blank Logo page checked at zoom-to-fit. Delayed exports completed after browser waits timed out; existing downloads were inspected before further export attempts. Temporary screen-reader support was authorized and restored. Connector edit restriction and fresh owner-artifact/prototype interaction limits remain, so this is a partial source-access resolution, not a full UI acceptance claim."}
+```
+
+```json
+{"kind":"verification","references":"ERR-20261014-010","evidence":"Read-only review agents encountered outer PowerShell string expansion, then used literal outer quoting successfully. The existing RTK/PowerShell prevention rule applies; no new root-cause category or product failure is inferred."}
+```
+
+```json
+{"id":"ERR-20261015-007","status":"resolved","area":"documentation-anchor","cause":"The team guide retained a delivery-section anchor after the implementation-plan heading changed. Existing document checks validate file paths but not Markdown heading anchors.","prevention":"Check affected cross-document anchors when renaming headings; keep a focused anchor verification alongside document checks for this change.","sources":["docs/team_guide.md","docs/implementation_plan.md"],"regression":"The link now targets the actual delivery-flow heading; final focused Markdown anchor verification checks this link and the design-handoff cross-reference."}
+```
