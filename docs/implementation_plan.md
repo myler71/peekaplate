@@ -206,7 +206,7 @@ sequenceDiagram
   Consumer->>R2: Create or verify identical evidence
   Consumer->>DB: Commit duplicate-safe facts and pending calculations
   Consumer-->>Queue: Acknowledge this message after both succeed
-  Note over Phone,DB: Receipt means queued; it does not mean a dashboard is already updated
+  Note over Phone,DB: Receipt means queued. It does not mean a dashboard is already updated
 ```
 
 PeekaPlate needs two separate paths:

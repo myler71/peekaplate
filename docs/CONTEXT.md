@@ -125,7 +125,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "backend"
       ],
-      "sourceFingerprint": "8767fb3946f500f75760e17b5bd961a3ff4dda5cd6d7d21b64d4b16d048e0213"
+      "sourceFingerprint": "c566869ff4049b059c92741d3b623132a220d1454bdaefa63d80f3ba523b5a9b"
     },
     {
       "id": "delivery",
@@ -163,7 +163,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "13d9f219247c7ecc15d65e71f206f99c91886c4cc26a1b2949673061bc9770e3"
+      "sourceFingerprint": "1cfd22d507e0f36f5c5af68d161f9787f04dc32bd97edb7bcab26523541a4b84"
     },
     {
       "id": "agents",
@@ -196,7 +196,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
   ],
   "handoffs": [
     {
-      "summary": "Expanded planning clarity with built/next/done, a glossary and pipeline/lifecycle diagrams. Reviewed all eight FigJam pages: five complete text exports, Cover/Inspiration visuals and blank Logo; preserved source priorities, research discrepancies and historical ideas. Added exact period anchors, Trends/operational/feedback formulas, sample diner actions/calculations, fast-tap/visit proposals, public GET handoff and D8 decisions. Two Astra lanes review technical and nontechnical clarity; no runtime features or external source edits.",
+      "summary": "Expanded planning clarity with built/next/done, a glossary and pipeline/lifecycle diagrams. Reviewed all eight FigJam pages: five complete text exports, Cover/Inspiration visuals and blank Logo; preserved source priorities, research discrepancies and historical ideas. Added exact period anchors, Trends/operational/feedback formulas, sample diner actions/calculations, fast-tap/visit proposals, public GET handoff and D8 decisions. Two Astra lanes reviewed technical and nontechnical clarity. Follow-up fixes an unescaped semicolon in the sequence diagram; GitHub rendering needs verification independently of document-link checks. No runtime features or external source edits.",
       "modules": [
         "delivery",
         "diner",
