@@ -482,30 +482,31 @@ OCR/URL acquisition needs deterministic limits, source snapshots, rights/provena
 
 The original baseline targets G1 October 19, G2 October 24, G3 October 28, G4 October 29 and readout November 1, 2026. Capture was planned for October 20–22 with October 23 for recapture. These are the original gates, not a promise that the expanded scope fits the remaining days. The $375 cash target excludes labor and is not a current vendor quote. Confirm staffing, venue, dates and measured effort; rebaseline explicitly if necessary.
 
-```text
-NOW: agree controls, metric version, content eligibility and task owners
-  |
-  +-- A. Diner design + synthetic menu/detail/ingredient/compare UI --------+
-  +-- B. Owner photos/rights + small T0/T1 preparation sample -------------+
-  +-- C. Backend capture -> review -> approve -> publish -> withdraw ------+--> M1
-  +-- D. Event schemas + hand-calculated fixtures + local collector -------+    |
-  +-- E. Owner screen shell + typed mock report states --------------------+    v
-  +-- F. Venue CSV/code feasibility + synthetic importer ------------------+   M2
-                                                                            |
-M1: approved T0 publication -> real local diner menu                          |
-M2: actual UI observations -> local Queue/R2 -> Postgres -> secured summary <-+
-  |
-  +-- tested T1/T2 assets join exact publication; photo fallback stays usable
-  +-- full owner metrics/evidence/actions use M2 facts
-  +-- verified CSV + code linkage adds outcome metrics when F is proven
-  |
-M3: integrated local demo, failure/replay/privacy tests, agreed release scope
-  |
-STOP FOR PROTECTED PROVIDER ACCESS: Cloudflare + Supabase/database decision
-  |
-M4: managed-service tests + permitted venue evidence + real-device/recovery gates
-  |
-pilot -> checked readout -> recorded restaurant action -> later Ask AI
+```mermaid
+flowchart TD
+  subgraph parallel[Start these lanes together]
+    A[A: design and synthetic diner UI]
+    B[B: source photos, rights and asset preparation]
+    C[C: review, approve, publish and withdraw]
+    D[D: event contracts and local collector]
+    E[E: owner UI and report calculations]
+    F[F: CSV and code feasibility, synthetic importer]
+  end
+  A --> M1[M1: usable local menu with approved synthetic T0 content]
+  C --> M1
+  M1 --> M2[M2: UI events through local Queue, R2 and Postgres]
+  D --> M2
+  M2 --> M3[M3: secured local report and recovery/privacy checks]
+  E --> M3
+  M3 --> ACCESS[Protected provider access checkpoint]
+  ACCESS --> M4[M4: managed services, real devices and release drills]
+  B --> REAL[Reviewed restaurant content and exact approved bundles]
+  C --> REAL
+  F --> ORDERS[Permitted item export and code-linkage proof]
+  M4 --> PILOT[Full accepted pilot, checked readout and restaurant action]
+  REAL --> PILOT
+  ORDERS --> PILOT
+  PILOT --> AI[Later: authorized Ask AI]
 ```
 
 The arrows describe integration dependencies. Work above the credential checkpoint can use synthetic records and local emulators. It is acceptable to request protected provider access once the local slice is ready rather than wait for every optional visual asset; real staging evidence still has to pass before pilot acceptance.
