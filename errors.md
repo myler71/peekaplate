@@ -1,5 +1,9 @@
 # Error ledger
 
+```json
+{"id":"ERR-20261016-001","status":"resolved","area":"documentation-edit-tooling","cause":"A context-handoff removal patch used text that did not exactly match the current file and was rejected before modification.","prevention":"Build removal patches from the current bounded file excerpt, then verify the context graph and diff.","regression":"The corrected patch removed only the oldest handoff; pnpm verify context:check docs:check passed with eight modules and ten handoffs. No runtime behavior changed."}
+```
+
 Consult this ledger before starting related work. Automatic records below cover only checks run through `node scripts/verify.mjs`; they record an observation, never a root cause.
 
 For a confirmed issue, add a short sanitized entry with the cause, prevention, and regression check. Do not record output, logs, environment values, secrets, customer data, or private source material. Keep records append-only; maintainers may curate older entries.

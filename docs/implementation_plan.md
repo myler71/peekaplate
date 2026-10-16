@@ -6,6 +6,8 @@ Updated October 15, 2026. This is a proposed implementation plan reconciled with
 
 Read sections 1–4 for the product, current progress, screens and data flow. Sections 5–6 are the event and calculation reference for implementation. Sections 7–8 cover food preparation and processing decisions. **Section 9 is the working schedule:** parallel lanes, dependencies, PR order and release gates. Sections 10–12 cover later AI, code locations and source coverage. “Proposed” means ready to discuss and implement after the named decision; “implemented” is reserved for code that exists.
 
+**October 16 planning update:** the [sprint ticket pack](sprint_tickets.md) proposes owners and three five-day sprints plus a five-day release window. It incorporates Adam's newer taxonomy/scope drafts and records differences requiring a decision, including ingredient behavior, consideration, timing and visit-level metrics. Those proposals do not silently replace this plan's formulas or accepted ADRs; ticket T04 freezes the reconciled version before implementation. T01 confirms the calendar and capacity against the original dated baseline.
+
 ## 1. The product we are building
 
 **Built today:** developers can save a dish draft locally, with permission checks, safe retries and protection against conflicting edits. The diner and owner interfaces are starting shells. A live menu and the analytics journey are not built.
