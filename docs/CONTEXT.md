@@ -27,7 +27,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "diner",
       "status": "foundation",
-      "summary": "Static TypeScript/Vite shell usable without JavaScript. Figma V1 is diner design direction; QR/link must open the menu directly with a small owner sign-in link. The October 15 plan specifies synthetic UI states, event definitions and photo-grounded assets; none are implemented. Build checks initial JS gzip budget and renderer boundaries; viewer, analytics and real-device evidence remain planned.",
+      "summary": "Static TypeScript/Vite shell usable without JavaScript. Figma Make V1 is diner design direction; the FigJam Product Structure page adds workflow evidence. Plan requires direct QR/menu entry, owner sign-in link, functional ingredient panel and truthful viewer fallback; these are not implemented. Build checks initial JS gzip budget and renderer boundaries; actual viewer, analytics and device evidence remain planned.",
       "paths": [
         "frontend/diner/index.html",
         "frontend/diner/src/main.ts",
@@ -43,7 +43,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "contracts"
       ],
-      "sourceFingerprint": "ace3aee345492de87b4aa6689a8553c17f09dca07d9a7e2dde3303e1725dda0a"
+      "sourceFingerprint": "b257480afb7a196ad8859c3ea58ccd2b9bb5ec88afe350a598acdba093459a48"
     },
     {
       "id": "console",
@@ -114,7 +114,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "measurement",
       "status": "planned",
-      "summary": "Venue-bound redeem codes will link sessions to POS tickets. The October 15 plan reconciles draft diner events, attention versus consideration, dashboard denominators and evidence limits. A browsing-only demo may precede linkage with orders unavailable; the accepted full pilot still needs linkage. Unknown outcomes and small-cell suppression remain; no ingestion, POS or experiment implementation exists.",
+      "summary": "Planned venue-bound CSV/code linkage and observation pipeline. The October 15 implementation plan specifies DIN/OWN controls, versioned event proposals including ingredient exposures/activations, logical fact projections, exact dashboard formulas and ordered parallel PR lanes. Consideration, unknown outcomes and small-cell suppression follow ADRs. Local draft saves exist; ingestion, reports, imports and experiments do not.",
       "paths": [
         "docs/delivery.md",
         "docs/implementation_plan.md"
@@ -125,7 +125,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "backend"
       ],
-      "sourceFingerprint": "49e756d90d895212f26b0a466aad311efa5c7c144059d024b982e2eb1c8aff5c"
+      "sourceFingerprint": "7d080b16c5ffa99e0324f8a756ca345c742d7c5780c4477b749e835bcb3f510d"
     },
     {
       "id": "delivery",
@@ -163,7 +163,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "9cdbf10a8f89f154bc500f8d2331423e4f2b537087a900fde63ea7905cabe0e9"
+      "sourceFingerprint": "487dc166e292daceb35ea5c3da4dfbba72725f7236f3e30e7fae1c436c7ec275"
     },
     {
       "id": "agents",
@@ -196,14 +196,14 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
   ],
   "handoffs": [
     {
-      "summary": "Reconciled Team Docs, diner scope/taxonomy, processing supplements and the owner dashboard into one proposed implementation plan. Updated team_guide and design handoff: QR opens the diner menu directly, owner sign-in leads to a private console, and the 20-dish photo-grounded batch is planned rather than completed. Confirmed the Figma V1 source in Vivien's commit 36052d3. Named OCR, approval/allergen, event-vocabulary and outcome-scope decisions; preserved accepted ADRs and actual local-only code status.",
+      "summary": "Expanded the source-linked implementation plan with observed FigJam DIN/OWN controls, ingredient opportunity/activation tracking, proposed v2 contracts/defaults, logical database facts, exact dashboard formulas, a corrected synthetic example and explicit parallel/dependent PR flow. Both diner DOCX redownloads match reviewed sources. Four bounded source/metric/platform/review lanes include Astra for the final independent review. Actual analytics and cloud capabilities remain unimplemented.",
       "modules": [
         "delivery",
         "diner",
         "console",
         "measurement"
       ],
-      "next": "Agree bounded ClickUp assignments and open product decisions. Build local capture/review/publication while synthetic diner UI, event contracts and photo preparation proceed in parallel. Complete pinned documentation review and recorded checks; stop at protected provider credentials before hosted integration. Fresh Figma frame inspection remains limited by account terms acceptance."
+      "next": "Resolve listed product/measurement release decisions and visual handoff gaps. Begin local T0 approval/publication alongside synthetic diner UI, event contracts and photo preparation. Review the pinned docs and recorded checks; use protected provider access only at the managed-service checkpoint."
     },
     {
       "summary": "Recovered Windows Docker after checksummed offline disk backups and an official Desktop 4.95 upgrade. Real testing exposed a pnpm.mjs launcher rejection; the DB harness now invokes installed Vitest directly, with a failing-then-passing launcher regression. All 43 SQL assertions, 13 Worker/Postgres cases and local startup/demo/cleanup passed on Windows. Contributor Claude/Codex setup is independently owned.",

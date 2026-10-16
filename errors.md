@@ -119,3 +119,15 @@ These records describe local validation limits, not application failures.
 ```json
 {"id":"ERR-20261015-002","status":"resolved","area":"documentation-edit-tooling","cause":"A patch attempted delete and add operations for the same path and was rejected before applying that patch.","prevention":"Use one update operation per existing file in a patch, then inspect the actual diff.","regression":"The design handoff was applied as an update; the rejected patch made no changes. Documentation/context verification covers the final references; no application behavior changed."}
 ```
+
+```json
+{"id":"ERR-20261015-003","status":"open","area":"planning-source-access","cause":"The read-only FigJam connector required edit permission despite browser view access. The workflow page was exported through Brave, but later browser operations timed out and the owner artifact remained loading. Direct navigation to a document attachment was blocked by the browser.","prevention":"Use existing read-only access without expanding permissions or disabling browser protections. Distinguish a successfully read page from an inventoried or still-loading one; retain explicit source freshness limits.","resolutionRequired":"Complete the remaining visual handoff inspection before UI acceptance. The plan uses the fully read workflow page, prior owner inventory and byte-identical downloaded document sources; it does not claim every frame was rechecked."}
+```
+
+```json
+{"id":"ERR-20261015-004","status":"resolved","area":"source-extraction-runtime","cause":"Default Python lacked the document extraction package and an attempted PDF reader module was unavailable.","prevention":"Use the configured bundled runtime and inspect available document libraries before selecting a parser; do not install a dependency just to repeat an unchanged extraction.","regression":"Bundled pypdf extracted the workflow PDF. Fresh diner-document SHA-256 values matched previously extracted paragraph/table sources, so their content review remained source-equivalent. Visual pagination remains unverified."}
+```
+
+```json
+{"id":"ERR-20261015-005","status":"resolved","area":"planning-metric-example","cause":"A synthetic example linked a comparison to a dish outside its displayed pair, mixed raw card exposures with a unique-visit numerator and omitted ingredient-control eligibility. Passing arithmetic assertions alone did not validate those relationships.","prevention":"Validate same-visit and dish-in-pair origins, matched card references, deduplicated opportunity denominators and explicit ingredient exposure. Include adversarial links and repeated exposures in future projection tests.","regression":"The revised isolated planning fixture asserts rejected wrong-pair, cross-visit and wrong-dish links, deduplicated repeat exposure and ingredient opportunities. This validates the documented example only; production projections are not implemented."}
+```
