@@ -1,0 +1,14 @@
+# Architecture decisions
+
+Accepted decisions express intent, not proof of completed implementation. Review acceptance tests and source before claiming a decision is realized. New decisions use `NNNN-short-title.md` with Status, Context, Decision, Consequences and Verification; supersede rather than erase accepted history.
+
+| ADR | Decision |
+| --- | --- |
+| [0001](0001-scope-and-repository.md) | One venue, pnpm monorepo and explicit module boundaries |
+| [0002](0002-selective-event-sourcing.md) | Selective Postgres event sourcing and safe replay |
+| [0003](0003-intent-evidence.md) | Queue/archive/database evidence and pinned exposure |
+| [0004](0004-visual-tiers.md) | T0 first; one lazy Three.js viewer for T1/T2 |
+| [0005](0005-tenancy-and-privacy.md) | Server-owned authority, private data and retention |
+| [0006](0006-orders-and-measurement.md) | POS linkage and honest metrics |
+| [0007](0007-delivery-and-recovery.md) | Staging, migration, rollout and recovery gates |
+| [0008](0008-agent-context-and-review.md) | Small grounded context and evidence-led review |
