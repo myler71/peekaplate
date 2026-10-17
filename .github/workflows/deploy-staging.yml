@@ -12,7 +12,8 @@ concurrency:
 
 jobs:
   deploy:
-    if: github.ref == 'refs/heads/main'
+    # Enable only after protected staging, provider bindings and parity approval exist.
+    if: github.ref == 'refs/heads/develop' && vars.STAGING_DEPLOYMENT_APPROVED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     environment: staging

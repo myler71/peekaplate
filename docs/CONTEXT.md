@@ -129,7 +129,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "delivery",
       "status": "foundation",
-      "summary": "Local staff-command development uses disposable Postgres, synthetic JWTs and workerd. Windows Docker was recovered with Desktop 4.95 and the real database/local demo checks passed. The team guide separates research/design from implemented code; hosted-provider checks and owner-controlled GitHub enforcement remain pending. Monthly grouped updates and human review/comment policy remain.",
+      "summary": "Local staff-command development uses disposable Postgres, synthetic JWTs and workerd. Windows Docker was recovered with Desktop 4.95 and the real database/local demo checks passed. The team guide separates research/design from implemented code; hosted-provider checks and owner-controlled GitHub enforcement remain pending. Monthly grouped updates and human review/comment policy remain. Canonical private repo migration preserves both histories; develop integration and a disabled manual staging workflow are proposed. Private-plan ruleset enforcement and production sign-off remain blocked.",
       "paths": [
         "README.md",
         "SECURITY.md",
@@ -151,7 +151,12 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "scripts/verify.mjs",
         "scripts/verify.test.mjs",
         "docs/verification.md",
-        "vitest.db.config.ts"
+        "vitest.db.config.ts",
+        ".github/main-ruleset.json",
+        ".github/develop-ruleset.json",
+        "docs/repository-migration.md",
+        "docs/adr/0010-canonical-repository-and-release-branches.md",
+        "docs/adr/README.md"
       ],
       "adrs": [
         "docs/adr/0007-delivery-and-recovery.md"
@@ -161,7 +166,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "8ace74c2d287765ee2016cb7676c0a9fd91344e5599b942204c5046c7fb5996a"
+      "sourceFingerprint": "ddbf47aacbfd1cf9e589213f89ca200e3007776dcb1949a17c94e5d9a32fa92d"
     },
     {
       "id": "agents",
@@ -193,6 +198,13 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     }
   ],
   "handoffs": [
+    {
+      "summary": "Prepared history-preserving core import, marketing split, develop CI, PR 13-derived ruleset proposals and disabled staging deployment gate. Application runtime and backend bindings are unchanged.",
+      "modules": [
+        "delivery"
+      ],
+      "next": "Verify exact-head CI and independent human approval; resolve private-repository protection plan, reconcile open source PRs and establish provider parity before release or archival."
+    },
     {
       "summary": "Recovered Windows Docker after checksummed offline disk backups and an official Desktop 4.95 upgrade. Real testing exposed a pnpm.mjs launcher rejection; the DB harness now invokes installed Vitest directly, with a failing-then-passing launcher regression. All 43 SQL assertions, 13 Worker/Postgres cases and local startup/demo/cleanup passed on Windows. Contributor Claude/Codex setup is independently owned.",
       "modules": [
@@ -264,13 +276,6 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "agents"
       ],
       "next": "Use the exact setup PR CI evidence, then start PR 1 staff authority and atomic command transaction. Confirm owner merge controls and staging resources; real menu/device/restore performance remains future gate evidence."
-    },
-    {
-      "summary": "Dependabot PRs failed the required narrative gate and version changes also stale the delivery fingerprint. Retained both safeguards, documented collaborator preparation and human review comments, grouped monthly updates, and placed documentation checks after build verification without adding CI jobs.",
-      "modules": [
-        "delivery"
-      ],
-      "next": "Review the maintenance PR and its exact CI results before merging; owner enables required ci and human approval rules plus Dependabot security settings. Prepare subsequent monthly bot PRs using CONTRIBUTING.md."
     }
   ]
 }

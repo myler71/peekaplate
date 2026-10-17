@@ -1,6 +1,6 @@
 # Contributing
 
-Read [architecture](docs/architecture.md) and [delivery](docs/delivery.md). Choose one ordered PR slice and state its observable outcome before coding. Branch from current `main`, use a descriptive `feat/`, `fix/` or `chore/` branch, and open a draft PR early when coordination helps.
+Read [architecture](docs/architecture.md) and [delivery](docs/delivery.md). Choose one ordered PR slice and state its observable outcome before coding. After the migration PR is approved and merged, branch from current `develop`, use a descriptive `feat/`, `fix/` or `chore/` branch, and target `develop`, and open a draft PR early when coordination helps. Promote a tested `develop` commit to `main` through a separate release PR with human release sign-off. See [repository migration](docs/repository-migration.md) for the current transition gates.
 
 ## Local checks
 

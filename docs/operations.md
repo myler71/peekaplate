@@ -1,5 +1,7 @@
 # Local and staging operations
 
+Repository transition: [migration and release checklist](repository-migration.md) records authoritative current repository, branch and deployment gates. The staging workflow now accepts only `develop` and requires `STAGING_DEPLOYMENT_APPROVED=true`; the variable is absent, so it is disabled. Production deployment remains unconfigured.
+
 ## What is configured
 
 Node 24.16.0, pnpm 11.25.0, frozen lockfile, two Vite apps and a Hono Worker with health and authenticated dish commands. `backend/wrangler.jsonc` names the local and staging Worker but supplies no hosted auth or database bindings. No Cloudflare account, Pages project, Hyperdrive, Queue, R2 bucket or Supabase project is provisioned. Application fixtures use synthetic data; package and image downloads contact their registries.
@@ -58,9 +60,9 @@ Before declaring PR 1 cloud-ready: confirm migration execution under the actual 
 
 The repository owner supplies real account values and enables controls before deployment:
 
-1. Create a GitHub `staging` environment restricted to `main`, with the appropriate human approval. Add `CLOUDFLARE_API_TOKEN` as an environment secret and `CLOUDFLARE_ACCOUNT_ID` as an environment variable. Scope the token only to the intended account and required deployment resources.
+1. Create a GitHub `staging` environment restricted to `develop`, with the appropriate human approval. Add `CLOUDFLARE_API_TOKEN` as an environment secret and `CLOUDFLARE_ACCOUNT_ID` as an environment variable. Scope the token only to the intended account and required deployment resources.
 2. Create two Cloudflare Pages projects using the repository root as install directory. Use `pnpm install --frozen-lockfile` followed by `pnpm --filter @peekaplate/diner build` or `pnpm --filter @peekaplate/console build`; outputs are `frontend/diner/dist` and `frontend/console/dist`. Disable automatic production promotion until review controls exist. The console shell contains no real staff data.
-3. Deploy the Worker from the reviewed `main` checkout using the manual staging workflow. Confirm `/health`, a rejected unknown route and fail-closed staff routes until real bindings are configured. Ingest is not implemented.
+3. Deploy the Worker from the reviewed `develop` checkout using the manual staging workflow. Confirm `/health`, a rejected unknown route and fail-closed staff routes until real bindings are configured. Ingest is not implemented.
 4. In the relevant feature PRs, create separate staging Postgres, Hyperdrive, private R2 and Queue/DLQ resources. Commit their non-secret binding IDs with the implementation and verify actual connections in staging. Keep migration credentials, runtime credentials and signing secrets separate. Follow [Cloudflare's Supabase/Hyperdrive guide](https://developers.cloudflare.com/hyperdrive/examples/connect-to-postgres/postgres-database-providers/supabase/) for the chosen driver and transaction behavior.
 5. Set budget notifications, retention/deletion ownership, backup destination and a named incident responder. Never infer these settings from an example file.
 
@@ -68,13 +70,13 @@ Production is a separate decision with separate credentials/resources. There is 
 
 ## GitHub merge controls
 
-A repository **administrator** must create a ruleset for `main`: require a pull request, at least one human approval, code-owner review, stale-approval dismissal, resolved conversations and the required check **`ci`** from GitHub Actions; block force-push and branch deletion. Avoid bypass actors except an explicitly controlled emergency role. Require branches to be current if concurrent merges can invalidate checks. The bootstrap account has push access but not administration, so these settings cannot be asserted by code or CODEOWNERS.
+A repository **administrator** must create rulesets for `main` and `develop`: require a pull request, at least one human approval, code-owner review, stale-approval dismissal, resolved conversations and the required check **`ci`** from GitHub Actions; block force-push and branch deletion. Use no bypass actors. Require branches to be current if concurrent merges can invalidate checks. The current owner has administration access, but private-repository rulesets are blocked by the current GitHub plan (HTTP 403). Configuration files and CODEOWNERS do not establish enforcement.
 
 CI runs with read-only tokens and pinned action SHAs. PR bodies are read as data, never interpolated into shell commands. The final gate requires path selection and quality to succeed and every applicable integration lane to pass. Fork PRs receive no deployment credentials. Require a human approval with a review comment on the current commit for every PR, including AI-written and dependency changes. Native approval rules enforce approval; the reviewer and merger enforce the comment's content. No additional comment-check workflow or automatic approval is configured.
 
 Each existing CI job has one purpose: `changes` selects relevant integration lanes; `quality` checks formatting, types, unit tests, builds and documentation; `database` tests migrations and database constraints; `browser` tests the diner/console smoke flows; `ci` is the single required aggregate check. Documentation checks run after code checks and builds, and still run after an earlier failure, so a missing PR section cannot hide a broken build. Database/browser jobs remain path-selected.
 
-Dependabot checks routine versions on the first day of each month, with one open grouped minor/patch PR per ecosystem (npm and GitHub Actions). Major version upgrades require deliberate manual review, including runtime/type compatibility. Security updates remain independently triggered when enabled and grouped per ecosystem; version-update limits and semver ignore rules do not delay them. See [GitHub's configuration reference](https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference) and [PR preparation](../CONTRIBUTING.md#dependency-pr-preparation). No auto-merge. The repository owner must confirm Dependabot alerts and security updates are enabled in Settings; these settings cannot be confirmed with the current non-admin account.
+Dependabot checks routine versions on the first day of each month, with one open grouped minor/patch PR per ecosystem (npm and GitHub Actions). Major version upgrades require deliberate manual review, including runtime/type compatibility. Security updates remain independently triggered when enabled and grouped per ecosystem; version-update limits and semver ignore rules do not delay them. See [GitHub's configuration reference](https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference) and [PR preparation](../CONTRIBUTING.md#dependency-pr-preparation). No auto-merge. The repository owner must confirm Dependabot alerts and security updates are enabled in Settings; their live activation is not part of this migration audit.
 
 ## Pilot recovery, before G3
 

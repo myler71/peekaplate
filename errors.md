@@ -111,3 +111,20 @@ These records describe local validation limits, not application failures.
 ```json
 {"kind":"resolution","references":{"check":"context:check","timestamp":"2026-10-15T05:50:07.099Z"},"cause":"The check ran while documentation edits were still in progress and before the required context fingerprint refresh.","prevention":"Refresh and inspect affected context nodes after completing source edits, then run the final recorded check. This observation does not indicate an application regression."}
 ```
+
+```json
+{"id":"ERR-20261017-MIGRATION-001","status":"resolved","area":"migration-tooling","cause":"Context refresh was first invoked from the audit directory instead of the core checkout; the process exited before changing context. RTK is unavailable on this host, so direct commands are used.","prevention":"Run checks with the core checkout as working directory.","regression":"node scripts/context.mjs refresh completed in the core checkout."}
+```
+
+<!-- automatic observation; not root cause -->
+```json
+{"kind":"automatic-check-observation","check":"context:check","timestamp":"2026-10-17T21:13:18.609Z","exitCode":1}
+```
+
+```json
+{"id":"ERR-20261017-MIGRATION-002","status":"resolved","area":"context-freshness","cause":"JSON formatting changed the two ruleset files after source fingerprint refresh; the freshness check correctly failed.","prevention":"Format all changed sources before final context refresh.","regression":"Refreshed after formatting; pnpm verify context:check docs:check passed."}
+```
+
+```json
+{"id":"ERR-20261017-MIGRATION-003","status":"resolved","area":"local-dependency-install","cause":"The fallback pnpm launcher attempted dependency downloads in the network-restricted context and encountered ENOTFOUND.","prevention":"Use the approved network context and explicit pinned Node and pnpm tools for installation.","regression":"Frozen dependency installation passed with Node 24.16.0 and pnpm 11.25.0; lint, types and 56 unit/script tests passed."}
+```
