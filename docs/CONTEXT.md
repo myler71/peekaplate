@@ -117,7 +117,6 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "summary": "Python controller ingests PDF, menu-image, static website/JSON-LD and UTF-8 sources into validated needs_review drafts. PDFium uses native page text or explicit OCR.space Engine 3; Pillow bounds uploads. Private reports retain original snapshots, segment outcomes, source spans, versions, settings and pending capture candidates. Failed pages break continuation context; public URL addresses are validated and pinned. Local/layout and configurable AI modes share evidence checks. CLI loads private working-directory dotenv without interpolation or overriding shell variables; explicit flags win. The example configures OpenRouter. Eighty-seven processing/configuration tests pass. Live OCR has been observed, but a live AI response failed JSON parsing and extraction quality remains unverified. Backend integration, approval/publication, durable jobs, shared assets and 2.5D/3D remain separate.",
       "paths": [
         ".gitattributes",
-        "processing/.env.example",
         "processing/.gitignore",
         "processing/.python-version",
         "processing/README.md",
@@ -151,7 +150,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "docs/adr/0001-scope-and-repository.md"
       ],
       "dependsOn": [],
-      "sourceFingerprint": "8a162f7f8decec0dd226a5015938ed89292e24e0b8f39033a7c44cb7858b6f1a"
+      "sourceFingerprint": "959c72af9866e3fdad94e6064b4ec35ef4b9abeaf36695dc81e8d7b1a0105e8f"
     },
     {
       "id": "measurement",
