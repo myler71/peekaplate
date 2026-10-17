@@ -114,25 +114,44 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "processing",
       "status": "foundation",
-      "summary": "Python menu-text extraction supports a documented local record format and a configurable OpenAI-compatible AI JSON mode. Both return source-grounded, validated needs_review DishDraft objects; source identity is caller-controlled, missing ingredients stay unknown, and output is atomic/create-only JSON. Input/dish/response/time limits and sanitized one-attempt provider failures are enforced. Thirty-one schema/extraction tests pass, including mocked provider transport and reviewed evidence regressions. Package/CLI checks pass. No live provider, OCR, image mapping, durable jobs or backend review/publication integration is implemented or verified.",
+      "summary": "Python controller ingests PDF, menu-image, static website/JSON-LD and UTF-8 sources into validated needs_review drafts. PDFium uses native page text or explicit OCR.space Engine 3; Pillow bounds uploads. Private reports retain original snapshots, segment outcomes, source spans, versions, settings and pending capture candidates. Failed pages break continuation context; public URL addresses are validated and pinned. Local/layout and configurable AI modes share evidence checks. CLI loads private working-directory dotenv without interpolation or overriding shell variables; explicit flags win. The example configures OpenRouter. Eighty-seven processing/configuration tests pass. Live OCR has been observed, but a live AI response failed JSON parsing and extraction quality remains unverified. Backend integration, approval/publication, durable jobs, shared assets and 2.5D/3D remain separate.",
       "paths": [
+        ".gitattributes",
+        "processing/.env.example",
         "processing/.gitignore",
         "processing/.python-version",
         "processing/README.md",
         "processing/pyproject.toml",
-        "processing/uv.lock",
         "processing/src/peekaplate_processing/__init__.py",
-        "processing/src/peekaplate_processing/schemas.py",
+        "processing/src/peekaplate_processing/captures.py",
+        "processing/src/peekaplate_processing/errors.py",
         "processing/src/peekaplate_processing/extract_menus.py",
-        "processing/tests/test_schemas.py",
+        "processing/src/peekaplate_processing/images.py",
+        "processing/src/peekaplate_processing/menu_text.py",
+        "processing/src/peekaplate_processing/ocr_space.py",
+        "processing/src/peekaplate_processing/pdf.py",
+        "processing/src/peekaplate_processing/schemas.py",
+        "processing/src/peekaplate_processing/sources.py",
+        "processing/src/peekaplate_processing/storage.py",
+        "processing/src/peekaplate_processing/website.py",
+        "processing/tests/fixture_factory.py",
+        "processing/tests/fixtures/menu-photo-expected.txt",
+        "processing/tests/fixtures/menu.txt",
+        "processing/tests/fixtures/website-menu.html",
+        "processing/tests/test_captures.py",
+        "processing/tests/test_configuration.py",
         "processing/tests/test_extract_menu.py",
-        "processing/tests/fixtures/menu.txt"
+        "processing/tests/test_ingestion.py",
+        "processing/tests/test_ocr_space.py",
+        "processing/tests/test_schemas.py",
+        "processing/tests/test_sources.py",
+        "processing/uv.lock"
       ],
       "adrs": [
         "docs/adr/0001-scope-and-repository.md"
       ],
       "dependsOn": [],
-      "sourceFingerprint": "33285d331f566b42937b384457d78fe755042f9a5204d2a0c0cb3203958b39b2"
+      "sourceFingerprint": "8a162f7f8decec0dd226a5015938ed89292e24e0b8f39033a7c44cb7858b6f1a"
     },
     {
       "id": "measurement",
@@ -217,6 +236,13 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
   ],
   "handoffs": [
     {
+      "summary": "Implemented the source controller, bounded PDF/image/website adapters, Engine 3 OCR caching, source/evidence reports, pending capture candidates and private dotenv configuration with an OpenRouter example. Processing tests pass; live OCR succeeded, while a live AI attempt did not produce usable JSON. Backend authority remains unchanged.",
+      "modules": [
+        "processing"
+      ],
+      "next": "Diagnose the provider finish reason and structured output, test representative menus and agree the backend ingestion/review contract. Preserve explicit unknowns and unapproved capture state."
+    },
+    {
       "summary": "Added the Python processing package: validated DishDraft, local and configurable AI menu-text extraction, source-evidence checks, atomic create-only JSON saving, synthetic fixtures and 31 unit tests. CI quality now installs the frozen Python lock, runs those tests and builds the package. No live AI or OCR service was exercised; backend integration remains planned.",
       "modules": [
         "processing",
@@ -285,16 +311,6 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "delivery"
       ],
       "next": "Implement the delivery plan's first feature slice: verified staff/venue authority and an atomic dish-revision command. Introduce a Python job with its own tests only when its processing/analysis feature is implemented."
-    },
-    {
-      "summary": "Foundation hardening adds source-to-check traceability, evolving design handoff, command/outbox RLS coverage, shell accessibility checks, fail-closed bundle imports, actionable DB diagnostics and automatic sanitized verification observations. Role adapters share evidence and task handoff rules; no product or cloud capability is invented.",
-      "modules": [
-        "diner",
-        "database",
-        "delivery",
-        "agents"
-      ],
-      "next": "Use the exact setup PR CI evidence, then start PR 1 staff authority and atomic command transaction. Confirm owner merge controls and staging resources; real menu/device/restore performance remains future gate evidence."
     }
   ]
 }
