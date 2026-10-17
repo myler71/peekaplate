@@ -1,6 +1,6 @@
 # Architecture
 
-Baseline: [Claude's final V1 plan](https://claude.ai/artifact/LUJ4ggBXpF7korJWbg4u8f), reviewed October 13, 2026. **3D is the hook. The loop is the product.** Accepted decisions are indexed in [ADRs](adr/README.md); implementation progress is explicit in [delivery](delivery.md).
+Baseline: [Claude's final V1 plan](https://claude.ai/artifact/HxpC9aET7geEwkEpyG6wrt), reviewed October 13, 2026. **3D is the hook. The loop is the product.** Accepted decisions are indexed in [ADRs](adr/README.md); implementation progress is explicit in [delivery](delivery.md).
 
 ## Module boundaries
 
