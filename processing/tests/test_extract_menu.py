@@ -10,7 +10,9 @@ from unittest.mock import MagicMock, patch
 from urllib.error import HTTPError, URLError
 
 from peekaplate_processing import DishDraft
-from peekaplate_processing.extract_menus import ExtractionError, extract_menus, main, save_drafts
+from peekaplate_processing.extract_menus import main
+from peekaplate_processing.menu_text import ExtractionError, extract_dishes as extract_menus
+from peekaplate_processing.storage import save_drafts
 
 
 class MenuExtractionTests(unittest.TestCase):
@@ -36,7 +38,7 @@ class MenuExtractionTests(unittest.TestCase):
         }]}).encode()
 
     def call_ai(self, response, **options):
-        with patch("peekaplate_processing.extract_menus.build_opener") as factory:
+        with patch("peekaplate_processing.menu_text.build_opener") as factory:
             connection=MagicMock()
             connection.read.return_value=response
             factory.return_value.open.return_value.__enter__.return_value=connection
@@ -185,7 +187,7 @@ class MenuExtractionTests(unittest.TestCase):
 
         for error in [URLError("private provider details"), HTTPError("https://example.invalid", 401, "private provider details", {}, None), IncompleteRead(b"private provider details")]:
             with self.subTest(error_type=type(error).__name__):
-                with patch("peekaplate_processing.extract_menus.build_opener") as factory:
+                with patch("peekaplate_processing.menu_text.build_opener") as factory:
                     factory.return_value.open.side_effect=error
                     with self.assertRaises(ExtractionError) as caught:
                         extract_menus(self.menu_text, "menu-1", mode="ai", api_url="https://example.invalid/chat/completions", model="test")
@@ -275,7 +277,9 @@ class MenuExtractionTests(unittest.TestCase):
             )
 
             self.assertEqual(result.returncode, 0, result.stderr)
-            dishes=json.loads(output.read_text())
+            report=json.loads(output.read_text())
+            self.assertEqual(report["status"], "complete")
+            dishes=report["drafts"]
             self.assertEqual(len(dishes), 3)
             self.assertTrue(dishes[0]["source_id"].startswith("sha256:"))
             self.assertIn("Saved 3 drafts", result.stdout)
@@ -293,14 +297,14 @@ class MenuExtractionTests(unittest.TestCase):
             )
 
             self.assertNotEqual(result.returncode, 0)
-            self.assertFalse(output.exists())
+            self.assertEqual(json.loads(output.read_text())["status"], "failed")
             self.assertNotIn("Traceback", result.stderr)
 
     def test_cli_existing_output_is_rejected_before_calling_ai(self):
         with tempfile.TemporaryDirectory() as directory:
             output=Path(directory)/"drafts.json"
             output.write_text("previous output", encoding="utf-8")
-            with patch("peekaplate_processing.extract_menus._extract_ai") as request:
+            with patch("peekaplate_processing.menu_text._extract_ai") as request:
                 with self.assertRaises(SystemExit):
                     with patch("sys.stderr"):
                         main(["--input", str(self.fixture), "--output", str(output), "--mode", "ai"])
