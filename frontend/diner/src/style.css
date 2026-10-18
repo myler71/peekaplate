@@ -1,0 +1,35 @@
+:root {
+  font-family: system-ui, sans-serif;
+  color: #f7f1e7;
+  background: #171712;
+  color-scheme: dark;
+}
+body {
+  margin: 0;
+}
+main {
+  max-width: 48rem;
+  margin: 12vh auto;
+  padding: 2rem;
+}
+.eyebrow {
+  color: #ffad6a;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+}
+h1 {
+  font-size: clamp(2.4rem, 8vw, 4.5rem);
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+}
+p {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  max-width: 38rem;
+}
+.note {
+  border-top: 1px solid #57574b;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  color: #d1cfc4;
+}

@@ -1,1 +1,37 @@
-{"name":"peekaplate-onboarding","private":true,"type":"module","scripts":{"check":"node --check site/onboarding.js && node --check site/entry.js && node --check netlify/functions/onboarding-confirmation.mjs"},"dependencies":{"nodemailer":"^10.0.14"},"devDependencies":{"netlify-cli":"^27.10.2"}}
+{
+  "name": "peekaplate",
+  "private": true,
+  "type": "module",
+  "version": "0.0.0",
+  "packageManager": "pnpm@11.25.0",
+  "engines": {
+    "node": ">=24.16.0 <25",
+    "pnpm": ">=11.25.0 <12"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel --filter './frontend/*' --filter @peekaplate/backend dev",
+    "dev:backend": "pnpm --filter @peekaplate/backend local",
+    "local:demo": "pnpm --filter @peekaplate/backend local:demo",
+    "build": "pnpm -r --if-present build",
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "test": "vitest run && node --test scripts/*.test.mjs",
+    "test:e2e": "playwright test",
+    "test:db": "node scripts/test-db.mjs",
+    "context:check": "node scripts/context.mjs check",
+    "context:refresh": "node scripts/context.mjs refresh",
+    "context:show": "node scripts/context.mjs show",
+    "docs:check": "node scripts/check-docs.mjs",
+    "verify": "node scripts/verify.mjs",
+    "check": "node scripts/verify.mjs lint typecheck test context:check docs:check"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@biomejs/biome": "2.5.15",
+    "@playwright/test": "1.64.0",
+    "@types/node": "24.19.2",
+    "typescript": "6.0.3",
+    "vitest": "4.1.11"
+  }
+}
