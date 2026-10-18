@@ -18,16 +18,30 @@ Continuation audit: source main advanced to `b40e3cae68ab1d78adf838a164fdd07c043
 - Use a **merge commit**, never squash or rebase, for the import and initial release PR. Squashing/rebasing would disconnect source ancestry. Do not force-push existing main or staging branches.
 - Full Git bundles preserve all advertised refs, including pull-request refs. Original branch and PR heads are also retained under `source-staging/` in the canonical repository. GitHub PR discussions, approvals, checks, issues and deployment records do not travel with Git; retain and link the source repository.
 
-## Open staging PRs
+## Staging PR handoff — October 18
 
-These are unmerged work, not part of the imported runtime. Reconcile each current head and its base before opening a successor PR against canonical `develop`; do not treat source approval as approval of a changed migration diff.
+The four source PRs below remain open at this audit. Their exact heads are preserved in the canonical repository. Preservation is not merge approval: source reviews and discussions stay at the linked original PRs. Do not close or delete those branches until each disposition is completed and confirmed. The tracking PR changes documentation only; it does not import CRM or menu-ingestion behavior.
 
-| Source PR | Audit head | Disposition |
+| Source PR and preserved head | What exists in canonical | Remaining action and order |
 | --- | --- | --- |
-| [13](https://github.com/vivienk/peekaplate_staging/pull/13) | a9ee2727d8ab1076d0bf0d32e25c7f1356584a94 | Main ruleset JSON copied semantically unchanged; develop variant changes only name/ref. Source PR remains open; reconcile after review. |
-| [14](https://github.com/vivienk/peekaplate_staging/pull/14) | 49c540f594444ae8bb197bd3d831624a4cb8f0df | Preserve CRM architecture branch; review separately. |
-| [15](https://github.com/vivienk/peekaplate_staging/pull/15) | 6027d7f9b67c0dccdbf8886010cd28e48bc451bf | Preserve planning branch; review separately. |
-| [16](https://github.com/vivienk/peekaplate_staging/pull/16) | 28b91d0af895401fcf145d56e7f28fef258ca0be | Preserve menu ingestion branch; review separately. |
+| [#13 — Main protection policy](https://github.com/vivienk/peekaplate_staging/pull/13), `a9ee2727d8ab1076d0bf0d32e25c7f1356584a94`; [preserved branch](https://github.com/vivienk/peekaplate/tree/source-staging/pr-13) | Equivalent main policy and a develop variant were imported by canonical PR #1. The files are proposals; live protection remains unavailable under private GitHub Free. | Verify policy parity and retain the source review link. This is not a missing runtime change and does not block the owner-controlled provider handoff. Owner may mark it superseded after confirmation; this tracker does not close it. |
+| [#14 — Agentic CRM architecture](https://github.com/vivienk/peekaplate_staging/pull/14), `49c540f594444ae8bb197bd3d831624a4cb8f0df`; [preserved branch](https://github.com/vivienk/peekaplate/tree/source-staging/pr-14) | Git history is preserved; CRM specification/ADR 0009 are not integrated into develop. | Product/architecture review first. If selected, create a focused successor against current develop and resolve ADR numbering/status deliberately. CRM is outside the current first-version scope and must not delay Worker/Supabase setup. |
+| [#15 — Diner tracking and implementation plan](https://github.com/vivienk/peekaplate_staging/pull/15), `6027d7f9b67c0dccdbf8886010cd28e48bc451bf`; [preserved branch](https://github.com/vivienk/peekaplate/tree/source-staging/pr-15) | [Canonical setup PR #6](https://github.com/vivienk/peekaplate/pull/6) restores the plan/design/guide and reconciles canonical migration context, manual preparation and provider-next scope. Historical source error/learning entries remain accessible in staging; they are not copied wholesale. | Review and merge #6 before this handoff PR. Do not merge the old branch over newer migration docs. Then confirm the recovered plan and mark the old PR superseded if its author agrees. Later Adam drafts still require contract reconciliation before collecting diner events. |
+| [#16 — PDF/photo/website menu ingestion](https://github.com/vivienk/peekaplate_staging/pull/16), `28b91d0af895401fcf145d56e7f28fef258ca0be`; [preserved branch](https://github.com/vivienk/peekaplate/tree/source-staging/pr-16) | Git history is preserved; ingestion implementation is not integrated into develop. | Review source handling, tenant authority, bounded external requests, dependencies and tests before any successor PR. Automated intake is deferred from the manual first version; preserve the work without adding it as a provider-setup dependency. |
+
+**Merge and work order:** canonical setup #6 → this documentation handoff → Cloudflare Workers + Supabase integration PR. Diner fixtures/design, event-contract discussion and manual preparation of three dishes can proceed in parallel. CRM and automated ingestion need separate scope decisions; they are not prerequisites for the cloud checkpoint. Sai and Vivien remain the code reviewers; automated comments do not replace independent human approval.
+
+For a successor feature PR, branch from current canonical `develop`, carry only the selected source changes, link the original PR and exact reviewed source SHA, resolve conflicts against the canonical ADRs, run the applicable checks and obtain a new review on the resulting head. Do not assume an old source approval transfers to a changed diff. Recheck source heads before closing the old work.
+
+### Other canonical PRs requiring disposition
+
+| PR | Action |
+| --- | --- |
+| [#2 — Disabled staging dispatch bootstrap](https://github.com/vivienk/peekaplate/pull/2) | The workflow already exists on main after promotion #3. Review as redundant; do not merge it merely to enable deployment or set the approval variable. |
+| [#4 — Grouped dependency updates](https://github.com/vivienk/peekaplate/pull/4) | Independent maintenance PR. Prepare its documentation/context and verify code/CI under the ordinary human-review protocol. Not included in setup parity. |
+| [#5 — Align the Git staging branch](https://github.com/vivienk/peekaplate/pull/5) | Review branch alignment separately. It targets the Git branch named staging; the disabled deployment workflow still selects develop. Obtain the documented branch/process decision before hosted deployment. |
+
+Collaborator access, integrations, provider configuration and live parity remain separate owner handoffs. The source repository stays available; this inventory does not authorize permission grants, archival or deployment.
 
 ## Branch and approval policy
 

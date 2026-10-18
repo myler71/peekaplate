@@ -130,7 +130,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "delivery",
       "status": "foundation",
-      "summary": "Canonical main/develop contain the migrated local foundation, unchanged runtime, monthly dependency groups and existing CI/agent setup. Staging PR15 planning is restored with current manual-content scope. Next: owner-controlled Cloudflare Workers + Supabase integration, genuine identity/restricted-role/Hyperdrive checks. Private GitHub Free has no enforced branch or protected deployment-environment gates; workflow stays disabled. Publication, analytics and hosted pilot acceptance remain pending.",
+      "summary": "Canonical main/develop contain the migrated local foundation, unchanged runtime, monthly dependency groups and existing CI/agent setup. Staging PR15 planning is restored with current manual-content scope. Next: owner-controlled Cloudflare Workers + Supabase integration, genuine identity/restricted-role/Hyperdrive checks. Private GitHub Free has no enforced branch or protected deployment-environment gates; workflow stays disabled. Publication, analytics and hosted pilot acceptance remain pending. The migration inventory links source PRs 13-16 and their preserved heads: policy carried, plan restored in canonical PR6, CRM/intake deferred for separate review.",
       "paths": [
         "README.md",
         "SECURITY.md",
@@ -169,7 +169,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "4e26a32380bad7a0d56a09ac7ec4799f3078289cabf5c82bcd726cdd5472b409"
+      "sourceFingerprint": "593974749ab9a68e4ed514d6764847ff03b703da07efb94932a9cd816795010e"
     },
     {
       "id": "agents",
@@ -201,6 +201,13 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     }
   ],
   "handoffs": [
+    {
+      "summary": "Added a separate source-PR handoff inventory with exact preserved heads, canonical setup successor, review/merge order and outstanding canonical PR dispositions. No source PR is closed and no deferred CRM/intake implementation is merged.",
+      "modules": [
+        "delivery"
+      ],
+      "next": "Merge canonical setup PR6 before this tracker. Then start the owner-controlled Cloudflare Workers + Supabase checkpoint; keep source branches available until their authors confirm successor dispositions."
+    },
     {
       "summary": "Restored staging PR15 implementation plan, diner design reference and team guide into the canonical setup without replacing runtime, CI or agent profiles. Preserved canonical migration history and current architecture link; updated manual-content scope and provider handoff. Local setup and hosted readiness remain separate.",
       "modules": [
@@ -272,13 +279,6 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "agents"
       ],
       "next": "Complete native role discovery/tool-restriction checks in compatible authenticated clients. Continue the delivery plan with verified staff/venue authority and an atomic dish-revision command."
-    },
-    {
-      "summary": "README now explains current versus planned capabilities, TypeScript rationale and the accepted Python/uv/pytest extension path, runnable checks, event paths, visual tiers, agent workflow and owner setup. ADRs and runtime behavior are unchanged.",
-      "modules": [
-        "delivery"
-      ],
-      "next": "Implement the delivery plan's first feature slice: verified staff/venue authority and an atomic dish-revision command. Introduce a Python job with its own tests only when its processing/analysis feature is implemented."
     }
   ]
 }
