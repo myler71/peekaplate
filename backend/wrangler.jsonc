@@ -1,0 +1,18 @@
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "peekaplate-api-local",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-13",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  "preview_urls": false,
+  "minify": true,
+  "send_metrics": false,
+  "env": {
+    "staging": {
+      "name": "peekaplate-api-staging",
+      "workers_dev": true,
+      "preview_urls": false
+    }
+  }
+}
