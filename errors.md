@@ -128,3 +128,12 @@ These records describe local validation limits, not application failures.
 ```json
 {"id":"ERR-20261017-MIGRATION-003","status":"resolved","area":"local-dependency-install","cause":"The fallback pnpm launcher attempted dependency downloads in the network-restricted context and encountered ENOTFOUND.","prevention":"Use the approved network context and explicit pinned Node and pnpm tools for installation.","regression":"Frozen dependency installation passed with Node 24.16.0 and pnpm 11.25.0; lint, types and 56 unit/script tests passed."}
 ```
+
+<!-- automatic observation; not root cause -->
+```json
+{"kind":"automatic-check-observation","check":"test:db","timestamp":"2026-10-18T17:41:58.315Z","exitCode":1}
+```
+
+```json
+{"kind":"resolution","references":{"check":"test:db","timestamp":"2026-10-18T17:41:58.315Z"},"status":"resolved","cause":"Docker Desktop's Linux daemon was not running in the new canonical checkout verification session; the named engine pipe was unavailable before any database test executed.","prevention":"Confirm docker version reaches the server before running database verification; start the existing Desktop installation without resetting or deleting data.","regression":"After starting the installed Docker Desktop, docker version reported server 29.8.2 and pnpm verify test:db passed 43 SQL assertions, 13 Worker/Postgres tests and the local startup/demo/cleanup flow. No application code, Docker installation or existing volumes changed."}
+```

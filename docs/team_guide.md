@@ -323,7 +323,7 @@ The six current tables have simple jobs: `venues` identifies restaurants; `staff
 | [.github/PULL_REQUEST_TEMPLATE.md](../.github/PULL_REQUEST_TEMPLATE.md) | Prompts authors to explain outcome, contract changes, verification and deferred work |
 | [.github/dependabot.yml](../.github/dependabot.yml) | Monthly grouped routine updates and separate security-update grouping |
 | [.github/workflows/ci.yml](../.github/workflows/ci.yml) | The five purposeful CI jobs described above |
-| [.github/workflows/deploy-staging.yml](../.github/workflows/deploy-staging.yml) | Manual main-branch Worker deployment using a staging environment and protected credentials |
+| [.github/workflows/deploy-staging.yml](../.github/workflows/deploy-staging.yml) | Disabled develop-only Worker deployment; its protected environment requirements are unavailable under the current private GitHub Free setup |
 
 ### Agent files: who does which job
 
