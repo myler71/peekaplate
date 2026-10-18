@@ -2,7 +2,7 @@
 
 **3D is the hook. The loop is the product.**
 
-PeekaPlate is a restaurant menu and measurement platform designed to connect diner menu exposure with linked order outcomes and controlled menu experiments. The [V1 planning baseline](https://claude.ai/artifact/LUJ4ggBXpF7korJWbg4u8f) defines the product scope; [Architecture Decision Records](docs/adr/README.md) define the accepted technical decisions.
+PeekaPlate is a restaurant menu and measurement platform designed to connect diner menu exposure with linked order outcomes and controlled menu experiments. The [PeekaPlate Orchestration + V1 Team Plan](https://claude.ai/artifact/HxpC9aET7geEwkEpyG6wrt) defines the product scope; [Architecture Decision Records](docs/adr/README.md) define the accepted technical decisions.
 
 The [team guide](docs/team_guide.md) explains the system and each tracked file's purpose in plain language, distinguishes working features from plans, and gives the next steps.
 
