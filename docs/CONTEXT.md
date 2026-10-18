@@ -129,7 +129,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "delivery",
       "status": "foundation",
-      "summary": "Local staff-command development uses disposable Postgres, synthetic JWTs and workerd. Windows Docker was recovered with Desktop 4.95 and the real database/local demo checks passed. The team guide separates research/design from implemented code; hosted-provider checks and owner-controlled GitHub enforcement remain pending. Monthly grouped updates and human review/comment policy remain. Canonical private repo migration preserves both histories; develop integration and a disabled manual staging workflow are proposed. Private-plan ruleset enforcement and production sign-off remain blocked.",
+      "summary": "Local staff-command development uses disposable Postgres, synthetic JWTs and workerd. Windows Docker was recovered with Desktop 4.95 and the real database/local demo checks passed. The team guide separates research/design from implemented code; hosted-provider checks remain pending. Monthly grouped updates and human review/comment policy remain. Canonical private repo migration preserves both histories; develop integration and a disabled manual staging workflow are proposed. Owner chooses private repositories on GitHub Free, so branch enforcement is inactive and PR/CI are manual process gates. Production sign-off remains required.",
       "paths": [
         "README.md",
         "SECURITY.md",
@@ -166,7 +166,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "fcb984aac20b0a145c8e2a680a4705fe6e1cf2df844e928a96b59cae4dbceb09"
+      "sourceFingerprint": "041f42f8ffbeb6072b1f4e7506dc709e84d8ec9323123448c7fa4d9458d99129"
     },
     {
       "id": "agents",
@@ -199,11 +199,11 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
   ],
   "handoffs": [
     {
-      "summary": "Prepared history-preserving core import, marketing split, develop CI, PR 13-derived ruleset proposals and disabled staging deployment gate. Reconciled all eight later source commits through b40e3ca, retaining their history and five updated planning links. Application runtime and backend bindings are unchanged. Owner API confirms private-plan protection remains blocked.",
+      "summary": "Prepared history-preserving core import, marketing split, develop CI, PR 13-derived ruleset proposals and disabled staging deployment gate. Reconciled all eight later source commits through b40e3ca, retaining their history and five updated planning links. Application runtime and backend bindings are unchanged. Owner chooses private GitHub Free; branch rules remain inactive and manual PR/CI gates apply.",
       "modules": [
         "delivery"
       ],
-      "next": "Verify exact-head CI and independent human approval; resolve private-repository protection plan, reconcile open source PRs and establish provider parity before release or archival."
+      "next": "Obtain independent human review; reconcile open source PRs and establish provider parity before release or archival. Apply manual PR/CI gates because private branch enforcement is unavailable on the selected free plan."
     },
     {
       "summary": "Recovered Windows Docker after checksummed offline disk backups and an official Desktop 4.95 upgrade. Real testing exposed a pnpm.mjs launcher rejection; the DB harness now invokes installed Vitest directly, with a failing-then-passing launcher regression. All 43 SQL assertions, 13 Worker/Postgres cases and local startup/demo/cleanup passed on Windows. Contributor Claude/Codex setup is independently owned.",
