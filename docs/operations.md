@@ -1,6 +1,6 @@
 # Local and staging operations
 
-Repository transition: [migration and release checklist](repository-migration.md) records authoritative current repository, branch and deployment gates. The staging workflow now accepts only `develop` and requires `STAGING_DEPLOYMENT_APPROVED=true`; the variable is absent, so it is disabled. Production deployment remains unconfigured.
+Repository transition: [migration and release checklist](repository-migration.md) records current repository, branch and deployment gates. The application is in canonical `main` and `develop`. The staging workflow accepts only `develop` and requires `STAGING_DEPLOYMENT_APPROVED=true`; leave that variable unset. Production deployment remains unconfigured. The Git branch named `staging` is not proof of a hosted staging service.
 
 ## What is configured
 
@@ -52,13 +52,30 @@ The staff migration creates the `peekaplate_runtime` group role and narrow table
 
 ## Cloud-integration checkpoint
 
-Stop local work here until the owner supplies a Cloudflare account/session or scoped API token, and a Supabase staging project with asymmetric signing keys and separate migration/runtime credentials. Keep secrets in protected environment configuration, not chat, fixtures or Git. An API key is not a staff session JWT.
+**This is the next engineering step after repository setup.** The current Worker already runs locally; the task is to connect and verify it on Cloudflare with Supabase, not create a second backend. Local design, synthetic UI, event definitions and manual dish preparation can continue alongside it.
+
+The owner supplies an authorized Cloudflare session or narrowly scoped deployment token and an isolated Supabase staging project. Use asymmetric signing keys, a separate migration credential and a restricted runtime database login. Keep secrets in the operator's local secret store or provider settings, never chat, fixtures, Git or frontend `VITE_*` variables. A Supabase API key is not a staff session JWT.
+
+Under private GitHub Free, environment secrets/variables and deployment-branch restrictions are unavailable; private required environment reviewers are also unavailable on Free/Pro/Team. See [GitHub's environment capabilities](https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments). The existing Actions workflow stays disabled. Do not substitute repository secrets or an approval variable and call that enforced review. For this phase use an owner-controlled deployment from a clean, reviewed exact commit, with passing CI and an independent human sign-off recorded on the PR. This is a manual process and remains bypassable by a person holding provider access.
+
+| Order | Work | Evidence before proceeding |
+| --- | --- | --- |
+| 1 | Confirm `develop` as the integration/deployment source; record acceptance of the branch/process exception described in proposed ADR 0010 | Named operator and independent reviewer; exact commit and CI run; explicit human approval. Merely merging the Git branch named `staging` does not change the workflow target. |
+| 2 | Create isolated Supabase staging and apply the existing migrations with the migration credential | Fresh schema/upgrade evidence; runtime login has only the intended role and cannot bypass RLS or change memberships. Use synthetic restaurant/staff fixtures. |
+| 3 | Configure genuine Supabase authentication and Cloudflare Hyperdrive | Actual HTTPS `AUTH_ISSUER`, matching JWKS/signatures, real `HYPERDRIVE` binding and query caching disabled for authority/command queries. Never set `APP_ENV=local` or `LOCAL_DATABASE_URL` in staging. Commit only verified non-secret resource identifiers in a reviewed provider-integration PR. |
+| 4 | Owner deploys the reviewed Worker using local/provider-held access | Build and Worker dry-run pass, then actual deployed `/health` and the staff command endpoint are tested. `/health` alone proves only liveness. Record provider deployment ID and commit. |
+| 5 | Verify hosted authorization and database behavior | Genuine login, cross-restaurant denial, role/membership revocation, conflict/retry/concurrency/rollback and pooled-context isolation tests pass. Record measured latency and failure behavior. |
+| 6 | Continue publication, diner observations and dashboard features in dependency order | Approved publication precedes real observations; Queue/R2 resources arrive with a tested ingest consumer, not empty bindings. Real aggregates follow verified observations. |
+
+No provider values, resources or credentials are supplied by this setup PR. The credential handoff is the boundary for the next task. Before later automated deployments, separately review an available enforcement mechanism and its permissions; do not activate the existing workflow until its documented environment gates can actually be satisfied.
 
 Before declaring PR 1 cloud-ready: confirm migration execution under the actual non-superuser provider role; provision synthetic staff membership; verify genuine login tokens and session/membership revocation semantics; connect Hyperdrive to Supabase's direct Postgres endpoint using a restricted runtime login; disable Hyperdrive query caching for authority and command paths; repeat isolation/retry/concurrency/rollback tests through that deployed connection mode. Measure latency and prove transaction context resets across pooled requests. Local connection reuse is evidence for application logic, not proof of a hosted pool. Supabase remains the accepted provider under ADR 0005; a Neon switch needs an explicit decision and equivalent auth integration evidence.
 
-## Staging activation checklist
+## Later Actions-based staging activation
 
-The repository owner supplies real account values and enables controls before deployment:
+This checklist is conditional on an account/control model that supports the required environment restrictions and independent approval. It is **not available under the current private GitHub Free choice**. Use the owner-controlled checkpoint above now; keep this workflow disabled. If capabilities change, verify them rather than assuming a paid upgrade alone supplies private required reviewers.
+
+The repository owner supplies real account values and enables controls before automated deployment:
 
 1. Create a GitHub `staging` environment restricted to `develop`, with the appropriate human approval. Add `CLOUDFLARE_API_TOKEN` as an environment secret and `CLOUDFLARE_ACCOUNT_ID` as an environment variable. Scope the token only to the intended account and required deployment resources.
 2. Create two Cloudflare Pages projects using the repository root as install directory. Use `pnpm install --frozen-lockfile` followed by `pnpm --filter @peekaplate/diner build` or `pnpm --filter @peekaplate/console build`; outputs are `frontend/diner/dist` and `frontend/console/dist`. Disable automatic production promotion until review controls exist. The console shell contains no real staff data.
@@ -72,7 +89,7 @@ Production is a separate decision with separate credentials/resources. There is 
 
 The current owner chooses GitHub Free and private repositories. GitHub does not enable branch protection/rulesets for these private repos on this plan, so `main` and `develop` remain unenforced. The ruleset files below are retained for a future plan change, not presented as active policy. For now, keep write access limited; require reviewed PRs, passing `ci`, and an independent human approval comment before merges; preserve migration/release history with merge commits. These are team process controls, not GitHub enforcement, and admins can bypass them. Protect production credentials in provider settings and keep production promotion behind explicit human release sign-off. Configuration files and CODEOWNERS do not establish enforcement.
 
-CI runs with read-only tokens and pinned action SHAs. PR bodies are read as data, never interpolated into shell commands. The final gate requires path selection and quality to succeed and every applicable integration lane to pass. Fork PRs receive no deployment credentials. Require a human approval with a review comment on the current commit for every PR, including AI-written and dependency changes. Native approval rules enforce approval; the reviewer and merger enforce the comment's content. No additional comment-check workflow or automatic approval is configured.
+CI runs with read-only tokens and pinned action SHAs. PR bodies are read as data, never interpolated into shell commands. The final gate requires path selection and quality to succeed and every applicable integration lane to pass. Fork PRs receive no deployment credentials. Require a human approval with a review comment on the current commit for every PR, including AI-written and dependency changes. Reviewers and mergers currently enforce both approval and comment content manually. Native approval rules could enforce approval only after they become available and are activated. No additional comment-check workflow or automatic approval is configured.
 
 Each existing CI job has one purpose: `changes` selects relevant integration lanes; `quality` checks formatting, types, unit tests, builds and documentation; `database` tests migrations and database constraints; `browser` tests the diner/console smoke flows; `ci` is the single required aggregate check. Documentation checks run after code checks and builds, and still run after an earlier failure, so a missing PR section cannot hide a broken build. Database/browser jobs remain path-selected.
 

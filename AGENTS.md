@@ -30,7 +30,7 @@ When sources conflict, name the conflict. An ADR edited in the same PR does not 
 - Domain events and intent observations are separate. Expected versions, command identity, same-transaction projections/outbox and side-effect-free replay are required for event-sourced workflows.
 - An identity sequence is not a commit-order cursor. Use durable pending work, not a guessed safety delay.
 - Preserve actual exposure references. Unlinked order outcomes are unknown. Captured food is evidence; generated edible surfaces are prohibited.
-- No real POS/customer data, secrets, private source code or private conversations in fixtures, context or this public repository.
+- No real POS/customer data, secrets, private source code or private conversations in fixtures, context or this repository.
 
 ## Agents and review
 

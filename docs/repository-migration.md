@@ -1,6 +1,12 @@
 # Repository migration and release gates
 
-Status: proposed in the migration PR; no merge or production cutover authorized. Audit: 2026-10-17 America/Los_Angeles.
+Current handoff: October 18, 2026 (America/Phoenix). [Core import PR #1](https://github.com/vivienk/peekaplate/pull/1) and [promotion PR #3](https://github.com/vivienk/peekaplate/pull/3) are merged. At this audit, `main` and `develop` both point to `d59589febf434f85aeb713d660c63f050e271927`. This records Git state, not proof of human approval, cloud deployment or production parity. The dated migration audit below remains historical evidence; its premerge instructions are not a claim that the import is still pending.
+
+The next engineering task is [Cloudflare Workers + Supabase integration](operations.md#cloud-integration-checkpoint). The private GitHub Free plan cannot supply the documented protected Actions environment; keep dispatch disabled and use the reviewed owner-controlled provider handoff. ADR 0010 remains proposed: record human acceptance of its deployment-branch/process change before hosted deployment. No provider setup is performed by the documentation restoration.
+
+The original workflow-bootstrap [PR #2](https://github.com/vivienk/peekaplate/pull/2) is no longer a prerequisite: default `main` already contains that workflow after PR #3. Reconcile it as redundant rather than merging it blindly. [PR #5](https://github.com/vivienk/peekaplate/pull/5) aligns the separate Git `staging` branch; it does not retarget the existing `develop` deployment guard or establish a running environment.
+
+## Historical migration audit (October 17)
 
 Continuation audit: source main advanced to `b40e3cae68ab1d78adf838a164fdd07c043027b2`. The migration branch merges all eight intervening commits without rewriting history; their net change updates five documentation links to the PeekaPlate Orchestration + V1 Team Plan. Runtime code remains identical to the original import. Owner-authenticated checks confirm private-repository rulesets and classic branch protection require a paid plan. The owner chooses GitHub Free and private repositories; use manual PR/CI review controls and leave branch enforcement explicitly inactive. No human reviews were present on the core import or source policy PR at that audit.
 

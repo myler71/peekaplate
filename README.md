@@ -1,12 +1,14 @@
 # PeekaPlate
 
-Canonical application repository: `vivienk/peekaplate` (private). Marketing lives in `vivienk/peekaplate-marketing`. This migration branch is pending human review; read the [migration and release checklist](docs/repository-migration.md) before merging or deploying.
+Canonical application repository: `vivienk/peekaplate` (private). Marketing lives in `vivienk/peekaplate-marketing`. The application import and promotion are merged into `develop` and `main`. Repository migration is not a hosted deployment; read the [migration and release checklist](docs/repository-migration.md) for remaining handoffs.
 
 **3D is the hook. The loop is the product.**
 
 PeekaPlate is a restaurant menu and measurement platform designed to connect diner menu exposure with linked order outcomes and controlled menu experiments. The [PeekaPlate Orchestration + V1 Team Plan](https://claude.ai/artifact/HxpC9aET7geEwkEpyG6wrt) defines the product scope; [Architecture Decision Records](docs/adr/README.md) define the accepted technical decisions.
 
 The [team guide](docs/team_guide.md) explains the system and each tracked file's purpose in plain language, distinguishes working features from plans, and gives the next steps.
+
+The [implementation plan](docs/implementation_plan.md) restores staging PR #15: diner controls, ingredient and side-by-side comparison events, dashboard formulas and delivery dependencies. Its current handoff makes **Cloudflare Workers + Supabase staging integration the next engineering step**; the product features remain planned.
 
 ## Implementation status
 
@@ -105,13 +107,13 @@ CI uses five jobs with distinct responsibilities: `changes` selects integration 
 
 Routine npm and GitHub Actions dependency updates are grouped monthly, with one open version-update PR per ecosystem. Major upgrades are manual; enabled security updates can arrive sooner. AI-written and dependency PRs follow the same documentation, verification and human approval-with-comment requirements.
 
-The manual staging workflow deploys the Worker, but its staff routes fail closed until real authentication and database bindings are supplied. No hosted integration has been activated. Repository administrators must configure branch protections, required `ci`, review rules, staging credentials and cloud resources. Configuration and release procedures are documented in [operations](docs/operations.md).
+The manual staging workflow deploys the Worker, but its staff routes fail closed until real authentication and database bindings are supplied. No hosted integration has been activated. Under the current private GitHub Free setup, review/CI are manual process gates and the protected GitHub deployment environment is unavailable. Keep the workflow disabled. The next provider integration uses an owner-controlled deployment of a reviewed commit, with credentials held locally or by the provider; this is not enforced branch protection. Configuration and release procedures are documented in [operations](docs/operations.md).
 
 Each contributor installs and authenticates their own Claude or Codex client and verifies its role/tool support. Native-client setup is separate from repository and cloud readiness.
 
 ## Project documentation
 
-- [Delivery plan](docs/delivery.md): ordered feature slices, beginning with verified staff/venue authority and an atomic dish-revision command.
+- [Delivery plan](docs/delivery.md): next Cloudflare Workers/Supabase checkpoint, followed by ordered publication, tracking and reporting slices.
 - [Verification map](docs/verification.md): existing evidence and feature acceptance requirements.
 - [Contributing](CONTRIBUTING.md): complete PRs, dependency maintenance and context handoffs.
 - [Research record](docs/research/README.md): the 65-repository pattern survey and adopted design choices.
