@@ -1,6 +1,6 @@
 # Verification tied to the V1 plan
 
-Reviewed baseline: [PeekaPlate V1 Team Plan](https://claude.ai/artifact/HxpC9aET7geEwkEpyG6wrt), inspected October 14, 2026. The external artifact can change. The requirements below, accepted ADRs and delivery gates are the repository-local review baseline; changes require explicit review. This is a trace of requirements, not a copy of the full artifact or a claim of completed product behavior.
+Reviewed baseline: [PeekaPlate Orchestration + V1 Team Plan](https://claude.ai/artifact/HxpC9aET7geEwkEpyG6wrt), inspected October 14, 2026. The external artifact can change. The requirements below, accepted ADRs and delivery gates are the repository-local review baseline; changes require explicit review. This is a trace of requirements, not a copy of the full artifact or a claim of completed product behavior.
 
 | Requirement and source | Evidence now | Evidence required when implemented |
 | --- | --- | --- |
