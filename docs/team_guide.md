@@ -442,7 +442,7 @@ The board review covered descriptions, assignments and scope subtasks. The Disco
 
 ## What needs to happen next: order and parallel work
 
-This sequence follows the [V1 architecture artifact](https://claude.ai/artifact/LUJ4ggBXpF7korJWbg4u8f), rechecked October 14, and its engineering breakdown in [delivery.md](delivery.md). The artifact allows overlapping work; the delivery steps describe when complete flows can be integrated and accepted. The step numbers below are delivery-plan numbers, not GitHub PR numbers. GitHub PR #9 delivered the local part of step 1.
+This sequence follows the [PeekaPlate Orchestration + V1 Team Plan](https://claude.ai/artifact/HxpC9aET7geEwkEpyG6wrt), rechecked October 14, and its engineering breakdown in [delivery.md](delivery.md). The artifact allows overlapping work; the delivery steps describe when complete flows can be integrated and accepted. The step numbers below are delivery-plan numbers, not GitHub PR numbers. GitHub PR #9 delivered the local part of step 1.
 
 ### Start these in parallel now
 

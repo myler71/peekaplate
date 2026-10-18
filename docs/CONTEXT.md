@@ -43,7 +43,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "contracts"
       ],
-      "sourceFingerprint": "09b3c416fc96e33d0e645d05ae270d004ad699983df725bef4f62d6165b3471f"
+      "sourceFingerprint": "c53513cb5494ecdb2e7da3a001ae30bf6a2decdabaf2e11d7b80a992a427de07"
     },
     {
       "id": "console",
@@ -166,7 +166,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "aea9b1cfc4e025f222417f700b95a9f8d78924086bf8fe7e8f0dfefd3a5a5425"
+      "sourceFingerprint": "fcb984aac20b0a145c8e2a680a4705fe6e1cf2df844e928a96b59cae4dbceb09"
     },
     {
       "id": "agents",
@@ -199,7 +199,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
   ],
   "handoffs": [
     {
-      "summary": "Prepared history-preserving core import, marketing split, develop CI, PR 13-derived ruleset proposals and disabled staging deployment gate. Application runtime and backend bindings are unchanged.",
+      "summary": "Prepared history-preserving core import, marketing split, develop CI, PR 13-derived ruleset proposals and disabled staging deployment gate. Reconciled all eight later source commits through b40e3ca, retaining their history and five updated planning links. Application runtime and backend bindings are unchanged. Owner API confirms private-plan protection remains blocked.",
       "modules": [
         "delivery"
       ],
