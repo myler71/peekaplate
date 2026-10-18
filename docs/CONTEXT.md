@@ -27,7 +27,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "diner",
       "status": "foundation",
-      "summary": "Static TypeScript/Vite shell usable without JavaScript. The supplied prototype is confirmed as latest design progress; shared Figma/tokens and flows are separately tracked, not implemented here. Build checks initial JS gzip budget and renderer boundaries. Viewer, analytics and device performance remain planned.",
+      "summary": "Static TypeScript/Vite shell usable without JavaScript. Rania's new Figma Design file is current diner visual direction; its wireframe export and selected frames were inspected, and FigJam supplies workflow context. Plan requires direct QR/menu entry, owner link, functional ingredient panel and truthful viewer fallback; none implemented. Initial JS/renderer checks exist; actual viewer, analytics and device evidence remain planned.",
       "paths": [
         "frontend/diner/index.html",
         "frontend/diner/src/main.ts",
@@ -43,12 +43,12 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "contracts"
       ],
-      "sourceFingerprint": "c53513cb5494ecdb2e7da3a001ae30bf6a2decdabaf2e11d7b80a992a427de07"
+      "sourceFingerprint": "6d957a8f0f14a234eb73662eb02c52f1f3501f71b8548bbb11e682140f91d00c"
     },
     {
       "id": "console",
       "status": "foundation",
-      "summary": "React/Vite staff shell. Authentication, review, approval, publication, experiments and readouts remain planned. No real staff data or mutation control is exposed.",
+      "summary": "React/Vite staff shell. The Claude owner dashboard artifact is distinct from the Figma diner menu. Authentication, review, approval, publication, experiments and secured readouts remain planned; the public owner link will not grant private access. No real staff data or mutation control is exposed.",
       "paths": [
         "frontend/console/src/main.tsx",
         "frontend/console/src/style.css",
@@ -114,9 +114,10 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "measurement",
       "status": "planned",
-      "summary": "Venue-bound redeem codes will link sessions to POS tickets. Unknown linkage stays unknown. Planned owner readout reports coverage and suppresses cells under ten sessions; frozen blocked-switchback assignment precedes causal claims. No POS or experiment implementation exists.",
+      "summary": "Planned venue-bound CSV/code linkage and observation pipeline. The source-linked implementation plan specifies screens, ingredient opportunities/activations, proposed v2 contracts/period anchors, database facts, every owner metric family, worked arithmetic and ordered parallel PRs. All eight FigJam pages are accounted for with precise review limits. Draft saves exist; ingestion, reports, imports and experiments do not.",
       "paths": [
-        "docs/delivery.md"
+        "docs/delivery.md",
+        "docs/implementation_plan.md"
       ],
       "adrs": [
         "docs/adr/0006-orders-and-measurement.md"
@@ -124,12 +125,12 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "backend"
       ],
-      "sourceFingerprint": "d76eaa82864d5199b795343e502786f38e2dc6ebe90ad70d3db9312c3205c2c3"
+      "sourceFingerprint": "b9f5f3e65bf72d986a560e49e910b745fafe069024d67cc60327ec8df89c8d4c"
     },
     {
       "id": "delivery",
       "status": "foundation",
-      "summary": "Local staff-command development uses disposable Postgres, synthetic JWTs and workerd. Windows Docker was recovered with Desktop 4.95 and the real database/local demo checks passed. The team guide separates research/design from implemented code; hosted-provider checks remain pending. Monthly grouped updates and human review/comment policy remain. Canonical private repo migration preserves both histories; develop integration and a disabled manual staging workflow are proposed. Owner chooses private repositories on GitHub Free, so branch enforcement is inactive and PR/CI are manual process gates. Production sign-off remains required.",
+      "summary": "Canonical main/develop contain the migrated local foundation, unchanged runtime, monthly dependency groups and existing CI/agent setup. Staging PR15 planning is restored with current manual-content scope. Next: owner-controlled Cloudflare Workers + Supabase integration, genuine identity/restricted-role/Hyperdrive checks. Private GitHub Free has no enforced branch or protected deployment-environment gates; workflow stays disabled. Publication, analytics and hosted pilot acceptance remain pending.",
       "paths": [
         "README.md",
         "SECURITY.md",
@@ -156,7 +157,9 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         ".github/develop-ruleset.json",
         "docs/repository-migration.md",
         "docs/adr/0010-canonical-repository-and-release-branches.md",
-        "docs/adr/README.md"
+        "docs/adr/README.md",
+        "docs/implementation_plan.md",
+        "docs/delivery.md"
       ],
       "adrs": [
         "docs/adr/0007-delivery-and-recovery.md"
@@ -166,7 +169,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "041f42f8ffbeb6072b1f4e7506dc709e84d8ec9323123448c7fa4d9458d99129"
+      "sourceFingerprint": "46cb97aaca04e42d4d16dc314237cc930642efe2da03db1018a7febfa5fe17e1"
     },
     {
       "id": "agents",
@@ -194,10 +197,20 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "docs/adr/0008-agent-context-and-review.md"
       ],
       "dependsOn": [],
-      "sourceFingerprint": "615c2bdb3e4c90550c42f3723804c7f69b2bcd6669f3ad97ad22f5174263e235"
+      "sourceFingerprint": "6de26962de2dbd484415e39cd6bfbd2b73a4eaef589faa60ed34e2c70e4d3ead"
     }
   ],
   "handoffs": [
+    {
+      "summary": "Restored staging PR15 implementation plan, diner design reference and team guide into the canonical setup without replacing runtime, CI or agent profiles. Preserved canonical migration history and current architecture link; updated manual-content scope and provider handoff. Local setup and hosted readiness remain separate.",
+      "modules": [
+        "delivery",
+        "diner",
+        "console",
+        "measurement"
+      ],
+      "next": "Review and merge the setup PR, then connect Cloudflare Workers + Supabase through the operations checkpoint. Reconcile outstanding staging PRs separately; no provider credential, deployment or permission change is part of this handoff."
+    },
     {
       "summary": "Prepared history-preserving core import, marketing split, develop CI, PR 13-derived ruleset proposals and disabled staging deployment gate. Reconciled all eight later source commits through b40e3ca, retaining their history and five updated planning links. Application runtime and backend bindings are unchanged. Owner chooses private GitHub Free; branch rules remain inactive and manual PR/CI gates apply.",
       "modules": [
@@ -266,16 +279,6 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "delivery"
       ],
       "next": "Implement the delivery plan's first feature slice: verified staff/venue authority and an atomic dish-revision command. Introduce a Python job with its own tests only when its processing/analysis feature is implemented."
-    },
-    {
-      "summary": "Foundation hardening adds source-to-check traceability, evolving design handoff, command/outbox RLS coverage, shell accessibility checks, fail-closed bundle imports, actionable DB diagnostics and automatic sanitized verification observations. Role adapters share evidence and task handoff rules; no product or cloud capability is invented.",
-      "modules": [
-        "diner",
-        "database",
-        "delivery",
-        "agents"
-      ],
-      "next": "Use the exact setup PR CI evidence, then start PR 1 staff authority and atomic command transaction. Confirm owner merge controls and staging resources; real menu/device/restore performance remains future gate evidence."
     }
   ]
 }

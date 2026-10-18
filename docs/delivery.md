@@ -2,6 +2,12 @@
 
 The foundation is PR 0. It establishes a place to build and verify PeekaPlate; it does not claim the pilot is complete. The product line stays: **3D is the hook. The loop is the product.**
 
+## Next step: Cloudflare Workers and Supabase
+
+The repository foundation and local staff-command slice already exist. The immediate engineering step is the [cloud-integration checkpoint](operations.md#cloud-integration-checkpoint): connect an isolated Supabase staging project to the existing Worker through Hyperdrive, verify real staff identities and restricted database access, then demonstrate the existing draft-save flow safely. No credentials or hosted resources are configured by this documentation change.
+
+Diner fixtures/design, event definitions and manual preparation of three sample dishes can proceed in parallel. Publication follows the existing command boundary; real observations require approved publication; dashboard aggregates require validated observations. The restored [implementation plan](implementation_plan.md) supplies the controls, exact calculation proposals and dependencies. Provider verification does not imply these product flows are complete.
+
 ## The first sprint
 
 One venue, one useful owner decision, a complete T0 menu and carefully selected T1/T2 dishes. T0 means normal photos and text. T1 adds shallow movement to reviewed photo cutouts. T2 separates real captured plating stages; it does not invent ingredients or unseen food. See [visual tiers](adr/0004-visual-tiers.md).
