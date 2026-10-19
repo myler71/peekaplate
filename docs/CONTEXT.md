@@ -66,7 +66,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "backend",
       "status": "foundation",
-      "summary": "Hono Worker verifies configured staff JWTs and restaurant membership, then executes atomic dish revision commands under a restricted database role. Pure dish replay is effect-free. Staging config points to the verified Cloudflare account, Supabase issuer and existing uncached Hyperdrive. Local JWT/real Postgres/workerd tests cover the slice; genuine staff login and hosted pooling/isolation remain a cloud checkpoint. No ingestion or publication endpoint.",
+      "summary": "Hono Worker verifies configured staff JWTs and current restaurant membership, then executes atomic dish revisions under a restricted database role. Staging API uses the Supabase issuer and uncached Hyperdrive. Bounded hosted tests passed genuine login, authorized writes, retries/concurrency, cross-restaurant denial and membership revocation; remote probes verified transaction-context reset and rollback. JWT logout revocation is bounded by expiry, not immediate. No ingestion or publication endpoint.",
       "paths": [
         "backend/src/index.ts",
         "backend/src/index.test.ts",
@@ -124,12 +124,12 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "backend"
       ],
-      "sourceFingerprint": "d76eaa82864d5199b795343e502786f38e2dc6ebe90ad70d3db9312c3205c2c3"
+      "sourceFingerprint": "b2504bcecd4c5e6a3656b827ee05529bdfb831b6b4b810abaa3723b783c011f0"
     },
     {
       "id": "delivery",
       "status": "foundation",
-      "summary": "Main supplies both deployment environments under ADR 0012: verify an exact commit in staging, then promote that same commit to production after human approval with separate resources. Develop remains an integration branch; the staging Git branch is historical. Existing Supabase migrations, restricted runtime-role metadata and uncached Hyperdrive were inspected; hosted auth, Worker integration and production provisioning remain pending. D1 is not used by the PostgreSQL backend. Actions activation remains gated; private GitHub Free controls remain manual.",
+      "summary": "Main supplies both environments under ADR 0012. API and both Pages shells are deployed to staging from bb56cef. CI, live smoke checks and bounded hosted staff-command acceptance passed, including genuine Supabase login, retries/concurrency, cross-restaurant denial, membership revocation and remote rollback/context-reset probes. Logout blocks refresh but issued JWTs remain valid until expiry. Login UI and pilot/load/recovery checks remain pending; production is unconfigured. Existing R2 staging assets are private and unbound. Actions remains gated; private GitHub Free controls remain manual.",
       "paths": [
         "README.md",
         "SECURITY.md",
@@ -169,7 +169,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "fd579e3be4cec91f6504045dba76817916d986694f1a3d519d5cdb8e827fa737"
+      "sourceFingerprint": "15e7a430689ddc3f634960808b3fd0feffb2a492646d52b0d75fc3c767288263"
     },
     {
       "id": "agents",
@@ -201,6 +201,14 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     }
   ],
   "handoffs": [
+    {
+      "summary": "PR #10 merged at bb56cef and API/Pages shells were deployed from that main revision. Hosted tests passed genuine Supabase login, atomic writes, retries/concurrency, cross-restaurant denial and membership revocation. Remote Hyperdrive probes passed context reset and rollback after an injected outbox failure. Logout rejected refresh but accepted the existing JWT until membership removal. Test membership was removed and ephemeral harnesses stopped. R2 staging is private; no paid upgrade or production deployment.",
+      "modules": [
+        "delivery",
+        "backend"
+      ],
+      "next": "Implement staff login UI and review/approval/immutable publication before diner exposure and ingestion. Design, manual assets and event-contract review can proceed in parallel. Before a real pilot, resolve session-lifetime policy, representative latency/load, recovery and cost/incident ownership. Production needs separate resources and release approval."
+    },
     {
       "summary": "Updated deployment selection to main for both environments per the maintainer's explicit instruction. Configured verified non-secret staging account, issuer and Hyperdrive bindings. Provider audit found existing Supabase migrations, forced RLS, restricted staging login, an ES256 public key and uncached Hyperdrive; no duplicate database branch was created. Hosted request behavior remains unverified.",
       "modules": [
@@ -269,14 +277,6 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "delivery"
       ],
       "next": "PR 9 has passing Linux CI for 43 SQL assertions, 13 Worker/Postgres integration tests, the local CLI flow and 4 browser checks, plus 35 unit and 20 script tests. Two independent review lanes closed their findings. Obtain human review on the current head. Windows Docker still needs restart/readiness verification; real Supabase identity, provider roles and Hyperdrive pooling are the next credential boundary."
-    },
-    {
-      "summary": "Evaluated all five role prompts before rewriting README as professional repository documentation. Builder initially exceeded assigned ownership in its plan and bypassed the recorder in a proposed command; paired profiles were corrected and the same case passed in a fresh session. Published cases, outcomes and native-client limits; runtime and ADRs are unchanged.",
-      "modules": [
-        "delivery",
-        "agents"
-      ],
-      "next": "Complete native role discovery/tool-restriction checks in compatible authenticated clients. Continue the delivery plan with verified staff/venue authority and an atomic dish-revision command."
     }
   ]
 }
