@@ -152,3 +152,12 @@ These records describe local validation limits, not application failures.
 ```json
 {"id":"ERR-20261018-DOCS-001","status":"resolved","area":"documentation-edit-tooling","cause":"A documentation read used an incorrect workflow filename and assumed the implementation plan existed on main; it is currently restored on develop. An initial patch repeated its target path and was rejected. A nested PowerShell smoke command expanded variables in the outer shell and failed before making requests.","prevention":"Resolve branch-specific paths from Git before reading; group patch hunks under one file target; use a script file for multi-statement probes instead of nested shell interpolation.","regression":"Read .github/workflows/deploy-staging.yml and verified the plan in preserved planning and develop history. Grouped patches succeeded. A Node script returned HTTP 200 and expected content for both staging pages and API health. pnpm check and git diff --check passed."}
 ```
+
+<!-- automatic observation; not root cause -->
+```json
+{"kind":"automatic-check-observation","check":"context:check","timestamp":"2026-10-19T22:41:42.253Z","exitCode":1}
+```
+
+```json
+{"id":"ERR-20261019-DOCS-001","status":"resolved","area":"context-documentation","references":{"check":"context:check","timestamp":"2026-10-19T22:41:42.253Z"},"cause":"Appending guidance exceeded the delivery node's 1000-character summary limit; context refresh and the first full check correctly rejected it.","prevention":"Keep node summaries below the validator's limit, put details in source docs and stop dependent checks if context refresh fails.","regression":"Shortened the summary without changing implementation status. pnpm context:refresh and pnpm check passed, including context validation, local links, 35 application tests and 21 repository-script tests. No runtime fix was needed.","sources":["docs/CONTEXT.md","scripts/context.mjs"]}
+```

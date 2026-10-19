@@ -129,7 +129,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "delivery",
       "status": "foundation",
-      "summary": "Main supplies both environments under ADR 0012. API and both Pages shells are deployed to staging from bb56cef. CI, live smoke checks and bounded hosted staff-command acceptance passed, including genuine Supabase login, retries/concurrency, cross-restaurant denial, membership revocation and remote rollback/context-reset probes. Logout blocks refresh but issued JWTs remain valid until expiry. Login UI and pilot/load/recovery checks remain pending; production is unconfigured. Existing R2 staging assets are private and unbound. Actions remains gated; private GitHub Free controls remain manual. Team guide explains retained staging names, service responsibilities, manual release flow, costs and next-ticket dependencies; the detailed planning document remains on develop.",
+      "summary": "Main supplies both environments under ADR 0012. Staging API and Pages shells run bb56cef; bounded hosted checks passed login, writes, retries, concurrency, tenant denial, membership revocation, rollback and context reset. Logout blocks refresh; issued JWTs remain valid until expiry. Login UI, pilot/load/recovery checks and production remain pending. R2 assets are private and unbound; Actions is gated and GitHub Free controls remain manual. README/team guide explain setup, next tickets and the accepted Python extension; no Python job exists. PostHog access/integration is pending, internal analysis is the proposed first use and ADR 0003 still governs durable evidence. Detailed planning remains on develop.",
       "paths": [
         "README.md",
         "SECURITY.md",
@@ -169,7 +169,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "3e869e75b0ae7364f67772a63a85127d6f927cfc20cb334bbbbe92c5213383d8"
+      "sourceFingerprint": "4bd9b3d215161372119ec263fe2b0e2f7aa1b99e2e9a7507996288591644e022"
     },
     {
       "id": "agents",
@@ -201,6 +201,13 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     }
   ],
   "handoffs": [
+    {
+      "summary": "Clarified Python and PostHog responsibilities in README and team guide. Python extends the existing API through a tested job contract; runtime and costs depend on the first real task. PostHog is planned with access pending, not installed or a replacement for ADR 0003. Documented privacy, usage, tenant access and duplicate-counting boundaries. No code, dependency, cloud or deployment changes.",
+      "modules": [
+        "delivery"
+      ],
+      "next": "Review the documentation PR. Obtain PostHog access and agree the collection route and taxonomy before implementation; choose a concrete Python task and test package/runtime compatibility. Any change to the durable observation path requires a new reviewed ADR."
+    },
     {
       "summary": "Clarified the existing staging setup for technical and nontechnical readers. Retained diner/console/API URLs, explained owner naming and each provider, corrected completed-check wording and linked newer planning/design references on develop. Added unassigned ticket boundaries and prerequisites; no runtime, cloud resource, credential or deployment change.",
       "modules": [
@@ -269,13 +276,6 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "diner"
       ],
       "next": "Confirm the provider decision and sprint scope with linked deliverables, reconcile the completed approval ticket with missing approval/publication code, recover local Docker and stop at the protected cloud-credential checkpoint before hosted integration."
-    },
-    {
-      "summary": "Added a plain-language team guide covering the product, current local command flow, every tracked file, verification, research and agent limits, and ordered next steps. Corrected the stale health-only security overview. Runtime behavior is unchanged.",
-      "modules": [
-        "delivery"
-      ],
-      "next": "Complete documentation review and exact-head CI, merge PR 9 under the owner instruction, then resolve local Docker readiness and the real Supabase/Hyperdrive credential-bound checks."
     }
   ]
 }
