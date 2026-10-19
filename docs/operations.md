@@ -1,10 +1,10 @@
 # Local and staging operations
 
-Repository transition: [migration and release checklist](repository-migration.md) records authoritative current repository, branch and deployment gates. The staging workflow now accepts only `develop` and requires `STAGING_DEPLOYMENT_APPROVED=true`; the variable is absent, so it is disabled. Production deployment remains unconfigured.
+Repository transition: [migration and release checklist](repository-migration.md) records authoritative current repository, branch and deployment gates. The staging workflow now accepts only `staging` and requires `STAGING_DEPLOYMENT_APPROVED=true`; the variable is absent, so it is disabled. Production deployment remains unconfigured.
 
 ## What is configured
 
-Node 24.16.0, pnpm 11.25.0, frozen lockfile, two Vite apps and a Hono Worker with health and authenticated dish commands. `backend/wrangler.jsonc` names the local and staging Worker but supplies no hosted auth or database bindings. No Cloudflare account, Pages project, Hyperdrive, Queue, R2 bucket or Supabase project is provisioned. Application fixtures use synthetic data; package and image downloads contact their registries.
+Node 24.16.0, pnpm 11.25.0, frozen lockfile, two Vite apps and a Hono Worker with health and authenticated dish commands. `backend/wrangler.jsonc` names the local and staging Worker but supplies no hosted auth or database bindings. The October 18, 2026 audit confirmed Cloudflare account access and two existing D1 databases, but no Pages projects, Hyperdrive configurations or staging Worker. D1 is not compatible with the existing PostgreSQL command implementation. Supabase staging and hosted auth remain unverified; GitHub deployment credentials are absent. Application fixtures use synthetic data; package and image downloads contact their registries.
 
 ## Local development and tests
 
@@ -60,9 +60,9 @@ Before declaring PR 1 cloud-ready: confirm migration execution under the actual 
 
 The repository owner supplies real account values and enables controls before deployment:
 
-1. Create a GitHub `staging` environment restricted to `develop`, with the appropriate human approval. Add `CLOUDFLARE_API_TOKEN` as an environment secret and `CLOUDFLARE_ACCOUNT_ID` as an environment variable. Scope the token only to the intended account and required deployment resources.
+1. Create a GitHub `staging` environment restricted to `staging`, with the appropriate human approval. Add `CLOUDFLARE_API_TOKEN` as an environment secret and `CLOUDFLARE_ACCOUNT_ID` as an environment variable. Scope the token only to the intended account and required deployment resources.
 2. Create two Cloudflare Pages projects using the repository root as install directory. Use `pnpm install --frozen-lockfile` followed by `pnpm --filter @peekaplate/diner build` or `pnpm --filter @peekaplate/console build`; outputs are `frontend/diner/dist` and `frontend/console/dist`. Disable automatic production promotion until review controls exist. The console shell contains no real staff data.
-3. Deploy the Worker from the reviewed `develop` checkout using the manual staging workflow. Confirm `/health`, a rejected unknown route and fail-closed staff routes until real bindings are configured. Ingest is not implemented.
+3. Deploy the Worker from the reviewed `staging` checkout using the manual staging workflow. Confirm `/health`, a rejected unknown route and fail-closed staff routes until real bindings are configured. Ingest is not implemented.
 4. In the relevant feature PRs, create separate staging Postgres, Hyperdrive, private R2 and Queue/DLQ resources. Commit their non-secret binding IDs with the implementation and verify actual connections in staging. Keep migration credentials, runtime credentials and signing secrets separate. Follow [Cloudflare's Supabase/Hyperdrive guide](https://developers.cloudflare.com/hyperdrive/examples/connect-to-postgres/postgres-database-providers/supabase/) for the chosen driver and transaction behavior.
 5. Set budget notifications, retention/deletion ownership, backup destination and a named incident responder. Never infer these settings from an example file.
 
