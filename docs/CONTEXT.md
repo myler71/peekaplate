@@ -129,7 +129,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "delivery",
       "status": "foundation",
-      "summary": "Local staff-command development uses disposable Postgres, synthetic JWTs and workerd. Windows Docker was recovered with Desktop 4.95 and the real database/local demo checks passed. The team guide separates research/design from implemented code; hosted-provider checks remain pending. Monthly grouped updates and human review/comment policy remain. Canonical private repo migration preserves both histories; develop integration and a disabled manual staging workflow are proposed. Owner chooses private repositories on GitHub Free, so branch enforcement is inactive and PR/CI are manual process gates. Production sign-off remains required.",
+      "summary": "Application code is present on main, develop and staging after PR #5. Develop integrates work; staging is the sole manual staging deployment source; main is the production release branch. CI covers staging pushes. Activation remains disabled: GitHub deployment credentials and hosted Supabase/auth/Hyperdrive/frontend integration are missing or unverified. Cloudflare account and D1 resources exist, but D1 does not satisfy the PostgreSQL backend. Private GitHub Free controls remain manual.",
       "paths": [
         "README.md",
         "SECURITY.md",
@@ -156,17 +156,19 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         ".github/develop-ruleset.json",
         "docs/repository-migration.md",
         "docs/adr/0010-canonical-repository-and-release-branches.md",
-        "docs/adr/README.md"
+        "docs/adr/README.md",
+        "docs/adr/0011-staging-environment-branch.md"
       ],
       "adrs": [
-        "docs/adr/0007-delivery-and-recovery.md"
+        "docs/adr/0007-delivery-and-recovery.md",
+        "docs/adr/0011-staging-environment-branch.md"
       ],
       "dependsOn": [
         "diner",
         "console",
         "backend"
       ],
-      "sourceFingerprint": "041f42f8ffbeb6072b1f4e7506dc709e84d8ec9323123448c7fa4d9458d99129"
+      "sourceFingerprint": "509f3ef075a2653a0b58775ab555da02a50187112e491086af4a0f260fcd801e"
     },
     {
       "id": "agents",
@@ -198,6 +200,13 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     }
   ],
   "handoffs": [
+    {
+      "summary": "Aligned staging to application history through PR #5 and corrected manual deployment selection from develop to staging, including CI push coverage and release documentation. Provider inspection confirmed no Hyperdrive, Pages project or staging Worker; D1 resources do not replace PostgreSQL.",
+      "modules": [
+        "delivery"
+      ],
+      "next": "Configure the isolated staging Supabase/auth/Hyperdrive and frontend/API connections, supply scoped GitHub deployment credentials, then verify the deployed staging flow before activation or production promotion."
+    },
     {
       "summary": "Prepared history-preserving core import, marketing split, develop CI, PR 13-derived ruleset proposals and disabled staging deployment gate. Reconciled all eight later source commits through b40e3ca, retaining their history and five updated planning links. Application runtime and backend bindings are unchanged. Owner chooses private GitHub Free; branch rules remain inactive and manual PR/CI gates apply.",
       "modules": [
@@ -266,16 +275,6 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "delivery"
       ],
       "next": "Implement the delivery plan's first feature slice: verified staff/venue authority and an atomic dish-revision command. Introduce a Python job with its own tests only when its processing/analysis feature is implemented."
-    },
-    {
-      "summary": "Foundation hardening adds source-to-check traceability, evolving design handoff, command/outbox RLS coverage, shell accessibility checks, fail-closed bundle imports, actionable DB diagnostics and automatic sanitized verification observations. Role adapters share evidence and task handoff rules; no product or cloud capability is invented.",
-      "modules": [
-        "diner",
-        "database",
-        "delivery",
-        "agents"
-      ],
-      "next": "Use the exact setup PR CI evidence, then start PR 1 staff authority and atomic command transaction. Confirm owner merge controls and staging resources; real menu/device/restore performance remains future gate evidence."
     }
   ]
 }
