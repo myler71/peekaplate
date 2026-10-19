@@ -4,7 +4,7 @@ Repository transition: [migration and release checklist](repository-migration.md
 
 ## What is configured
 
-Node 24.16.0, pnpm 11.25.0, frozen lockfile, two Vite apps and a Hono Worker with health and authenticated dish commands. `backend/wrangler.jsonc` configures the verified account, HTTPS Supabase issuer and existing Hyperdrive ID only under `env.staging`. It contains no password, API token, local-mode override or production binding. The issuer's public JWKS currently returns an ES256 signing key. Genuine staff-session verification remains a hosted acceptance check. Application fixtures use synthetic data; package and image downloads contact their registries.
+Node 24.16.0, pnpm 11.25.0, frozen lockfile, two Vite apps and a Hono Worker with health and authenticated dish commands. `backend/wrangler.jsonc` configures the verified account, HTTPS Supabase issuer and existing Hyperdrive ID only under `env.staging`. It contains no password, API token, local-mode override or production binding. The October 18 issuer inspection returned an ES256 public signing key; genuine staff-session checks passed as recorded below. Application fixtures use synthetic data; package and image downloads contact their registries.
 
 The October 18 provider inspection verified the existing Supabase project `icwhkrlsecpzcomfjsso` and Hyperdrive `peekaplate-staging-postgres` (`bef46ec5f5044d0ea5f9e48450895b64`) in Cloudflare account `51eda1917fd22a9478808a82d2980741`. Hyperdrive targets that project's direct PostgreSQL endpoint, uses `peekaplate_staging_login`, has query caching disabled and a 20-connection limit. The Supabase dashboard calls the project's default branch `main / PRODUCTION`; that provider label is distinct from the application's deployment environment. This existing project is the staging candidate, not a separate production database.
 
@@ -20,7 +20,9 @@ Verified October 18, 2026 (America/Phoenix; provider timestamps are October 19 U
 | --- | --- | --- |
 | API | [Worker health](https://peekaplate-api-staging.vxkong.workers.dev/health) | Worker version `0ce9faa6-6267-4ff0-b4e6-ef535135dd2f` |
 | Diner shell | [Diner](https://peekaplate-diner-staging.pages.dev/) | Pages deployment `057a77d4` |
-| Staff shell | [Console](https://peekaplate-console-staging.pages.dev/) | Pages deployment `3c841efb` |
+| Owner/staff shell | [Console](https://peekaplate-console-staging.pages.dev/) | Pages deployment `3c841efb` |
+
+Keep these existing staging names. `console` is the owner/staff application, not an additional product. No custom domain is registered or attached as part of this setup. The [plain-language setup walkthrough](team_guide.md#where-to-open-staging) explains the services, access and deployment process.
 
 Pages uses direct uploads from reviewed builds, with `main` as each staging project's default branch. The provider may label that default deployment "production"; these are still dedicated **staging** projects. Direct Upload does not provide native Git-triggered builds; a future protected Actions workflow can upload the same artifacts. No automatic push deployment or production app was activated. Both public sites contain only foundation shells, not a published restaurant menu or working staff login.
 
@@ -85,7 +87,7 @@ Use `YYYYMMDDHHMMSS_description.sql` for new dbmate migrations (the initial migr
 
 Use a reviewed, pinned dbmate release (the harness uses 2.36.0) with a separate migration credential supplied through the environment, never a command argument or committed file. Apply to staging first with `dbmate --migrations-dir migrations up`. A runtime credential must not own tables or bypass RLS; do not use the migration owner or Supabase service-role key in the browser. Do not enable API access to `app_private`.
 
-The staff migration creates the `peekaplate_runtime` group role and narrow table/column grants. A separately provisioned login receives that role; never use the migration owner for requests. The local harness verifies the role's restrictions, but the actual managed-provider login still needs inspection. Before each release, test an upgrade from the last deployed schema as well as a fresh install. Back up before risky changes; restoration requires an operator decision and a rehearsed runbook.
+The staff migration creates the `peekaplate_runtime` group role and narrow table/column grants. A separately provisioned login receives that role; never use the migration owner for requests. The October 18 staging audit verified that login's effective restrictions; recheck after permission changes and verify production separately. Before each release, test an upgrade from the last deployed schema as well as a fresh install. Back up before risky changes; restoration requires an operator decision and a rehearsed runbook.
 
 ## Cloud-integration checkpoint
 
@@ -93,7 +95,7 @@ Account access and scoped Wrangler authentication are available; reuse the deplo
 
 Under the recorded private GitHub Free policy, do not assume protected environments or approval enforcement exist. Keep the Actions deployment disabled unless those controls are verified. An authorized operator may deploy a clean, reviewed exact `main` commit using provider-held credentials after independent human approval. This is a manual process, not GitHub-enforced protection.
 
-Before declaring PR 1 cloud-ready: confirm migration execution under the actual non-superuser provider role; provision synthetic staff membership; verify genuine login tokens and session/membership revocation semantics; connect Hyperdrive to Supabase's direct Postgres endpoint using a restricted runtime login; disable Hyperdrive query caching for authority and command paths; repeat isolation/retry/concurrency/rollback tests through that deployed connection mode. Measure latency and prove transaction context resets across pooled requests. Local connection reuse is evidence for application logic, not proof of a hosted pool. Supabase remains the accepted provider under ADR 0005; a Neon switch needs an explicit decision and equivalent auth integration evidence.
+The staff-command cloud checks above are complete within their recorded scope: existing migration versions and effective runtime grants, genuine login, restricted uncached Hyperdrive, isolation, retries, concurrency, membership revocation, rollback and transaction-context reset. Do not recreate accounts or resources merely to repeat initial setup. Remaining pilot work includes the session-lifetime policy, representative latency/load, physical pooled-connection reuse evidence and backup restoration. A fresh hosted migration rehearsal remains unrun. Local connection reuse is evidence for application logic, not proof of a hosted pool. Supabase remains the accepted provider under ADR 0005; a Neon switch needs an explicit decision and equivalent auth integration evidence.
 
 ## Staging activation checklist
 

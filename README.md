@@ -8,6 +8,8 @@ PeekaPlate is a restaurant menu and measurement platform designed to connect din
 
 The [team guide](docs/team_guide.md) explains the system and each tracked file's purpose in plain language, distinguishes working features from plans, and gives the next steps.
 
+Staging links: [diner](https://peekaplate-diner-staging.pages.dev/) · [owner/staff console](https://peekaplate-console-staging.pages.dev/) · [API health](https://peekaplate-api-staging.vxkong.workers.dev/health). Existing names are retained. Both pages are starter shells; production is not configured. Start with the guide's [setup walkthrough](docs/team_guide.md#where-to-open-staging), then the [next-ticket sequence](docs/delivery.md#next-tickets-from-the-deployed-foundation).
+
 ## Implementation status
 
 The repository contains diner and staff-console shells and a staff-command slice: signed staff-token verification, restaurant membership checks, and atomic dish-revision writes with tenant isolation. Staging hosts both shells and the API. Hosted acceptance with a genuine Supabase session verified authorized writes through Hyperdrive, retries, concurrent updates, cross-restaurant denial and membership revocation. A separate remote probe verified rollback and transaction-context reset. These are bounded synthetic checks, not pilot or production certification. Console login UI, menu publication, intent ingestion, POS integration and visual rendering are not implemented. Feature and pilot acceptance criteria are tracked in the [verification map](docs/verification.md).
