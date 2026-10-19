@@ -27,7 +27,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "diner",
       "status": "foundation",
-      "summary": "Static TypeScript/Vite shell usable without JavaScript. The supplied prototype is confirmed as latest design progress; shared Figma/tokens and flows are separately tracked, not implemented here. Build checks initial JS gzip budget and renderer boundaries. Viewer, analytics and device performance remain planned.",
+      "summary": "Static TypeScript/Vite shell usable without JavaScript. Rania's newer Figma Design file is the diner reference recorded in the develop implementation plan; selected frames/tokens need confirmation for each UI task. No real menu is implemented here. Build checks initial JS gzip budget and renderer boundaries. Viewer, analytics and device performance remain planned.",
       "paths": [
         "frontend/diner/index.html",
         "frontend/diner/src/main.ts",
@@ -43,7 +43,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "contracts"
       ],
-      "sourceFingerprint": "c53513cb5494ecdb2e7da3a001ae30bf6a2decdabaf2e11d7b80a992a427de07"
+      "sourceFingerprint": "bcff21683d3799b129966eb088cc0825ceacae3dbe45e0065eb630ba2e5d3a45"
     },
     {
       "id": "console",
@@ -94,7 +94,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "database",
       "status": "foundation",
-      "summary": "Private Postgres venue/event/command/outbox, actor-scoped memberships and tenant-scoped dish projections. Runtime grants cannot modify membership; share locks serialize revocation. Forward migration validates safe existing runtime-role attributes. Tests cover prior-schema upgrade, RLS, atomic commands and direct connection reuse; managed-provider role/pool verification remains required.",
+      "summary": "Private Postgres venue/event/command/outbox, actor-scoped memberships and tenant-scoped dish projections. Runtime grants cannot modify membership; share locks serialize revocation. Forward migration validates safe existing runtime-role attributes. Tests cover prior-schema upgrade, RLS, atomic commands and direct connection reuse; October 18 staging checks verified effective managed-provider grants and transaction-context reset; physical hosted pool reuse and restore evidence remain pending.",
       "paths": [
         "migrations/202610130001_foundation.sql",
         "tests/db/foundation.sql",
@@ -124,12 +124,12 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "backend"
       ],
-      "sourceFingerprint": "b2504bcecd4c5e6a3656b827ee05529bdfb831b6b4b810abaa3723b783c011f0"
+      "sourceFingerprint": "71e672e00fa81c646e9b8f360f4d54b3f930c604c899a21aab877625cd7d310a"
     },
     {
       "id": "delivery",
       "status": "foundation",
-      "summary": "Main supplies both environments under ADR 0012. API and both Pages shells are deployed to staging from bb56cef. CI, live smoke checks and bounded hosted staff-command acceptance passed, including genuine Supabase login, retries/concurrency, cross-restaurant denial, membership revocation and remote rollback/context-reset probes. Logout blocks refresh but issued JWTs remain valid until expiry. Login UI and pilot/load/recovery checks remain pending; production is unconfigured. Existing R2 staging assets are private and unbound. Actions remains gated; private GitHub Free controls remain manual.",
+      "summary": "Main supplies both environments under ADR 0012. API and both Pages shells are deployed to staging from bb56cef. CI, live smoke checks and bounded hosted staff-command acceptance passed, including genuine Supabase login, retries/concurrency, cross-restaurant denial, membership revocation and remote rollback/context-reset probes. Logout blocks refresh but issued JWTs remain valid until expiry. Login UI and pilot/load/recovery checks remain pending; production is unconfigured. Existing R2 staging assets are private and unbound. Actions remains gated; private GitHub Free controls remain manual. Team guide explains retained staging names, service responsibilities, manual release flow, costs and next-ticket dependencies; the detailed planning document remains on develop.",
       "paths": [
         "README.md",
         "SECURITY.md",
@@ -169,7 +169,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "4e586373fbefbd8fde574c4266caef1e7ea9b2e7ee3f48745a3acf821eba0e41"
+      "sourceFingerprint": "3e869e75b0ae7364f67772a63a85127d6f927cfc20cb334bbbbe92c5213383d8"
     },
     {
       "id": "agents",
@@ -201,6 +201,15 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     }
   ],
   "handoffs": [
+    {
+      "summary": "Clarified the existing staging setup for technical and nontechnical readers. Retained diner/console/API URLs, explained owner naming and each provider, corrected completed-check wording and linked newer planning/design references on develop. Added unassigned ticket boundaries and prerequisites; no runtime, cloud resource, credential or deployment change.",
+      "modules": [
+        "delivery",
+        "diner",
+        "database"
+      ],
+      "next": "Agree weekly tickets from the deployed foundation. Start staff login/editing alongside three-dish preparation, diner fixture UI and event/metric contract review. Publication precedes real exposure; ingestion precedes live reports. Preserve pilot and production gates."
+    },
     {
       "summary": "PR #10 merged at bb56cef and API/Pages shells were deployed from that main revision. Hosted tests passed genuine Supabase login, atomic writes, retries/concurrency, cross-restaurant denial and membership revocation. Remote Hyperdrive probes passed context reset and rollback after an injected outbox failure. Logout rejected refresh but accepted the existing JWT until membership removal. Test membership was removed and ephemeral harnesses stopped. R2 staging is private; no paid upgrade or production deployment.",
       "modules": [
@@ -267,16 +276,6 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "delivery"
       ],
       "next": "Complete documentation review and exact-head CI, merge PR 9 under the owner instruction, then resolve local Docker readiness and the real Supabase/Hyperdrive credential-bound checks."
-    },
-    {
-      "summary": "Implemented the local PR 1 staff/dish command slice: strict contracts, signed JWT verification, current membership authorization, atomic events/projection/receipt/outbox, effect-free replay and local Worker/Postgres tooling. Cloud provisioning and live-provider checks remain explicitly blocked on credentials; no cloud resources created.",
-      "modules": [
-        "contracts",
-        "backend",
-        "database",
-        "delivery"
-      ],
-      "next": "PR 9 has passing Linux CI for 43 SQL assertions, 13 Worker/Postgres integration tests, the local CLI flow and 4 browser checks, plus 35 unit and 20 script tests. Two independent review lanes closed their findings. Obtain human review on the current head. Windows Docker still needs restart/readiness verification; real Supabase identity, provider roles and Hyperdrive pooling are the next credential boundary."
     }
   ]
 }

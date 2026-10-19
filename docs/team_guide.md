@@ -8,6 +8,8 @@ PeekaPlate is meant to help a restaurant explain its food and learn how people u
 
 This guide starts with the product and progress, then follows the code behind one dish change. The complete file list, task board and test evidence are at the end for reference.
 
+For setup, read **section 2**. For code, follow **section 4**. For the next sprint, read **What needs to happen next** at the end. The [detailed implementation plan on develop](https://github.com/vivienk/peekaplate/blob/develop/docs/implementation_plan.md) contains screen controls, events, metric formulas and the wider delivery sequence. It is planning material; the dated deployment evidence below establishes what is running.
+
 ## 1. What a restaurant should eventually be able to do
 
 Imagine a restaurant wants to add Tomato Soup to its digital menu. This is an example, not a real restaurant record.
@@ -24,7 +26,7 @@ The visual experience is one part of this loop. Accurate food information, a usa
 
 ## 2. Where we are today
 
-**Research and design:** the team has worked on diner needs, restaurant interviews, journeys, screen designs, processing requirements and measurement ideas. The [design shared earlier](https://www.figma.com/make/bSifEKu5rGS7t0JTvEcXt0/The-diner-menu-V1?code-node-id=0-6&p=f&t=4dpQxA2jzoNs34mQ-0&fullscreen=1) is the latest design progress confirmed on October 14. It should guide the upcoming screens. The shared Figma/design-system tasks are a separate handoff; an open task does not mean the design work has not happened.
+**Research and design:** the team has worked on diner needs, restaurant interviews, journeys, screen designs, processing requirements and measurement ideas. [Rania's Figma Design file](https://www.figma.com/design/l7A9n8tACJic0FIhY49Zjw/PeekaPlate?node-id=0-1) is the newer diner reference recorded in the implementation plan; the earlier Make V1 is historical context. The [owner dashboard artifact](https://claude.ai/artifact/X8uwfdGP6CGttfrDGBnwpu) describes the other experience. Confirm selected frames and states when starting each screen ticket. Design progress does not establish working code.
 
 **Code foundation:** the repository now has separate places for the diner app, staff app, server rules, database changes, tests and documentation. It also has instructions for coding assistants and checks that run when someone proposes a change.
 
@@ -42,6 +44,71 @@ The visual experience is one part of this loop. Accurate food information, a usa
 | Owner report | Research/design requirements | A report built from real, permitted evidence |
 
 ClickUp's “Complete” status describes a task's recorded progress. It is not proof that a feature works in the code. For example, the approval-path task is marked complete, while approval and publication are still missing from this repository. That mismatch needs to be reconciled with the actual deliverable.
+
+### Where to open staging
+
+**Staging is our shared online test environment.** It lets the team test the same version before real restaurant use. We are keeping these existing names; no domain purchase or rename is needed.
+
+| Open this | Who it is for | What to expect today |
+| --- | --- | --- |
+| [Diner staging](https://peekaplate-diner-staging.pages.dev/) | People browsing a restaurant menu | A starter page, not a restaurant menu yet |
+| [Owner/staff staging](https://peekaplate-console-staging.pages.dev/) | Restaurant owners and permitted staff | A starter page; login and dashboard screens still need building |
+| [API health](https://peekaplate-api-staging.vxkong.workers.dev/health) | Developers checking whether the server responds | A machine-readable response; this alone does not test database access |
+
+**Console means the owner/staff application.** It is the existing project and folder name, not a third product. The future diner menu will open directly from a QR code or link, with a small owner sign-in link. Neither that menu nor that sign-in flow is connected yet.
+
+### What each service does
+
+| Service | Everyday explanation | Current setup |
+| --- | --- | --- |
+| GitHub | Stores code, documents and proposed changes | `vivienk/peekaplate` is the application repository. CI checks proposals before review. |
+| Cloudflare Pages | Delivers browser pages | Separate diner and console staging projects serve their built files. |
+| Cloudflare Worker | Runs server rules when a request arrives | The staging API checks identity and restaurant access before saving a draft dish. |
+| Supabase Auth | Confirms who signed in | Genuine test sign-in has been exercised. The console still needs a login interface. |
+| Supabase PostgreSQL | Keeps lasting application records | Stores restaurants, staff permissions, dish drafts, history, retry results and pending work. |
+| Cloudflare Hyperdrive | Manages Worker connections to PostgreSQL | Uses a restricted staging login. It is not another database. Query caching is disabled for this command path. |
+| Cloudflare R2 | Stores files such as photos and prepared visual assets | Existing staging and production buckets are reserved. Staging is private; uploads and approved asset delivery are not connected yet. |
+| Cloudflare Queues | Holds accepted observations until processing finishes | Planned with event ingestion; not running in the current flow. A failed-message queue will hold work needing recovery. |
+| Docker | Gives developers a disposable test database | Used locally and in CI. The shared database is hosted by Supabase. |
+
+The **current tested save path** is:
+
+```text
+Genuine test login with Supabase Auth
+    → a signed identity token
+    → test client calls the Cloudflare API
+    → API verifies identity and current restaurant membership
+    → Hyperdrive connects to Supabase PostgreSQL
+    → history + current dish + retry result + pending work save together
+    → API returns the saved draft
+```
+
+The test client will be replaced by the real staff editing screen. Neither frontend connects directly to private database tables. Knowing a restaurant ID does not grant access: the backend checks permission, and database row rules provide another layer of protection. Separate restaurant Docker containers are not required.
+
+Photo files belong in file storage; the database will hold their references, ownership, review state and related dish information. Richer assets are prepared manually for this version. No live image-generation service or automatic processing pipeline has been deployed. Existing Cloudflare D1 resources are unused: Supabase PostgreSQL remains the application database.
+
+### How code reaches staging and later production
+
+`main` supplies **both** environments. They will have separate data and credentials; a merge does not automatically deploy. Feature work follows [CONTRIBUTING.md](../CONTRIBUTING.md), and release candidates reach `main` before deployment.
+
+1. Review and test a proposed change, then merge the approved release candidate.
+2. An authorized operator builds a specific `main` commit and deploys it to staging.
+3. Test that deployed version and record its commit, deployment IDs and results.
+4. Once production exists and release approval is given, deploy that same tested commit with separate production resources.
+
+Today, Pages receives manually uploaded builds and the Worker was deployed with Wrangler, Cloudflare's deployment tool. Automatic GitHub deployment remains disabled behind its activation gate. Production is not configured. Provider screens may label a default branch or deployment “production”; these projects and the database are being used for staging. A production-named R2 bucket alone does not make a production system.
+
+The running apps were built from `bb56cef94f09f4937a89532cf1f28d47d323a171`. Subsequent documentation commits do not change those running apps. [Operations](operations.md#staging-deployment-record) records deployment IDs and test evidence.
+
+### Verified behavior, access and costs
+
+Hosted synthetic tests passed real sign-in, draft saving, duplicate retries, conflicting edits, concurrent requests and denial of another restaurant's writes. Removing restaurant membership blocked subsequent commands. Temporary test membership was removed; labelled synthetic records remain for audit and must be excluded from analytics. Separate remote probes checked rollback and cleared transaction context.
+
+This is a working backend foundation, not a completed owner screen, published menu, tracking system or dashboard. Signing out prevents refresh, but an issued access token can remain valid until expiry; agree the session policy before real staff use. Realistic load, backup restoration, monitoring and incident ownership remain release work.
+
+Product, research and design contributors can use the guide, designs and staging links without database credentials. Developers can run the local demo without cloud keys. Shared deployments and access grants belong to authorized operators. Passwords and deployment tokens stay in approved secret storage, never Git, chat or browser code.
+
+Keeping the existing addresses adds no custom-domain registration. Setup created no extra paid database branch or plan upgrade. This does **not** mean hosting is free: existing subscriptions and usage still apply. Before a pilot, confirm account bills, limits, budget alerts and cost ownership. Production resources and any custom domain need a separate cost check.
 
 ## 3. What “events” mean in PeekaPlate
 
@@ -255,7 +322,7 @@ The filename tells you where to look. The description explains what that file is
 | [backend/src/dish.integration.ts](../backend/src/dish.integration.ts) | Actual Worker plus PostgreSQL tests, including concurrent edits, rollback and restaurant separation |
 | [backend/local.mjs](../backend/local.mjs) | Starts the disposable local database, synthetic identity issuer and Worker; also runs the demo/check mode |
 | [backend/local.test.mjs](../backend/local.test.mjs) | Reproduces failed Worker shutdown and checks that remaining cleanup is attempted |
-| [backend/wrangler.jsonc](../backend/wrangler.jsonc) | Worker entry, runtime compatibility and local/staging names; hosted auth/database bindings are not supplied |
+| [backend/wrangler.jsonc](../backend/wrangler.jsonc) | Worker entry, runtime compatibility, staging account, Supabase issuer and Hyperdrive binding; no secrets or production binding |
 | [backend/package.json](../backend/package.json) | Backend dependencies and commands |
 | [backend/tsconfig.json](../backend/tsconfig.json) | TypeScript settings for backend source |
 
@@ -452,7 +519,7 @@ The [Team Interests & Responsibilities document](https://app.clickup.com/9014174
 
 | Work | Suggested contribution, based on interests | Start with this small piece | Hand it over when |
 | --- | --- | --- | --- |
-| Local setup and provider decision | Sai continues the existing code/setup work; Vivien continues the recorded provider/API coordination | Docker recovery and the local demo are verified; confirm the provider, access and real identity/database test plan | The provider decision and protected access are available. Hosted readiness still needs real-provider tests. |
+| Staff sign-in and editing | Developers take a bounded implementation task; Sai and Vivien review the PR | Reuse the verified staging API and Supabase identity setup; connect the console to authorized draft saving | A permitted user signs in and saves; denied access, expired login, retries and edit conflicts have working screen states and tests. |
 | Diner journey and event meaning | Adam, whose interest is the diner experience, continues the assigned event-taxonomy work | Walk through menu entry, dish details and return/exit. State which action produces each event and what it does—and does not—tell us. | Event examples are agreed with the person implementing collection, and tracking points are ready for the screen annotations. This does not assign frontend coding to Adam. |
 | Design handoff | Amr could develop the visual-menu screens and research questions; Rania could take a bounded flow/component task using her UX and design-system experience | Proposed split: Amr works from the current prototype on the next agreed diner screen; Rania specifies its reusable styles, transitions and loading/error/fallback states. Confirm the split first so both are not redrawing the same screen. | The shared designs explain behavior as well as appearance, and the person implementing the UI can identify each required state. |
 | Event collection in code | Eirene can contribute to backend/event capture and could pair with Sai on the existing code and restaurant-security rules if both agree | After agreeing Adam's definitions and the request format, select one local component and its tests—for example validating an incoming event batch. Then tackle retry storage, queue delivery and archive processing as separate complete tasks. | The selected component passes its tests and has a clear connection to the next component. Real exposure still waits for approved publication and the diner flow. |
@@ -508,4 +575,12 @@ The artifact's original targets were G1 October 19, G2 October 24, G3 October 28
 
 The artifact's $375 figure is a staged pilot cash target, not a current vendor quote or total company cost; labor and other costs are separate. Confirm costs before spending. Python processing and GPU services are added for a demonstrated job, not as a prerequisite for manual content preparation. Full 3D/AR, glasses, SMS/CRM and additional POS integrations remain outside the first launch path.
 
-For the immediate work selection: connect staff sign-in/editing, take the latest design and research into capture/review/publication, and develop the agreed event contracts alongside it. Then connect diner exposure and ingestion through a real published T0 menu before accepting order linkage, reporting or a pilot launch. Asset preparation remains manual for this version.
+### Next step: select implementation tickets
+
+Yes: turn the remaining work into small, reviewable tickets now. Use the [next-ticket sequence](delivery.md#next-tickets-from-the-deployed-foundation) for scope, dependencies and merge order. Keep tickets unassigned until availability is confirmed; Mohammad and Marwan are additional developers, not assumed task owners. Product/design contributors supply decisions and acceptance examples rather than being assigned code by default. Sai and Vivien are the requested code reviewers.
+
+Begin with **three representative dishes**, then expand the approved photo/text menu toward roughly 20 after the end-to-end flow works. Richer assets stay manual and optional. Synthetic design fixtures must be labelled; they are not approved restaurant records.
+
+Use weekly Tuesday-to-Tuesday sprint headings within the requested 15–20-day delivery window. Reconfirm capacity and dates before committing. Each ticket needs a plain title, research/design/implementation label, estimated effort, required roles, source links, acceptance examples and its prerequisite PR. Include review and integration time in the estimate.
+
+The first integrated demo should show permitted staff saving, reviewing and publishing a dish, and a diner seeing that approved version. Layout, manual content preparation and event-definition review can proceed alongside backend work. Accept tracking and reports only after their real data paths and calculations are tested; a collector alone is not a finished dashboard.
