@@ -1,0 +1,15 @@
+# Frontend design handoff
+
+The current reference is the [PeekaPlate Flow Prototype](https://claude.ai/artifact/LjkRVm78VioRB2FrVSauwJ), inspected and confirmed as the latest design progress on October 14, 2026. The supplied URL hosts the prototype in Claude; the shared Figma/design-system handoff is tracked separately in ClickUp. Use this design progress while the team continues refining it. The [PeekaPlate Orchestration + V1 Team Plan](https://claude.ai/artifact/HxpC9aET7geEwkEpyG6wrt) and [visual-tier ADR](adr/0004-visual-tiers.md) govern behavior, truthfulness and performance.
+
+The dated [team task map](team_guide.md#reference-the-clickup-task-snapshot) records Amr Hussien and Rania's layout, palette, shared-design and flow tasks. The current direction is to iterate on the existing structure, develop reusable tokens/components and specify accessible light/dark treatments adaptable to restaurant branding. Open board tasks do not establish that no design progress exists, and prototype progress does not establish implementation in the repository.
+
+Observed direction: QR entry, menu loading, category filters, a featured dish, photo-led cards with description/category/price and progressive browsing. The visible treatment uses a light cream/marble background, dark serif titles and warm brand accents. Sample food, prices and imagery are demonstration content; they are not approved venue data or evidence of asset rights.
+
+The existing diner and console are clearly labelled foundation shells. They are not claimed to match the prototype. Do not copy the entire prototype into the application or build its unfinished screens during infrastructure work. No new UI framework, token package or image dependency is needed now.
+
+For the first real diner slice, record the chosen screen/state and the source version or dated screenshot in the PR. Map it to `frontend/diner`; staff workflows belong to `frontend/console`. Start with approved assets and actual design tokens, then reuse local components/styles. If a Figma file arrives, record its frame/node and version instead of inferring them from this URL.
+
+The same slice supplies mobile and desktop layout, loading/empty/error/unavailable states, keyboard focus, reduced motion, useful no-WebGL fallback, and a photo/text menu without analytics. A viewer failure must not remove the menu. Renderer code stays behind the tap-loaded boundary. Do not turn prototype timing, menus or simulated receipts into production claims.
+
+Acceptance includes a bounded screenshot at the selected viewport and working interactions. The existing browser job checks shell accessibility and narrow-screen overflow; approved visual comparisons, real menu performance and real-phone assistive technology checks join the actual feature PR. No brittle pixel baseline is frozen against this evolving draft.
