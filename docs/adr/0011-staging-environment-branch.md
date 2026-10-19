@@ -2,6 +2,8 @@
 
 Status: Accepted · 2026-10-18 · Owner: repository owner
 
+Deployment branch selection superseded by [ADR 0012](0012-main-environment-promotion.md). The decision below records the earlier policy.
+
 ## Decision
 
 The owner explicitly clarified that `staging` is the staging environment and `develop` is development, then authorized the correction. This supersedes ADR 0010's develop-based staging deployment selection only.

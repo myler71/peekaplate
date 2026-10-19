@@ -2,6 +2,8 @@
 
 Status: Proposed · 2026-10-17 · Owner: repository owner
 
+Deployment branch selection superseded by [ADR 0012](0012-main-environment-promotion.md). Historical migration choices below are retained for traceability.
+
 ## Decision
 
 Under the owner's repository-reorganization request, use private `vivienk/peekaplate` for the core app and private `vivienk/peekaplate-marketing` for marketing. Preserve both histories through a two-parent import commit and reviewed merge-commit PRs. Integrate features on `develop`; release through separately approved PRs to `main`.
