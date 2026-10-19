@@ -1,6 +1,6 @@
 # PeekaPlate
 
-Canonical application repository: `vivienk/peekaplate` (private). Marketing lives in `vivienk/peekaplate-marketing`. This migration branch is pending human review; read the [migration and release checklist](docs/repository-migration.md) before merging or deploying.
+Canonical application repository: `vivienk/peekaplate` (private). Marketing lives in `vivienk/peekaplate-marketing`. Application migration and the initial staging deployment are complete; see the [migration and release checklist](docs/repository-migration.md) and [staging evidence](docs/operations.md#staging-deployment-record).
 
 **3D is the hook. The loop is the product.**
 
@@ -10,7 +10,7 @@ The [team guide](docs/team_guide.md) explains the system and each tracked file's
 
 ## Implementation status
 
-The repository contains diner and staff-console shells and a local staff-command slice: signed staff-token verification, restaurant membership checks, and atomic dish-revision writes with tenant isolation. Local verification uses synthetic identities, real PostgreSQL and the Workers runtime. Hosted Supabase authentication, Hyperdrive connection behavior and cloud resource provisioning remain unverified. Console login, menu publication, intent ingestion, POS integration and visual rendering are not implemented. Feature and pilot acceptance criteria are tracked in the [verification map](docs/verification.md).
+The repository contains diner and staff-console shells and a staff-command slice: signed staff-token verification, restaurant membership checks, and atomic dish-revision writes with tenant isolation. Staging hosts both shells and the API. Hosted acceptance with a genuine Supabase session verified authorized writes through Hyperdrive, retries, concurrent updates, cross-restaurant denial and membership revocation. A separate remote probe verified rollback and transaction-context reset. These are bounded synthetic checks, not pilot or production certification. Console login UI, menu publication, intent ingestion, POS integration and visual rendering are not implemented. Feature and pilot acceptance criteria are tracked in the [verification map](docs/verification.md).
 
 ## Technology and architecture
 
@@ -18,7 +18,7 @@ The repository contains diner and staff-console shells and a local staff-command
 | --- | --- | --- |
 | Diner frontend | TypeScript, Vite | Static shell with content available without JavaScript |
 | Staff console | React, TypeScript, Vite | Application shell |
-| Backend | Hono, TypeScript, Cloudflare Workers | Health and authenticated dish-revision commands; hosted bindings remain unconfigured |
+| Backend | Hono, TypeScript, Cloudflare Workers | Health and authenticated dish-revision commands; staging issuer and Hyperdrive configured |
 | Shared contracts | Zod, TypeScript | Health, dish revision and initial dish-intent schemas |
 | Database | PostgreSQL, SQL, dbmate | Private venues, staff memberships, dish projections, events, receipts and outbox; restricted runtime role |
 | Processing and analysis | Python, uv, pytest | Accepted scope in [ADR 0001](docs/adr/0001-scope-and-repository.md); no job, package or runtime dependency implemented |
@@ -105,7 +105,7 @@ CI uses five jobs with distinct responsibilities: `changes` selects integration 
 
 Routine npm and GitHub Actions dependency updates are grouped monthly, with one open version-update PR per ecosystem. Major upgrades are manual; enabled security updates can arrive sooner. AI-written and dependency PRs follow the same documentation, verification and human approval-with-comment requirements.
 
-Both deployment environments use an exact `main` commit: deploy it to staging, verify it, then promote the same commit to production after human approval. Each environment has separate resources and credentials; the `staging` Git branch is not a deployment source. The manual staging workflow remains gated, and production deployment is not configured. Existing Supabase and Hyperdrive resources have been inspected, but hosted authentication and command tests remain pending. See [ADR 0012](docs/adr/0012-main-environment-promotion.md) and [operations](docs/operations.md) for the verified setup and release controls.
+Both deployment environments use an exact `main` commit: deploy it to staging, verify it, then promote the same commit to production after human approval. Each environment requires separate resources and credentials; the `staging` Git branch is not a deployment source. The initial staging deployment used the authorized operator route and passed bounded hosted staff-command checks. The Actions workflow remains gated, and production deployment is not configured. See [ADR 0012](docs/adr/0012-main-environment-promotion.md) and [operations](docs/operations.md) for URLs, deployed revision, session-revocation limits and release controls.
 
 Each contributor installs and authenticates their own Claude or Codex client and verifies its role/tool support. Native-client setup is separate from repository and cloud readiness.
 

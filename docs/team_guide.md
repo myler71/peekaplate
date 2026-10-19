@@ -1,6 +1,6 @@
 # PeekaPlate: team guide
 
-Updated October 14, 2026.
+Infrastructure updated October 18, 2026. The team research and board inventory below remains the dated October 14 snapshot.
 
 PeekaPlate is meant to help a restaurant explain its food and learn how people use its menu. The team has been researching that idea and designing the experience. Sai started the code setup. We now have the project structure, checks for new code, and one tested way to save a staff member's draft dish change.
 
@@ -30,13 +30,13 @@ The visual experience is one part of this loop. Accurate food information, a usa
 
 **First working code flow:** a developer can use a local demo to submit a draft dish change. The backend checks a made-up test identity and its restaurant permission, saves the change and remembers the result. Each saved version of a dish is called a **revision**, like version history in a document. This work was reviewed and merged in [PR #9](https://github.com/vivienk/peekaplate_staging/pull/9).
 
-“Local” means it runs in a development environment with made-up test identities and disposable data. It does not mean the team has a live online staging service. The shared cloud database, real staff sign-in and Cloudflare connections have not been configured.
+“Local” means it runs on a developer's machine with made-up test identities and disposable data. We now also have a shared online staging service: [diner starter page](https://peekaplate-diner-staging.pages.dev/), [staff starter page](https://peekaplate-console-staging.pages.dev/) and [API health](https://peekaplate-api-staging.vxkong.workers.dev/health). Supabase stores the data; Cloudflare runs the API, and Hyperdrive manages its database connections. A real Supabase test login successfully saved synthetic dish revisions. Tests prevented duplicate changes and rejected conflicting edits, another restaurant's writes and access after restaurant membership was removed. The staff screen still needs its own sign-in and editing interface. See [the deployment record](operations.md#staging-deployment-record) for the exact tested limits.
 
 | Part | What exists now | What still needs building |
 | --- | --- | --- |
 | Diner screen | A basic staging page | A real restaurant menu based on the design |
 | Staff screen | A starter page | Sign-in, editing, review, approval and publishing screens |
-| Saving a dish | Tested backend draft-save flow | Connecting it to the staff screen and real identity provider |
+| Saving a dish | Backend draft-save flow tested locally and online with Supabase identity | Connecting it to the staff screen |
 | Food visuals | Design direction and written rules | Reviewed assets and the optional interactive viewer |
 | Diner tracking | Initial rules for event data | Collecting, storing and reporting actual browsing actions |
 | Owner report | Research/design requirements | A report built from real, permitted evidence |
@@ -111,7 +111,7 @@ The [checks at lines 127–159](https://github.com/vivienk/peekaplate_staging/bl
 
 The [write section at lines 179–225](https://github.com/vivienk/peekaplate_staging/blob/413be96/backend/src/dish-command.ts#L179-L225) saves the history event, current dish, request result and pending follow-up described above. It commits them together, or rolls the change back if something fails. This prevents a dish from appearing saved while its history is missing.
 
-The database has its own protection too. [migrations/20261014210000_staff_commands.sql](https://github.com/vivienk/peekaplate_staging/blob/413be96/migrations/20261014210000_staff_commands.sql#L2) creates `staff_membership` at line 2 and `dish_current` at line 10. The rules at [lines 22–35](https://github.com/vivienk/peekaplate_staging/blob/413be96/migrations/20261014210000_staff_commands.sql#L22-L35) restrict which rows an ordinary application connection can use. Developers call this row-level security, or RLS. The restricted database role starts at line 37. Actual cloud accounts still need their own permission checks before use.
+The database has its own protection too. [migrations/20261014210000_staff_commands.sql](https://github.com/vivienk/peekaplate_staging/blob/413be96/migrations/20261014210000_staff_commands.sql#L2) creates `staff_membership` at line 2 and `dish_current` at line 10. The rules at [lines 22–35](https://github.com/vivienk/peekaplate_staging/blob/413be96/migrations/20261014210000_staff_commands.sql#L22-L35) restrict which rows an ordinary application connection can use. Developers call this row-level security, or RLS. The restricted database role starts at line 37. Staging's effective permissions and rules were checked, followed by synthetic requests through the real hosted connection. Future production accounts need their own checks.
 
 ### F. Return a result; rebuild history when needed
 
@@ -129,9 +129,9 @@ The two frontend apps and backend share one repository, but they are separate pr
 
 ## 5. Why these tools, and where Python fits
 
-The current browser and backend code use **TypeScript**, so they can share rules for requests and responses. **Hono** is the small routing library used by the backend. A **Cloudflare Worker** is where that backend is intended to run online; tests also exercise its runtime locally.
+The current browser and backend code use **TypeScript**, so they can share rules for requests and responses. **Hono** is the small routing library used by the backend. A **Cloudflare Worker** runs the staging backend online; tests also exercise its runtime locally.
 
-**PostgreSQL** stores the restaurant data and enforces database rules. **Supabase** is the provider in the accepted repository plan because it combines PostgreSQL with staff identity services. The October 14 project update says Vivien is still finalizing Supabase versus Neon. Confirm that decision before setting up accounts. If Neon is chosen, record the change and decide how staff identity will work too.
+**PostgreSQL** stores the restaurant data and enforces database rules. **Supabase** is the accepted and now configured provider, combining PostgreSQL with staff identity services. The earlier Supabase-versus-Neon discussion did not change that decision. A future provider change needs a recorded decision and equivalent identity/isolation checks; there is no second D1 application database.
 
 **Docker** runs a temporary PostgreSQL database for tests. It does not provide restaurant isolation by itself. The backend's permission checks and database rules do that. The Windows startup issue was recovered with Desktop 4.95 on October 14 after backing up the existing data. The local database tests and dish-save demo now pass; each contributor still needs a working Docker engine on their own machine.
 
@@ -436,7 +436,9 @@ Routine dependency updates are monthly and grouped, with at most one open versio
 
 The repository survey covered 65 public projects' metadata and folder patterns. It was not 65 complete code or security audits. The [research notes](research/README.md) explain what was adopted and why.
 
-Real Supabase authentication, managed database permissions, Hyperdrive connection reuse and hosted latency remain unverified. GitHub review enforcement depends on repository settings; a policy file alone does not enable it. A separate security workbench scan failed without a verdict on an earlier snapshot, so it is not passing evidence for this release. The reviewed code and tests are separate evidence.
+The October 18 hosted checks verified real Supabase sign-in, effective database permissions, staff writes, retries/concurrency, cross-restaurant denial, membership removal and rollback. A remote probe checked that connection context clears after a transaction, but it did not prove reuse of the same physical pooled connection. The observed request timings are small smoke samples, not a load or p95 result. The completed PR #10 security diff review found no supported issues within that change; it is not a whole-product guarantee. GitHub review controls remain manual under the selected private Free plan.
+
+Signing out and removing restaurant access are different. Signing out prevents refreshing that session, but its existing access token can remain valid until it expires. Removing restaurant membership immediately blocked the next tested command. We need an explicit session-lifetime decision before real staff use; the current tests must not be described as instant logout revocation.
 
 The board review covered descriptions, assignments and scope subtasks. The Discord review covered recent visible messages in general, design, daily-updates, product and dev; the last two contained no messages at the time. It did not audit every attachment, linked PRD, interview record or full chat history. Private conversation text and personal details are not reproduced. Workspace links may require access.
 
@@ -466,14 +468,14 @@ For later steps, **Eirene and Amr's interest in owner insights and AI evaluation
 
 Before committing dates, name who will implement the diner/staff screens, capture pipeline, optional viewer, POS adapter and operational recovery. Interest in technical work is a starting point for a small paired task, not evidence that all those engineering gaps are staffed. Rania's recorded AR learning goal and other future experiments do not add them to the first launch.
 
-Keep each implementation assignment bounded and avoid two people changing the same files without coordination. Local work can continue without cloud keys. **Stop before provisioning or exercising real Cloudflare/database services until the provider decision and protected credentials are available.** The [October 14 setup update](https://discord.com/channels/1556028660832673885/1556115536243589212/1560031592410521641) still leaves that decision with Vivien. Never place credentials in the guide, Git or chat.
+Keep each implementation assignment bounded and avoid two people changing the same files without coordination. Local work can continue without cloud keys. The shared staging setup now exists; reuse its resources and use approved synthetic fixtures for tests. Shared credentials stay with authorized operators. Keep production separate and require release approval. Never place credentials in the guide, Git or chat.
 
 ### Build and accept the connected flows in this order
 
 | Step | Outcome to deliver | Must exist first | Work that can overlap / proof needed |
 | --- | --- | --- | --- |
-| **0 — Repository foundation** | Shared code structure, checks, docs and agent instructions | None | Done for local development. Shared cloud environments are still pending. |
-| **1 — Safe staff changes** | A permitted staff member can save a dish revision without cross-restaurant access, duplicate changes or silent overwrites | Step 0 | Local code is merged. Complete real identity, restricted database-account and Hyperdrive connection tests at the cloud checkpoint. Design and step-2 local work can continue meanwhile; hosted acceptance cannot be claimed. |
+| **0 — Repository foundation** | Shared code structure, checks, docs and agent instructions | None | Local foundation and shared staging are available. Production is not configured. |
+| **1 — Safe staff changes** | A permitted staff member can save a dish revision without cross-restaurant access, duplicate changes or silent overwrites | Step 0 | Backend slice passed bounded hosted checks. Build the staff sign-in/editing UI and continue step 2; session-lifetime, load and recovery decisions remain before a real pilot. |
 | **2 — Capture, review and publication** | Staff review the exact source/asset revision; only approved content becomes a published photo/text menu; withdrawn content becomes unavailable | Step 1's command/permission rules | Content preparation and staff UI can progress together against agreed data rules. Prove unauthorized approval fails, competing publications cannot both win, and rebuilding history sends no uploads or notifications. |
 | **3 — Real T0 menu and durable observations** | Diners browse approved content; the system records what they actually saw and safely accepts observations | Step 2 for real published content and version references | Diner layout and event plumbing can be developed earlier with fixtures. Accept the combined flow only after testing offline/reload/reconnect, partial receipts, duplicates, queue failure, archive-before-index ordering, failed-message recovery and deletion/retention. The menu must work without tracking or WebGL. |
 | **4 — Link sessions to order tickets** | A short-lived restaurant-specific code connects a browsing session to a permitted order record; repeated imports do not duplicate it | Step 3 for a real session and exposure trail; a verified usable export | Can run alongside step 5. Test wrong-restaurant codes, expiry, duplicate tickets, refunds/voids and time zones. Unlinked sessions remain unknown. |
@@ -506,4 +508,4 @@ The artifact's original targets were G1 October 19, G2 October 24, G3 October 28
 
 The artifact's $375 figure is a staged pilot cash target, not a current vendor quote or total company cost; labor and other costs are separate. Confirm costs before spending. Python processing and GPU services are added for a demonstrated job, not as a prerequisite for manual content preparation. Full 3D/AR, glasses, SMS/CRM and additional POS integrations remain outside the first launch path.
 
-For the immediate work selection: finish the local/cloud foundation checkpoint, take the latest design and research into the capture/review/publication slice, and develop the agreed event components alongside it. Then connect those pieces through a real published T0 menu before accepting order linkage, reporting or a pilot launch.
+For the immediate work selection: connect staff sign-in/editing, take the latest design and research into capture/review/publication, and develop the agreed event contracts alongside it. Then connect diner exposure and ingestion through a real published T0 menu before accepting order linkage, reporting or a pilot launch. Asset preparation remains manual for this version.
