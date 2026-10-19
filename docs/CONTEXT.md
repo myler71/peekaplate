@@ -66,7 +66,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "backend",
       "status": "foundation",
-      "summary": "Hono Worker verifies configured staff JWTs and restaurant membership, then executes atomic dish revision commands under a restricted database role. Pure dish replay is effect-free. Local JWT/real Postgres/workerd tests cover the slice; genuine Supabase auth and Hyperdrive pooling remain a cloud checkpoint. No ingestion or publication endpoint.",
+      "summary": "Hono Worker verifies configured staff JWTs and restaurant membership, then executes atomic dish revision commands under a restricted database role. Pure dish replay is effect-free. Staging config points to the verified Cloudflare account, Supabase issuer and existing uncached Hyperdrive. Local JWT/real Postgres/workerd tests cover the slice; genuine staff login and hosted pooling/isolation remain a cloud checkpoint. No ingestion or publication endpoint.",
       "paths": [
         "backend/src/index.ts",
         "backend/src/index.test.ts",
@@ -89,7 +89,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "contracts",
         "database"
       ],
-      "sourceFingerprint": "bb81da3c697f544c38f64e287ae9b4767204ba5a20625f399b38a17be05f7e3c"
+      "sourceFingerprint": "3919fa1e39fd43702f4ea6ccecef4804c79d0347b74ad89d113b8e29cdb7c13d"
     },
     {
       "id": "database",
@@ -129,7 +129,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "delivery",
       "status": "foundation",
-      "summary": "Application code is present on main, develop and staging after PR #5. Develop integrates work; staging is the sole manual staging deployment source; main is the production release branch. CI covers staging pushes. Activation remains disabled: GitHub deployment credentials and hosted Supabase/auth/Hyperdrive/frontend integration are missing or unverified. Cloudflare account and D1 resources exist, but D1 does not satisfy the PostgreSQL backend. Private GitHub Free controls remain manual.",
+      "summary": "Main supplies both deployment environments under ADR 0012: verify an exact commit in staging, then promote that same commit to production after human approval with separate resources. Develop remains an integration branch; the staging Git branch is historical. Existing Supabase migrations, restricted runtime-role metadata and uncached Hyperdrive were inspected; hosted auth, Worker integration and production provisioning remain pending. D1 is not used by the PostgreSQL backend. Actions activation remains gated; private GitHub Free controls remain manual.",
       "paths": [
         "README.md",
         "SECURITY.md",
@@ -157,18 +157,19 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "docs/repository-migration.md",
         "docs/adr/0010-canonical-repository-and-release-branches.md",
         "docs/adr/README.md",
-        "docs/adr/0011-staging-environment-branch.md"
+        "docs/adr/0011-staging-environment-branch.md",
+        "docs/adr/0012-main-environment-promotion.md"
       ],
       "adrs": [
         "docs/adr/0007-delivery-and-recovery.md",
-        "docs/adr/0011-staging-environment-branch.md"
+        "docs/adr/0012-main-environment-promotion.md"
       ],
       "dependsOn": [
         "diner",
         "console",
         "backend"
       ],
-      "sourceFingerprint": "509f3ef075a2653a0b58775ab555da02a50187112e491086af4a0f260fcd801e"
+      "sourceFingerprint": "fd579e3be4cec91f6504045dba76817916d986694f1a3d519d5cdb8e827fa737"
     },
     {
       "id": "agents",
@@ -200,6 +201,14 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     }
   ],
   "handoffs": [
+    {
+      "summary": "Updated deployment selection to main for both environments per the maintainer's explicit instruction. Configured verified non-secret staging account, issuer and Hyperdrive bindings. Provider audit found existing Supabase migrations, forced RLS, restricted staging login, an ES256 public key and uncached Hyperdrive; no duplicate database branch was created. Hosted request behavior remains unverified.",
+      "modules": [
+        "delivery",
+        "backend"
+      ],
+      "next": "Review and test the staging configuration, run hosted identity and tenant-isolation checks, and record deployment evidence. Production requires separate resources and human release approval for the same tested main SHA."
+    },
     {
       "summary": "Aligned staging to application history through PR #5 and corrected manual deployment selection from develop to staging, including CI push coverage and release documentation. Provider inspection confirmed no Hyperdrive, Pages project or staging Worker; D1 resources do not replace PostgreSQL.",
       "modules": [
@@ -268,13 +277,6 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "agents"
       ],
       "next": "Complete native role discovery/tool-restriction checks in compatible authenticated clients. Continue the delivery plan with verified staff/venue authority and an atomic dish-revision command."
-    },
-    {
-      "summary": "README now explains current versus planned capabilities, TypeScript rationale and the accepted Python/uv/pytest extension path, runnable checks, event paths, visual tiers, agent workflow and owner setup. ADRs and runtime behavior are unchanged.",
-      "modules": [
-        "delivery"
-      ],
-      "next": "Implement the delivery plan's first feature slice: verified staff/venue authority and an atomic dish-revision command. Introduce a Python job with its own tests only when its processing/analysis feature is implemented."
     }
   ]
 }

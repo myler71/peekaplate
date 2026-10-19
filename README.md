@@ -105,7 +105,7 @@ CI uses five jobs with distinct responsibilities: `changes` selects integration 
 
 Routine npm and GitHub Actions dependency updates are grouped monthly, with one open version-update PR per ecosystem. Major upgrades are manual; enabled security updates can arrive sooner. AI-written and dependency PRs follow the same documentation, verification and human approval-with-comment requirements.
 
-The manual staging workflow deploys the Worker, but its staff routes fail closed until real authentication and database bindings are supplied. No hosted integration has been activated. Repository administrators must configure branch protections, required `ci`, review rules, staging credentials and cloud resources. Configuration and release procedures are documented in [operations](docs/operations.md).
+Both deployment environments use an exact `main` commit: deploy it to staging, verify it, then promote the same commit to production after human approval. Each environment has separate resources and credentials; the `staging` Git branch is not a deployment source. The manual staging workflow remains gated, and production deployment is not configured. Existing Supabase and Hyperdrive resources have been inspected, but hosted authentication and command tests remain pending. See [ADR 0012](docs/adr/0012-main-environment-promotion.md) and [operations](docs/operations.md) for the verified setup and release controls.
 
 Each contributor installs and authenticates their own Claude or Codex client and verifies its role/tool support. Native-client setup is separate from repository and cloud readiness.
 

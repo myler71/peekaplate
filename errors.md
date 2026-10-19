@@ -128,3 +128,11 @@ These records describe local validation limits, not application failures.
 ```json
 {"id":"ERR-20261017-MIGRATION-003","status":"resolved","area":"local-dependency-install","cause":"The fallback pnpm launcher attempted dependency downloads in the network-restricted context and encountered ENOTFOUND.","prevention":"Use the approved network context and explicit pinned Node and pnpm tools for installation.","regression":"Frozen dependency installation passed with Node 24.16.0 and pnpm 11.25.0; lint, types and 56 unit/script tests passed."}
 ```
+
+```json
+{"id":"ERR-20261018-CLOUD-001","status":"resolved","area":"operator-authentication","cause":"Wrangler keyring login required its Windows helper; a non-interactive attempt could not install it. A later localhost OAuth retry expired and then rejected a mismatched callback state.","prevention":"Use Wrangler's interactive keyring setup and an isolated device-login flow when localhost callbacks are stale. Never disable OAuth state validation or print credentials.","regression":"wrangler login --device --scopes account:read user:read workers:write --use-keyring --browser=false succeeded. wrangler whoami confirmed encrypted credential storage and the approved scopes; an account-scoped wrangler hyperdrive list returned the expected staging connection.","limit":"Authentication and resource listing do not prove deployment or hosted database behavior."}
+```
+
+```json
+{"id":"ERR-20261018-CLOUD-002","status":"resolved","area":"context-handoff-limit","cause":"Adding the cloud setup handoff exceeded the ten-entry context limit; refresh refused the update.","prevention":"Roll the oldest handoff into Git history before adding a new entry to a full context list.","regression":"After retaining the ten newest handoffs, pnpm context:refresh completed for all eight modules."}
+```
