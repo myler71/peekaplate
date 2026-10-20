@@ -117,3 +117,7 @@ Each contributor installs and authenticates their own Claude or Codex client and
 - [Verification map](docs/verification.md): existing evidence and feature acceptance requirements.
 - [Contributing](CONTRIBUTING.md): complete PRs, dependency maintenance and context handoffs.
 - [Research record](docs/research/README.md): the 65-repository pattern survey and adopted design choices.
+
+## Optional product analytics
+
+See [PostHog setup and evidence limits](docs/posthog.md) for consent, separate staging/production build variables, taxonomy mapping, validation and manual project setup. Tracking is disabled until configured; current shells do not publish menu or owner-report events.

@@ -137,3 +137,16 @@ These records describe local validation limits, not application failures.
 ```json
 {"kind":"resolution","references":{"check":"test:db","timestamp":"2026-10-18T17:41:58.315Z"},"status":"resolved","cause":"Docker Desktop's Linux daemon was not running in the new canonical checkout verification session; the named engine pipe was unavailable before any database test executed.","prevention":"Confirm docker version reaches the server before running database verification; start the existing Desktop installation without resetting or deleting data.","regression":"After starting the installed Docker Desktop, docker version reported server 29.8.2 and pnpm verify test:db passed 43 SQL assertions, 13 Worker/Postgres tests and the local startup/demo/cleanup flow. No application code, Docker installation or existing volumes changed."}
 ```
+
+```json
+{"id": "ERR-20261019-POSTHOG-001", "status": "resolved", "area": "local-tooling", "cause": "RTK is unavailable and offline dependency resolution lacked optional platform metadata.", "prevention": "Use direct commands on this host and the approved network installation context with a supported Node 24 runtime.", "regression": "Network installation completed with repository-pinned dependency versions; no runtime dependency upgrades were requested."}
+```
+
+```json
+{"id":"ERR-20261019-POSTHOG-002","status":"resolved","area":"context-source-paths","cause":"The context graph rejects env-style source paths, including credential-free .env.example files.","prevention":"Document example build variables in docs/posthog.md and fingerprint that guide instead of env files.","regression":"Removing the example paths allowed context:refresh to validate all nine nodes."}
+```
+
+<!-- automatic observation; not root cause -->
+```json
+{"kind":"automatic-check-observation","check":"test","timestamp":"2026-10-20T04:46:52.443Z","exitCode":1}
+```

@@ -51,6 +51,9 @@ importers:
 
   frontend/console:
     dependencies:
+      '@peekaplate/analytics':
+        specifier: workspace:*
+        version: link:../../packages/analytics
       react:
         specifier: 19.3.0
         version: 19.3.0
@@ -72,10 +75,20 @@ importers:
         version: 8.3.4(@types/node@24.19.2)(esbuild@0.28.2)
 
   frontend/diner:
+    dependencies:
+      '@peekaplate/analytics':
+        specifier: workspace:*
+        version: link:../../packages/analytics
     devDependencies:
       vite:
         specifier: 8.3.4
         version: 8.3.4(@types/node@24.19.2)(esbuild@0.28.2)
+
+  packages/analytics:
+    dependencies:
+      '@peekaplate/contracts':
+        specifier: workspace:*
+        version: link:../contracts
 
   packages/contracts:
     dependencies:

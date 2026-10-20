@@ -27,7 +27,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "diner",
       "status": "foundation",
-      "summary": "Static TypeScript/Vite shell usable without JavaScript. Rania's new Figma Design file is current diner visual direction; its wireframe export and selected frames were inspected, and FigJam supplies workflow context. Plan requires direct QR/menu entry, owner link, functional ingredient panel and truthful viewer fallback; none implemented. Initial JS/renderer checks exist; actual viewer, analytics and device evidence remain planned.",
+      "summary": "Static TypeScript/Vite foundation shell remains readable without JavaScript. Optional consent-gated PostHog shell views are wired; no published menu or dish controls exist. Dish intent adapter is tested but awaits real controls. See docs/posthog.md for activation and evidence limits.",
       "paths": [
         "frontend/diner/index.html",
         "frontend/diner/src/main.ts",
@@ -35,7 +35,8 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "frontend/diner/vite.config.ts",
         "scripts/check-bundle.mjs",
         "scripts/check-bundle.test.mjs",
-        "docs/frontend-design.md"
+        "docs/frontend-design.md",
+        "frontend/diner/package.json"
       ],
       "adrs": [
         "docs/adr/0004-visual-tiers.md"
@@ -43,16 +44,17 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "contracts"
       ],
-      "sourceFingerprint": "6d957a8f0f14a234eb73662eb02c52f1f3501f71b8548bbb11e682140f91d00c"
+      "sourceFingerprint": "5174065869b70846c1e9a1da4f8351aaf073d241f3428ecb3480c8c5194efb7b"
     },
     {
       "id": "console",
       "status": "foundation",
-      "summary": "React/Vite staff shell. The Claude owner dashboard artifact is distinct from the Figma diner menu. Authentication, review, approval, publication, experiments and secured readouts remain planned; the public owner link will not grant private access. No real staff data or mutation control is exposed.",
+      "summary": "React/Vite staff shell with optional consent-gated PostHog technical shell views. Authentication, publication and restaurant-scoped owner reports remain planned; shell views do not establish owner identity or business activity.",
       "paths": [
         "frontend/console/src/main.tsx",
         "frontend/console/src/style.css",
-        "frontend/console/index.html"
+        "frontend/console/index.html",
+        "frontend/console/package.json"
       ],
       "adrs": [
         "docs/adr/0001-scope-and-repository.md",
@@ -61,7 +63,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "contracts"
       ],
-      "sourceFingerprint": "4fd9de39834180bc7771633d7fe52bdb34e71fed017ed7ae236bd90299ffe5da"
+      "sourceFingerprint": "76fee1388a2aa45d7ffaf13527a727816305f7038d4f48e0d17cb00181145893"
     },
     {
       "id": "backend",
@@ -159,7 +161,9 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "docs/adr/0010-canonical-repository-and-release-branches.md",
         "docs/adr/README.md",
         "docs/implementation_plan.md",
-        "docs/delivery.md"
+        "docs/delivery.md",
+        "playwright.posthog.config.ts",
+        "tests/e2e/posthog.spec.ts"
       ],
       "adrs": [
         "docs/adr/0007-delivery-and-recovery.md"
@@ -169,7 +173,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "593974749ab9a68e4ed514d6764847ff03b703da07efb94932a9cd816795010e"
+      "sourceFingerprint": "4c2f15ad70a41644866f278ba051a3c4fffe997a49322b3d9465be83cbe03d50"
     },
     {
       "id": "agents",
@@ -198,9 +202,41 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       ],
       "dependsOn": [],
       "sourceFingerprint": "6de26962de2dbd484415e39cd6bfbd2b73a4eaef589faa60ed34e2c70e4d3ead"
+    },
+    {
+      "id": "analytics",
+      "status": "foundation",
+      "summary": "Disabled-by-default optional PostHog capture with explicit page consent, DNT/GPC, exact origin/mode guards, allowlisted v1 dish projection and bounded best-effort delivery. Both shells emit app_shell_viewed only after consent. No real project credentials, ingestion verification, canonical receipts or owner reports.",
+      "paths": [
+        "packages/analytics/package.json",
+        "packages/analytics/tsconfig.json",
+        "packages/analytics/src/index.ts",
+        "packages/analytics/src/consent.ts",
+        "packages/analytics/src/index.test.ts",
+        "docs/posthog.md"
+      ],
+      "adrs": [
+        "docs/adr/0003-intent-evidence.md",
+        "docs/adr/0005-tenancy-and-privacy.md",
+        "docs/adr/0006-orders-and-measurement.md"
+      ],
+      "dependsOn": [
+        "contracts"
+      ],
+      "sourceFingerprint": "2e20cca094103b9d4f671f0b5fca3b9e44fb00600d2b568a37df6b6ba64386e8"
     }
   ],
   "handoffs": [
+    {
+      "summary": "Added optional privacy-gated PostHog capture for existing shells and tested v1 dish adapter. Real dish controls and owner reports do not exist; canonical evidence architecture is unchanged. Separate project tokens, project privacy review and live staging ingestion remain required.",
+      "modules": [
+        "analytics",
+        "diner",
+        "console",
+        "delivery"
+      ],
+      "next": "Review PR into develop; configure separate PostHog projects and exact frontend build environments before an authorized staging deployment. Wire dish events only when real controls exist."
+    },
     {
       "summary": "Added a separate source-PR handoff inventory with exact preserved heads, canonical setup successor, review/merge order and outstanding canonical PR dispositions. No source PR is closed and no deferred CRM/intake implementation is merged.",
       "modules": [
@@ -271,14 +307,6 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "delivery"
       ],
       "next": "PR 9 has passing Linux CI for 43 SQL assertions, 13 Worker/Postgres integration tests, the local CLI flow and 4 browser checks, plus 35 unit and 20 script tests. Two independent review lanes closed their findings. Obtain human review on the current head. Windows Docker still needs restart/readiness verification; real Supabase identity, provider roles and Hyperdrive pooling are the next credential boundary."
-    },
-    {
-      "summary": "Evaluated all five role prompts before rewriting README as professional repository documentation. Builder initially exceeded assigned ownership in its plan and bypassed the recorder in a proposed command; paired profiles were corrected and the same case passed in a fresh session. Published cases, outcomes and native-client limits; runtime and ADRs are unchanged.",
-      "modules": [
-        "delivery",
-        "agents"
-      ],
-      "next": "Complete native role discovery/tool-restriction checks in compatible authenticated clients. Continue the delivery plan with verified staff/venue authority and an atomic dish-revision command."
     }
   ]
 }
