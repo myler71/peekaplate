@@ -97,9 +97,11 @@ Under the recorded private GitHub Free policy, do not assume protected environme
 
 The staff-command cloud checks above are complete within their recorded scope: existing migration versions and effective runtime grants, genuine login, restricted uncached Hyperdrive, isolation, retries, concurrency, membership revocation, rollback and transaction-context reset. Do not recreate accounts or resources merely to repeat initial setup. Remaining pilot work includes the session-lifetime policy, representative latency/load, physical pooled-connection reuse evidence and backup restoration. A fresh hosted migration rehearsal remains unrun. Local connection reuse is evidence for application logic, not proof of a hosted pool. Supabase remains the accepted provider under ADR 0005; a Neon switch needs an explicit decision and equivalent auth integration evidence.
 
-## Staging activation checklist
+## Later Actions-based staging activation
 
-The repository owner supplies real account values and enables controls before deployment:
+This checklist is conditional on an account/control model that supports the required environment restrictions and independent approval. It is **not available under the current private GitHub Free choice**. Use the owner-controlled checkpoint above now; keep this workflow disabled. If capabilities change, verify them rather than assuming a paid upgrade alone supplies private required reviewers.
+
+The repository owner supplies real account values and enables controls before automated deployment:
 
 1. Before enabling Actions deployment, verify that the GitHub plan supports the required controls. Configure the `staging` environment to accept `main` and require appropriate human approval. Keep `CLOUDFLARE_API_TOKEN` in protected configuration and `CLOUDFLARE_ACCOUNT_ID` scoped to the intended account. If the controls are unavailable, use the manual operator route above; leave the workflow disabled.
 2. Reuse `peekaplate-diner-staging` and `peekaplate-console-staging`. Use `pnpm install --frozen-lockfile` followed by `pnpm --filter @peekaplate/diner build` or `pnpm --filter @peekaplate/console build`; outputs are `frontend/diner/dist` and `frontend/console/dist`. Set `CLOUDFLARE_ACCOUNT_ID` to the verified account and upload each output with an explicit project name, `--branch main` and `--commit-hash <reviewed-sha>`. Use `wrangler pages deploy`; do not recreate projects. Disable automatic production promotion until review controls exist. The console shell contains no real staff data.
@@ -109,11 +111,21 @@ The repository owner supplies real account values and enables controls before de
 
 Production is a separate decision with separate credentials/resources. There is no production deployment workflow in this foundation.
 
+## Optional PostHog staging release
+
+The existing US PostHog project `675372` is used only for synthetic staging data. Local staging builds sent verified diner and console shell views; this does not mean the hosted Pages deployments contain the integration yet. The [setup record](posthog.md) identifies current access, privacy settings, the internal dashboard and remaining approval gates.
+
+After the final PR receives independent human approval and the release reaches `main`, build that exact commit with `--mode staging`. Supply the five `VITE_POSTHOG_*` values from each frontend's `.env.example`; use its exact Pages origin and the staging project's public ingestion token. Build-time configuration is required: runtime variables cannot change uploaded static JavaScript. Never add personal API keys or database secrets to these values.
+
+Upload only `frontend/diner/dist` and `frontend/console/dist` to their existing, explicitly named Pages projects, using `--branch main` and the reviewed commit hash. No Worker, database or migration deployment is required for PostHog. Verify zero capture before consent, one correct event after opt-in, withdrawal/reload, browser privacy blocking and real PostHog readback on both hosted URLs. Record deployment IDs and the exact SHA. To roll back analytics, rebuild with `VITE_POSTHOG_ENABLED=false` and redeploy, or restore the previous reviewed Pages release.
+
+Member access is sufficient for these synthetic checks and internal charts. An administrator still needs to confirm project naming, staging-only use, the actual billing limits and deletion responsibility. No paid upgrade was purchased. Production requires its own project and release approval; real diner collection also needs an approved privacy/retention policy.
+
 ## GitHub merge controls
 
 The current owner chooses GitHub Free and private repositories. GitHub does not enable branch protection/rulesets for these private repos on this plan, so `main` and `develop` remain unenforced. The ruleset files below are retained for a future plan change, not presented as active policy. For now, keep write access limited; require reviewed PRs, passing `ci`, and an independent human approval comment before merges; preserve migration/release history with merge commits. These are team process controls, not GitHub enforcement, and admins can bypass them. Protect production credentials in provider settings and keep production promotion behind explicit human release sign-off. Configuration files and CODEOWNERS do not establish enforcement.
 
-CI runs with read-only tokens and pinned action SHAs. PR bodies are read as data, never interpolated into shell commands. The final gate requires path selection and quality to succeed and every applicable integration lane to pass. Fork PRs receive no deployment credentials. Require a human approval with a review comment on the current commit for every PR, including AI-written and dependency changes. Native approval rules enforce approval; the reviewer and merger enforce the comment's content. No additional comment-check workflow or automatic approval is configured.
+CI runs with read-only tokens and pinned action SHAs. PR bodies are read as data, never interpolated into shell commands. The final gate requires path selection and quality to succeed and every applicable integration lane to pass. Fork PRs receive no deployment credentials. Require a human approval with a review comment on the current commit for every PR, including AI-written and dependency changes. Reviewers and mergers currently enforce both approval and comment content manually. Native approval rules could enforce approval only after they become available and are activated. No additional comment-check workflow or automatic approval is configured.
 
 Each existing CI job has one purpose: `changes` selects relevant integration lanes; `quality` checks formatting, types, unit tests, builds and documentation; `database` tests migrations and database constraints; `browser` tests the diner/console smoke flows; `ci` is the single required aggregate check. Documentation checks run after code checks and builds, and still run after an earlier failure, so a missing PR section cannot hide a broken build. Database/browser jobs remain path-selected.
 

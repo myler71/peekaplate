@@ -1,6 +1,6 @@
 # PeekaPlate: team guide
 
-Infrastructure updated October 18, 2026. The team research and board inventory below remains the dated October 14 snapshot.
+Infrastructure updated October 18, 2026; Python and PostHog setup guidance updated October 19 (verification recorded October 20 UTC). The team research and board inventory below remains the dated October 14 snapshot.
 
 PeekaPlate is meant to help a restaurant explain its food and learn how people use its menu. The team has been researching that idea and designing the experience. Sai started the code setup. We now have the project structure, checks for new code, and one tested way to save a staff member's draft dish change.
 
@@ -8,7 +8,7 @@ PeekaPlate is meant to help a restaurant explain its food and learn how people u
 
 This guide starts with the product and progress, then follows the code behind one dish change. The complete file list, task board and test evidence are at the end for reference.
 
-For setup, read **section 2**. For code, follow **section 4**. For the next sprint, read **What needs to happen next** at the end. The [detailed implementation plan on develop](https://github.com/vivienk/peekaplate/blob/develop/docs/implementation_plan.md) contains screen controls, events, metric formulas and the wider delivery sequence. It is planning material; the dated deployment evidence below establishes what is running.
+For setup, read **section 2**. For code, follow **section 4**. For Python and PostHog, read **section 5**. For the next sprint, read **What needs to happen next** at the end. The [detailed implementation plan on develop](https://github.com/vivienk/peekaplate/blob/develop/docs/implementation_plan.md) contains screen controls, events, metric formulas and the wider delivery sequence. It is planning material; the dated deployment evidence below establishes what is running.
 
 ## 1. What a restaurant should eventually be able to do
 
@@ -41,6 +41,8 @@ The visual experience is one part of this loop. Accurate food information, a usa
 | Saving a dish | Backend draft-save flow tested locally and online with Supabase identity | Connecting it to the staff screen |
 | Food visuals | Design direction and written rules | Reviewed assets and the optional interactive viewer |
 | Diner tracking | Initial rules for event data | Collecting, storing and reporting actual browsing actions |
+| PostHog analytics | Opt-in tracking code; real test events verified in the staging PostHog project from local builds | Reviewed hosted release, then connect actual menu controls as they are built |
+| Python processing | Accepted extension in the architecture | Implement, test and choose a runtime for the first specific job |
 | Owner report | Research/design requirements | A report built from real, permitted evidence |
 
 ClickUp's “Complete” status describes a task's recorded progress. It is not proof that a feature works in the code. For example, the approval-path task is marked complete, while approval and publication are still missing from this repository. That mismatch needs to be reconciled with the actual deliverable.
@@ -202,7 +204,55 @@ The current browser and backend code use **TypeScript**, so they can share rules
 
 **Docker** runs a temporary PostgreSQL database for tests. It does not provide restaurant isolation by itself. The backend's permission checks and database rules do that. The Windows startup issue was recovered with Desktop 4.95 on October 14 after backing up the existing data. The local database tests and dish-save demo now pass; each contributor still needs a working Docker engine on their own machine.
 
-**Python is part of the accepted plan for processing or analysis work.** When there is a real job to implement, it should come with its own environment and pytest tests. No Python service exists yet because that processing job has not been built. We have not added a second language just to create an empty folder.
+### How Python can work with the existing backend
+
+**Python is part of the accepted plan for processing or analysis work.** Contributors can use it for a suitable task without rewriting the existing backend. TypeScript continues to handle the main API and restaurant permissions. Python can handle a defined task such as checking photo dimensions, cleaning imported data or calculating an analysis result. Supabase remains the application database.
+
+Here is a proposed example; this upload/processing flow is not built yet:
+
+```text
+Staff supplies a dish photo
+  → TypeScript API checks permission and records the processing request
+  → Python checks the photo and prepares a result
+  → API checks that the result belongs to the expected job and restaurant
+  → Result is saved as a draft through the application's normal rules
+  → A person reviews it before publication
+```
+
+The two languages exchange structured messages, like a form with agreed field names. Developers call this a **data contract**. It includes a job reference, the approved input and the expected result. TypeScript types do not automatically work in Python, so developers test that both sides understand the same messages. A job must not gain permission simply by supplying a restaurant ID, and a repeated result must not create duplicate changes.
+
+Python needs its own environment and tests: **uv** manages its dependencies and **pytest** runs its tests. Those tools will be added with the first real task. There is no Python service deployed today, and the current `pnpm` commands only run the existing JavaScript/TypeScript toolchain.
+
+For a small compatible job, a separate **Cloudflare Python Worker** may be enough. Cloudflare supports Python, but some libraries and workloads do not fit its runtime. Heavier work may need a container or specialist compute service with a separately agreed cost. Calling an AI provider is different from hosting an image model ourselves. The first Python ticket must check those requirements before choosing where it runs. See the [supported Python packages](https://developers.cloudflare.com/workers/languages/python/packages/).
+
+Before connecting a job to staging, test a successful result, bad input, a timeout, a repeated result and an attempt to use another restaurant's data. Keep long processing away from the diner's page request so people can continue browsing. Manual preparation and review of T1/T2 assets remain the current plan; adding Python does not introduce automatic generation or publishing.
+
+### What PostHog adds, and what it does not
+
+**The PostHog connection is implemented and has received real test events from local builds. It is awaiting a reviewed release to the hosted staging pages.** For now, the two screens are starter pages. Clicking **Allow optional analytics** sends one `app_shell_viewed` event: a small record saying which screen was viewed and that this is staging. PostHog turns those records into an internal chart. It does not mean a diner opened a published menu or ordered food.
+
+The flow is **page → consent check → PostHog → internal chart**. It does not pass through Supabase, and it does not change the trusted database records. Tracking starts off, stops when withdrawn, and resets when the page reloads. Browser privacy signals can block it. The menu must work even if PostHog is unavailable.
+
+When the real menu is built, its actions must follow [Adam's taxonomy and measurement plan](https://app.clickup.com/90141746115/docs/2kydvry3-1494?view=open) and the [implementation plan](implementation_plan.md), including ingredient interactions and comparisons. Agree the names, exact triggers and content versions before wiring each control. The current v1 adapter is tested for `dish_open` and `portion_compare`; it has no real dish-control caller yet. A general dish comparison must not be labelled as physical portion measurement.
+
+These responsibilities remain separate:
+
+| Part | What it is responsible for |
+| --- | --- |
+| Main backend and Supabase | Permissions and trusted application records, including dish revision history |
+| Planned diner-evidence pipeline | Recoverable observations of the exact content shown, under [ADR 0003](adr/0003-intent-evidence.md) |
+| PostHog | Optional internal charts; current test events describe starter-page views |
+| Owner dashboard | A future product screen with agreed calculations and access restricted to the owner's restaurant |
+
+PostHog can supply analytics through an API, but using it for owner reports is still a decision to review. A filter saying "Restaurant A" is not a security boundary. Our backend must establish which restaurant the signed-in owner can access. The current durable-event plan remains in place until a new architecture decision explicitly changes it. Decide the collection route before implementation so one action is not accidentally recorded twice.
+
+**Capacity example:** 300 menu visits per day, with 40 events per visit over 30 days, would produce 360,000 events. PostHog lists a one-million-event monthly free allowance as checked on October 19, 2026. That should leave room for a small pilot under these assumptions; it is not a forecast or an unlimited service. Include test and automatically collected events in usage, and monitor the allowance because extra events can be dropped when a free or configured billing limit is reached. See [current pricing](https://posthog.com/pricing).
+
+**Where to see it:** the [internal staging dashboard](https://us.posthog.com/project/675372/dashboard/2233365) uses Vivien's existing US project, currently named **Default project**. Only synthetic staging activity belongs there. Members can inspect events and create charts; administrators control project settings and billing. The public ingestion token lets the app send events but does not give anyone permission to read analytics. Contributors can run the normal local app with tracking disabled; they do not all need cloud credentials.
+
+**Files behind this:** [analytics/index.ts](../packages/analytics/src/index.ts) checks configuration and consent, builds the allowed event fields and limits network requests. [analytics/consent.ts](../packages/analytics/src/consent.ts) provides the opt-in button. [diner/main.ts](../frontend/diner/src/main.ts) and [console/main.tsx](../frontend/console/src/main.tsx) connect it to each screen. [Unit tests](../packages/analytics/src/index.test.ts) and [browser tests](../tests/e2e/posthog.spec.ts) check allowed, blocked and failed capture. [posthog.md](posthog.md) is the operator's setup and verification record.
+
+**What comes next:** finish review and release the staging builds; then finalize the diner design states, build approved menu controls and connect their agreed events. The durable evidence pipeline and owner calculations remain separate implementation work. Vivien can rename the project **PeekaPlate Staging** later and confirm billing and retention ownership; Member access was enough to test the connection and prepare the internal chart. Before real diner use, approve the privacy notice and deletion policy. Python work can proceed separately once its first job is defined.
 
 ### What T0, T1 and T2 mean
 
