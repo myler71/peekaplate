@@ -41,7 +41,7 @@ The visual experience is one part of this loop. Accurate food information, a usa
 | Saving a dish | Backend draft-save flow tested locally and online with Supabase identity | Connecting it to the staff screen |
 | Food visuals | Design direction and written rules | Reviewed assets and the optional interactive viewer |
 | Diner tracking | Initial rules for event data | Collecting, storing and reporting actual browsing actions |
-| PostHog analytics | Opt-in tracking code; real test events verified in the staging PostHog project from local builds | Reviewed hosted release, then connect actual menu controls as they are built |
+| PostHog analytics | Opt-in shell views verified from both hosted staging sites | Activate the private Supabase export, then connect real menu controls as they are built |
 | Python processing | Accepted extension in the architecture | Implement, test and choose a runtime for the first specific job |
 | Owner report | Research/design requirements | A report built from real, permitted evidence |
 
@@ -229,9 +229,9 @@ Before connecting a job to staging, test a successful result, bad input, a timeo
 
 ### What PostHog adds, and what it does not
 
-**The PostHog connection is implemented and has received real test events from local builds. It is awaiting a reviewed release to the hosted staging pages.** For now, the two screens are starter pages. Clicking **Allow optional analytics** sends one `app_shell_viewed` event: a small record saying which screen was viewed and that this is staging. PostHog turns those records into an internal chart. It does not mean a diner opened a published menu or ordered food.
+**Both hosted staging pages now send consented test events to PostHog, and those records were checked in PostHog.** For now, the two screens are starter pages. Clicking **Allow optional analytics** sends one `app_shell_viewed` event: a small record saying which screen was viewed and that this is staging. PostHog turns those records into an internal chart. It does not mean a diner opened a published menu or ordered food.
 
-The flow is **page → consent check → PostHog → internal chart**. It does not pass through Supabase, and it does not change the trusted database records. Tracking starts off, stops when withdrawn, and resets when the page reloads. Browser privacy signals can block it. The menu must work even if PostHog is unavailable.
+The flow is **page → consent check → PostHog → internal chart**. The next connection copies those observations into a separate private area of the same Supabase database. Its migration is prepared but the hosted export is not yet active. A raw table keeps received copies; a view counts identical repeats once and excludes conflicting copies. It does not change trusted restaurant records. See [export setup and status](posthog-export.md). Tracking starts off, stops when withdrawn, and resets when the page reloads. Browser privacy signals can block it. The menu must work even if PostHog is unavailable.
 
 When the real menu is built, its actions must follow [Adam's taxonomy and measurement plan](https://app.clickup.com/90141746115/docs/2kydvry3-1494?view=open) and the [implementation plan](implementation_plan.md), including ingredient interactions and comparisons. Agree the names, exact triggers and content versions before wiring each control. The current v1 adapter is tested for `dish_open` and `portion_compare`; it has no real dish-control caller yet. A general dish comparison must not be labelled as physical portion measurement.
 

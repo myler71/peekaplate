@@ -99,7 +99,7 @@ The staff-command cloud checks above are complete within their recorded scope: e
 
 ## Later Actions-based staging activation
 
-This checklist is conditional on an account/control model that supports the required environment restrictions and independent approval. It is **not available under the current private GitHub Free choice**. Use the owner-controlled checkpoint above now; keep this workflow disabled. If capabilities change, verify them rather than assuming a paid upgrade alone supplies private required reviewers.
+This checklist is conditional on verified environment restrictions and independent approval. The repository is now public, but these controls have not been activated or verified. Use the owner-controlled checkpoint above until an administrator configures and tests them; keep this workflow disabled.
 
 The repository owner supplies real account values and enables controls before automated deployment:
 
@@ -113,17 +113,17 @@ Production is a separate decision with separate credentials/resources. There is 
 
 ## Optional PostHog staging release
 
-The existing US PostHog project `675372` is used only for synthetic staging data. Local staging builds sent verified diner and console shell views; this does not mean the hosted Pages deployments contain the integration yet. The [setup record](posthog.md) identifies current access, privacy settings, the internal dashboard and remaining approval gates.
+The existing US PostHog project `675372` is used only for synthetic staging data. Both hosted staging pages now send verified consented synthetic shell views. The [setup record](posthog.md) identifies current access, privacy settings, the internal dashboard and remaining approval gates.
 
-After the final PR receives independent human approval and the release reaches `main`, build that exact commit with `--mode staging`. Supply the five `VITE_POSTHOG_*` values from each frontend's `.env.example`; use its exact Pages origin and the staging project's public ingestion token. Build-time configuration is required: runtime variables cannot change uploaded static JavaScript. Never add personal API keys or database secrets to these values.
+For future releases, obtain the required review and build the exact approved `main` commit with `--mode staging`. Supply the five `VITE_POSTHOG_*` values from each frontend's `.env.example`; use its exact Pages origin and the staging project's public ingestion token. Build-time configuration is required: runtime variables cannot change uploaded static JavaScript. Never add personal API keys or database secrets to these values.
 
-Upload only `frontend/diner/dist` and `frontend/console/dist` to their existing, explicitly named Pages projects, using `--branch main` and the reviewed commit hash. No Worker, database or migration deployment is required for PostHog. Verify zero capture before consent, one correct event after opt-in, withdrawal/reload, browser privacy blocking and real PostHog readback on both hosted URLs. Record deployment IDs and the exact SHA. To roll back analytics, rebuild with `VITE_POSTHOG_ENABLED=false` and redeploy, or restore the previous reviewed Pages release.
+Upload only `frontend/diner/dist` and `frontend/console/dist` to their existing, explicitly named Pages projects, using `--branch main` and the reviewed commit hash. Browser capture requires no Worker or database deployment. The separate [Supabase export](posthog-export.md) requires its reviewed migration and restricted connection. Verify zero capture before consent, one correct event after opt-in, withdrawal/reload, browser privacy blocking and real PostHog readback on both hosted URLs. Record deployment IDs and the exact SHA. To roll back analytics, rebuild with `VITE_POSTHOG_ENABLED=false` and redeploy, or restore the previous reviewed Pages release.
 
 Member access is sufficient for these synthetic checks and internal charts. An administrator still needs to confirm project naming, staging-only use, the actual billing limits and deletion responsibility. No paid upgrade was purchased. Production requires its own project and release approval; real diner collection also needs an approved privacy/retention policy.
 
 ## GitHub merge controls
 
-The current owner chooses GitHub Free and private repositories. GitHub does not enable branch protection/rulesets for these private repos on this plan, so `main` and `develop` remain unenforced. The ruleset files below are retained for a future plan change, not presented as active policy. For now, keep write access limited; require reviewed PRs, passing `ci`, and an independent human approval comment before merges; preserve migration/release history with merge commits. These are team process controls, not GitHub enforcement, and admins can bypass them. Protect production credentials in provider settings and keep production promotion behind explicit human release sign-off. Configuration files and CODEOWNERS do not establish enforcement.
+On October 19, the canonical repository was public and GitHub reported both `main` and `develop` as unprotected. Earlier private-plan limitations are historical. The stored ruleset proposals are not active policy; an administrator should now evaluate enabling them for the public repository. For now, keep write access limited; require reviewed PRs, passing `ci`, and an independent human approval comment before merges; preserve migration/release history with merge commits. These are team process controls, not GitHub enforcement, and admins can bypass them. Protect production credentials in provider settings and keep production promotion behind explicit human release sign-off. Configuration files and CODEOWNERS do not establish enforcement.
 
 CI runs with read-only tokens and pinned action SHAs. PR bodies are read as data, never interpolated into shell commands. The final gate requires path selection and quality to succeed and every applicable integration lane to pass. Fork PRs receive no deployment credentials. Require a human approval with a review comment on the current commit for every PR, including AI-written and dependency changes. Reviewers and mergers currently enforce both approval and comment content manually. Native approval rules could enforce approval only after they become available and are activated. No additional comment-check workflow or automatic approval is configured.
 
@@ -136,3 +136,13 @@ Dependabot checks routine versions on the first day of each month, with one open
 Document and demonstrate: Queue retry and poison-message DLQ handling; create-only archive conflict quarantine; replay with network side effects disabled; independent backup of Postgres, approved assets/manifests and R2 evidence; restore reconciliation by ID and checksum; deletion requests reapplied after restoration. Measure the plan's content RPO ≤24 hours and restore RTO ≤4 hours. Until the drill exists, those are targets only.
 
 For a failing release, stop promotion and preserve logs without secrets or raw diner data. Prefer restoring the prior application deployment and forward-fixing schema. Do not delete an event stream or silently acknowledge unarchived observations to clear an alert.
+
+## PostHog hosted release — October 19, 2026
+
+Released exact main commit `2a135faa4386fc3e1002aef3d1a150930e5ff9bf` after [PR 14](https://github.com/vivienk/peekaplate/pull/14) and [PR 15](https://github.com/vivienk/peekaplate/pull/15). The user explicitly delegated setup approval; the review disclosed agent assistance. Ordinary PR review requirements remain unchanged.
+
+- Diner Pages deployment: `013f89a7`, [staging diner](https://peekaplate-diner-staging.pages.dev/).
+- Console Pages deployment: `9ebf0f78`, [staging console](https://peekaplate-console-staging.pages.dev/).
+- Worker and database were unchanged by this frontend release.
+- Live isolated-browser checks passed on both stable URLs: no capture before consent, HTTP 200 after consent, expected minimal properties, and no new capture after withdrawal/reload. Both matching generated IDs were visible in PostHog. Synthetic data only.
+- Private Supabase export is a separate change; see [its current status](posthog-export.md). These results do not prove diner-event ingestion, menu functionality or owner reports.

@@ -194,3 +194,16 @@ These records describe local validation limits, not application failures.
 ```json
 {"id":"ERR-20261019-RELEASE-001","status":"resolved","area":"release-context","cause":"The release merge included a newer main README edit, so the delivery fingerprint calculated on the feature head no longer matched the proposed merged tree.","prevention":"Check the release merge tree against the reviewed head, preserve target-branch edits, and refresh affected context before promotion.","regression":"Merged the current main README change into the release candidate and refreshed the delivery fingerprint; context validation must pass on the resulting release tree.","evidence":"https://github.com/vivienk/peekaplate/actions/runs/39381320009","sources":["README.md","docs/CONTEXT.md"]}
 ```
+
+```json
+{"id":"OBS-20261019-EXPORT-RED-001","status":"resolved","area":"posthog-export-tests","cause":"The intentional red test found the requested private analytics table absent before implementation.","regression":"Added a forward migration. pnpm verify test:db passed 15 new export assertions, existing 43 pgTAP assertions, 13 database integration cases and the local demo lifecycle.","sources":["migrations/20261020070000_posthog_exports.sql","tests/db/posthog.sql"]}
+```
+
+```json
+{"id":"OBS-20261019-SETUP-TOOLS-001","status":"resolved","area":"operator-tooling","observation":"A quoted shell comment command failed to parse, and claiming an existing Supabase browser tab timed out twice. Neither action completed a write.","prevention":"Use a UTF-8 body file for GitHub prose. Recover a stale browser tab through a new tab in the already-selected browser, without accessing profile files.","regression":"Body-file submission succeeded. A fresh Supabase tab displayed the existing app_private schema."}
+```
+
+<!-- automatic observation; not root cause -->
+```json
+{"kind":"automatic-check-observation","check":"test:db","timestamp":"2026-10-20T06:48:43.863Z","exitCode":1}
+```

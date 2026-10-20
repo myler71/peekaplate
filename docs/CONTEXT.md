@@ -96,7 +96,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "database",
       "status": "foundation",
-      "summary": "Private Postgres venue/event/command/outbox, actor-scoped memberships and tenant-scoped dish projections. Runtime grants cannot modify membership; share locks serialize revocation. Forward migration validates safe existing runtime-role attributes. Tests cover prior-schema upgrade, RLS, atomic commands and direct connection reuse; October 18 staging checks verified effective managed-provider grants and transaction-context reset; physical hosted pool reuse and restore evidence remain pending.",
+      "summary": "Private Postgres venue/event/command/outbox, actor-scoped memberships and tenant-scoped dish projections. Runtime grants cannot modify membership; share locks serialize revocation. Forward migration validates safe existing runtime-role attributes. Tests cover prior-schema upgrade, RLS, atomic commands and direct connection reuse; October 18 staging checks verified effective managed-provider grants and transaction-context reset; physical hosted pool reuse and restore evidence remain pending. Private PostHog landing table and conflict-aware deduplication view are migration-tested; hosted application/export pending. Exporter is separate from app runtime.",
       "paths": [
         "migrations/202610130001_foundation.sql",
         "tests/db/foundation.sql",
@@ -104,14 +104,17 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "scripts/test-db.mjs",
         "scripts/test-db.test.mjs",
         "migrations/20261014210000_staff_commands.sql",
-        "tests/db/staff.sql"
+        "tests/db/staff.sql",
+        "migrations/20261020070000_posthog_exports.sql",
+        "tests/db/posthog.sql"
       ],
       "adrs": [
         "docs/adr/0002-selective-event-sourcing.md",
-        "docs/adr/0005-tenancy-and-privacy.md"
+        "docs/adr/0005-tenancy-and-privacy.md",
+        "docs/adr/0013-posthog-export-boundary.md"
       ],
       "dependsOn": [],
-      "sourceFingerprint": "59f97389cbaa95e02e355b4aaad030f9decd1701006f69fc09d83efcecbe487e"
+      "sourceFingerprint": "3e37b2753902f5d04e03a92dcf439a52a8082cf94a22fb61a3c9a92a211c1a12"
     },
     {
       "id": "measurement",
@@ -127,12 +130,12 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "backend"
       ],
-      "sourceFingerprint": "a292bc0c5001819c38c6dddbb4540eeb3cc4bde2626bc34aa91398f52304fc8d"
+      "sourceFingerprint": "0689d8f202fe8bfe56aa8ae8fb404b06d3323a1c2e99c7aeb85c4e5c69ef45c2"
     },
     {
       "id": "delivery",
       "status": "foundation",
-      "summary": "Main supplies both environments under ADR 0012. Hosted staging foundation checks cover login, writes, retries, concurrency, tenant denial, membership revocation, rollback and context reset. Issued JWTs remain valid until expiry. Login UI, pilot/load/recovery checks and production remain pending. R2 assets are private and unbound; Actions is gated and GitHub Free controls remain manual. README/team guide explain setup and the accepted Python extension; no Python job exists. Optional PostHog shell capture is verified from local staging builds against the real project; hosted release awaits human review. ADR 0003 still governs durable evidence; PostHog is internal best-effort analytics. Detailed planning is preserved with the deployed foundation.",
+      "summary": "Main supplies staging and production under ADR 0012. Staging Pages, Worker, restricted Supabase/Hyperdrive and staff-command checks are recorded in operations. PRs 14/15 merged under explicit delegated setup approval; hosted PostHog shell views verified at main 2a135fa. Public repository main/develop remain unprotected. Private PostHog export activation is pending; product tickets can start from tested foundations.",
       "paths": [
         "README.md",
         "SECURITY.md",
@@ -176,7 +179,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "e06f71365798054a3bd6cf150b6a70c1ff914040658b62dfcb35341ab73d5b8e"
+      "sourceFingerprint": "8ad6d080f01ec64a04f2e49afaeeb24308c08bd3c5722ba193ce6eedfe3e8b9f"
     },
     {
       "id": "agents",
@@ -209,24 +212,26 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "analytics",
       "status": "foundation",
-      "summary": "Disabled-by-default optional PostHog capture with page consent, DNT/GPC, exact origin/mode guards, allowlisted v1 dish projection and bounded best-effort delivery. Local staging builds sent diner and console shell views to real US project 675372; matching records and propertyless processing were verified in PostHog. Hosted activation awaits human review and release. Real dish controls, canonical receipts and owner reports remain unimplemented. See docs/posthog.md for privacy, retention and admin limits.",
+      "summary": "Consent-gated explicit PostHog capture: hosted diner/console shell views verified in staging. Dish adapter awaits real controls. Private Supabase export migration and duplicate/permission tests exist; hosted export is not yet activated. Optional untrusted observations remain separate from canonical evidence and owner authorization.",
       "paths": [
         "packages/analytics/package.json",
         "packages/analytics/tsconfig.json",
         "packages/analytics/src/index.ts",
         "packages/analytics/src/consent.ts",
         "packages/analytics/src/index.test.ts",
-        "docs/posthog.md"
+        "docs/posthog.md",
+        "docs/posthog-export.md"
       ],
       "adrs": [
         "docs/adr/0003-intent-evidence.md",
         "docs/adr/0005-tenancy-and-privacy.md",
-        "docs/adr/0006-orders-and-measurement.md"
+        "docs/adr/0006-orders-and-measurement.md",
+        "docs/adr/0013-posthog-export-boundary.md"
       ],
       "dependsOn": [
         "contracts"
       ],
-      "sourceFingerprint": "e1535c6f24c72095c59fcb8c2e4f1327064740e2e1d3d0887396c504ce357d12"
+      "sourceFingerprint": "b5fb39288dd7aba2ba1ad2dd630570d4f50ae02d8e0f124a7c251c560898b614"
     }
   ],
   "handoffs": [

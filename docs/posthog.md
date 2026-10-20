@@ -2,7 +2,7 @@
 
 This integration is a best-effort internal product-analytics channel, **not** the durable observation receipt or owner reporting source under [ADR 0003](adr/0003-intent-evidence.md). It never changes staff commands, database events, outbox processing or replay. Do not run both a browser mirror and future server mirror for the same action.
 
-**Setup status, October 19, 2026 (October 20 UTC):** the existing US project `675372`, currently named **Default project**, received synthetic events from both local staging builds. The [internal integration dashboard](https://us.posthog.com/project/675372/dashboard/2233365) is for staging only. The hosted Pages sites have not yet received this integration; final human PR approval and the normal release process still apply. Repository defaults keep analytics disabled.
+**Setup status, October 19, 2026 (October 20 UTC):** the existing US project `675372`, currently named **Default project**, received synthetic events from both hosted staging sites after the approved setup release. The [internal integration dashboard](https://us.posthog.com/project/675372/dashboard/2233365) is for staging only. Repository defaults keep analytics disabled; these deployments use explicit staging configuration. The separate [Supabase export](posthog-export.md) is prepared but not activated.
 
 ## What exists and what does not
 
@@ -75,12 +75,12 @@ Repository verification after reconciling the branches: **PASS** `pnpm check` (5
 
 ## Remaining owner and release actions
 
-1. **Human review:** obtain the required independent human approval comment on the final PR commit, merge through the documented release flow, and rebuild the frontends with their exact hosted origins. Repeat the consent/readback checks on the hosted URLs. A local preview is not a deployed release.
+1. **Staging release completed:** PRs #14 and #15 were merged under the user’s explicit delegated setup approval, disclosed as agent assistance rather than independent human inspection. Main commit `2a135faa4386fc3e1002aef3d1a150930e5ff9bf` was built and deployed to both staging sites. Live consent checks passed and both generated IDs were read back in PostHog. This one-time instruction does not change the normal human-review policy.
 2. **Administration:** Vivien can rename the project and confirm it remains staging-only. Confirm the actual billing plan, usage cap/alerts and who handles deletion requests. Billing was inaccessible to Member access; no account-specific spending limit was verified.
 3. **Privacy before real diners:** approve the public notice, region and retention/deletion policy. PostHog documents one-year event retention for Free and seven years for paid plans; it does not offer a shorter automatic retention setting. A 30-day proposal is therefore not implemented by this setup. A different policy needs an explicit, tested deletion process or a different collection decision. See [retention](https://posthog.com/docs/data/events-retention) and [data storage controls](https://posthog.com/docs/privacy/data-storage).
 4. **Real controls:** when menu controls ship, test each agreed trigger against pinned approved content and check one observation per actual action. Do not rename historical v1 portion events into general comparison events. Build the durable PostgreSQL evidence path separately; PostHog HTTP success is not its receipt.
 
-Team members need PostHog membership only if they will inspect its data or manage charts. Developers can use synthetic fixtures and intercepted tests without account access. Supabase access is separate: application users obtain permitted data through the backend, not through a browser service-role credential. This integration requires no personal PostHog API key or Supabase schema change.
+Team members need PostHog membership only if they will inspect its data or manage charts. Developers can use synthetic fixtures and intercepted tests without account access. Supabase access is separate: application users obtain permitted data through the backend, not through a browser service-role credential. Browser capture requires no personal PostHog API key. The separately requested [Supabase export](posthog-export.md) does require a private schema migration and its own restricted database login; hosted activation is pending.
 
 ## Internal analysis versus owner analytics
 
