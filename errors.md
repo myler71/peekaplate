@@ -150,3 +150,7 @@ These records describe local validation limits, not application failures.
 ```json
 {"kind":"automatic-check-observation","check":"test","timestamp":"2026-10-20T04:46:52.443Z","exitCode":1}
 ```
+
+```json
+{"id":"ERR-20261019-POSTHOG-003","status":"resolved","area":"sandbox-local-servers","references":{"check":"test","timestamp":"2026-10-20T04:46:52.443Z"},"cause":"The restricted execution context rejected loopback server binding with EPERM, preventing existing auth/local-harness test setup.","prevention":"Run local-server checks in an approved context that permits loopback listeners; do not weaken auth tests.","regression":"The permitted pnpm check rerun passed 50 application and 21 script tests; pnpm verify build and pnpm verify test:e2e passed, including four foundation and four intercepted analytics browser cases."}
+```
