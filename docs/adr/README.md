@@ -14,3 +14,6 @@ Accepted decisions express intent, not proof of completed implementation. Review
 | [0008](0008-agent-context-and-review.md) | Small grounded context and evidence-led review |
 
 - [0010 — Canonical repository and release branches](0010-canonical-repository-and-release-branches.md) — Proposed; migration review required.
+
+- [0011 — Deploy staging from the staging branch](0011-staging-environment-branch.md) — Accepted; supersedes ADR 0010 branch selection.
+- [0012 — Promote a main commit through staging and production](0012-main-environment-promotion.md) — Accepted; supersedes deployment branch selection in ADRs 0010 and 0011.

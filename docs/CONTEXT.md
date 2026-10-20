@@ -27,7 +27,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "diner",
       "status": "foundation",
-      "summary": "Static TypeScript/Vite shell usable without JavaScript. Rania's new Figma Design file is current diner visual direction; its wireframe export and selected frames were inspected, and FigJam supplies workflow context. Plan requires direct QR/menu entry, owner link, functional ingredient panel and truthful viewer fallback; none implemented. Initial JS/renderer checks exist; actual viewer, analytics and device evidence remain planned.",
+      "summary": "Static TypeScript/Vite foundation shell remains readable without JavaScript. Optional consent-gated PostHog shell views are wired; no published menu or dish controls exist. Dish intent adapter is tested but awaits real controls. See docs/posthog.md for activation and evidence limits.",
       "paths": [
         "frontend/diner/index.html",
         "frontend/diner/src/main.ts",
@@ -35,7 +35,8 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "frontend/diner/vite.config.ts",
         "scripts/check-bundle.mjs",
         "scripts/check-bundle.test.mjs",
-        "docs/frontend-design.md"
+        "docs/frontend-design.md",
+        "frontend/diner/package.json"
       ],
       "adrs": [
         "docs/adr/0004-visual-tiers.md"
@@ -43,16 +44,17 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "contracts"
       ],
-      "sourceFingerprint": "6d957a8f0f14a234eb73662eb02c52f1f3501f71b8548bbb11e682140f91d00c"
+      "sourceFingerprint": "277a8be5e4b45ef41eba68d87907024a6aa89c030677e64af388f97f6d5f5221"
     },
     {
       "id": "console",
       "status": "foundation",
-      "summary": "React/Vite staff shell. The Claude owner dashboard artifact is distinct from the Figma diner menu. Authentication, review, approval, publication, experiments and secured readouts remain planned; the public owner link will not grant private access. No real staff data or mutation control is exposed.",
+      "summary": "React/Vite staff shell with optional consent-gated PostHog technical shell views. Authentication, publication and restaurant-scoped owner reports remain planned; shell views do not establish owner identity or business activity.",
       "paths": [
         "frontend/console/src/main.tsx",
         "frontend/console/src/style.css",
-        "frontend/console/index.html"
+        "frontend/console/index.html",
+        "frontend/console/package.json"
       ],
       "adrs": [
         "docs/adr/0001-scope-and-repository.md",
@@ -61,12 +63,12 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "contracts"
       ],
-      "sourceFingerprint": "4fd9de39834180bc7771633d7fe52bdb34e71fed017ed7ae236bd90299ffe5da"
+      "sourceFingerprint": "76fee1388a2aa45d7ffaf13527a727816305f7038d4f48e0d17cb00181145893"
     },
     {
       "id": "backend",
       "status": "foundation",
-      "summary": "Hono Worker verifies configured staff JWTs and restaurant membership, then executes atomic dish revision commands under a restricted database role. Pure dish replay is effect-free. Local JWT/real Postgres/workerd tests cover the slice; genuine Supabase auth and Hyperdrive pooling remain a cloud checkpoint. No ingestion or publication endpoint.",
+      "summary": "Hono Worker verifies configured staff JWTs and current restaurant membership, then executes atomic dish revisions under a restricted database role. Staging API uses the Supabase issuer and uncached Hyperdrive. Bounded hosted tests passed genuine login, authorized writes, retries/concurrency, cross-restaurant denial and membership revocation; remote probes verified transaction-context reset and rollback. JWT logout revocation is bounded by expiry, not immediate. No ingestion or publication endpoint.",
       "paths": [
         "backend/src/index.ts",
         "backend/src/index.test.ts",
@@ -89,12 +91,12 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "contracts",
         "database"
       ],
-      "sourceFingerprint": "bb81da3c697f544c38f64e287ae9b4767204ba5a20625f399b38a17be05f7e3c"
+      "sourceFingerprint": "3919fa1e39fd43702f4ea6ccecef4804c79d0347b74ad89d113b8e29cdb7c13d"
     },
     {
       "id": "database",
       "status": "foundation",
-      "summary": "Private Postgres venue/event/command/outbox, actor-scoped memberships and tenant-scoped dish projections. Runtime grants cannot modify membership; share locks serialize revocation. Forward migration validates safe existing runtime-role attributes. Tests cover prior-schema upgrade, RLS, atomic commands and direct connection reuse; managed-provider role/pool verification remains required.",
+      "summary": "Private Postgres venue/event/command/outbox, actor-scoped memberships and tenant-scoped dish projections. Runtime grants cannot modify membership; share locks serialize revocation. Forward migration validates safe existing runtime-role attributes. Tests cover prior-schema upgrade, RLS, atomic commands and direct connection reuse; October 18 staging checks verified effective managed-provider grants and transaction-context reset; physical hosted pool reuse and restore evidence remain pending.",
       "paths": [
         "migrations/202610130001_foundation.sql",
         "tests/db/foundation.sql",
@@ -114,7 +116,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "measurement",
       "status": "planned",
-      "summary": "Planned venue-bound CSV/code linkage and observation pipeline. The source-linked implementation plan specifies screens, ingredient opportunities/activations, proposed v2 contracts/period anchors, database facts, every owner metric family, worked arithmetic and ordered parallel PRs. All eight FigJam pages are accounted for with precise review limits. Draft saves exist; ingestion, reports, imports and experiments do not.",
+      "summary": "Venue-bound redeem codes will link sessions to POS tickets. Unknown linkage stays unknown. Planned owner readout reports coverage and suppresses cells under ten sessions; frozen blocked-switchback assignment precedes causal claims. No POS or experiment implementation exists.",
       "paths": [
         "docs/delivery.md",
         "docs/implementation_plan.md"
@@ -125,12 +127,12 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "backend"
       ],
-      "sourceFingerprint": "b9f5f3e65bf72d986a560e49e910b745fafe069024d67cc60327ec8df89c8d4c"
+      "sourceFingerprint": "a292bc0c5001819c38c6dddbb4540eeb3cc4bde2626bc34aa91398f52304fc8d"
     },
     {
       "id": "delivery",
       "status": "foundation",
-      "summary": "Canonical main/develop contain the migrated local foundation, unchanged runtime, monthly dependency groups and existing CI/agent setup. Staging PR15 planning is restored with current manual-content scope. Next: owner-controlled Cloudflare Workers + Supabase integration, genuine identity/restricted-role/Hyperdrive checks. Private GitHub Free has no enforced branch or protected deployment-environment gates; workflow stays disabled. Publication, analytics and hosted pilot acceptance remain pending. The migration inventory links source PRs 13-16 and their preserved heads: policy carried, plan restored in canonical PR6, CRM/intake deferred for separate review.",
+      "summary": "Main supplies both environments under ADR 0012. Hosted staging foundation checks cover login, writes, retries, concurrency, tenant denial, membership revocation, rollback and context reset. Issued JWTs remain valid until expiry. Login UI, pilot/load/recovery checks and production remain pending. R2 assets are private and unbound; Actions is gated and GitHub Free controls remain manual. README/team guide explain setup and the accepted Python extension; no Python job exists. Optional PostHog shell capture is verified from local staging builds against the real project; hosted release awaits human review. ADR 0003 still governs durable evidence; PostHog is internal best-effort analytics. Detailed planning is preserved with the deployed foundation.",
       "paths": [
         "README.md",
         "SECURITY.md",
@@ -158,18 +160,23 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "docs/repository-migration.md",
         "docs/adr/0010-canonical-repository-and-release-branches.md",
         "docs/adr/README.md",
+        "docs/adr/0011-staging-environment-branch.md",
+        "docs/adr/0012-main-environment-promotion.md",
         "docs/implementation_plan.md",
-        "docs/delivery.md"
+        "docs/delivery.md",
+        "playwright.posthog.config.ts",
+        "tests/e2e/posthog.spec.ts"
       ],
       "adrs": [
-        "docs/adr/0007-delivery-and-recovery.md"
+        "docs/adr/0007-delivery-and-recovery.md",
+        "docs/adr/0012-main-environment-promotion.md"
       ],
       "dependsOn": [
         "diner",
         "console",
         "backend"
       ],
-      "sourceFingerprint": "593974749ab9a68e4ed514d6764847ff03b703da07efb94932a9cd816795010e"
+      "sourceFingerprint": "25f4a81896fbc2e19fa71ddf1b5f6f4a00e6f98409f446a93abb99024c984fb8"
     },
     {
       "id": "agents",
@@ -198,25 +205,72 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       ],
       "dependsOn": [],
       "sourceFingerprint": "6de26962de2dbd484415e39cd6bfbd2b73a4eaef589faa60ed34e2c70e4d3ead"
+    },
+    {
+      "id": "analytics",
+      "status": "foundation",
+      "summary": "Disabled-by-default optional PostHog capture with page consent, DNT/GPC, exact origin/mode guards, allowlisted v1 dish projection and bounded best-effort delivery. Local staging builds sent diner and console shell views to real US project 675372; matching records and propertyless processing were verified in PostHog. Hosted activation awaits human review and release. Real dish controls, canonical receipts and owner reports remain unimplemented. See docs/posthog.md for privacy, retention and admin limits.",
+      "paths": [
+        "packages/analytics/package.json",
+        "packages/analytics/tsconfig.json",
+        "packages/analytics/src/index.ts",
+        "packages/analytics/src/consent.ts",
+        "packages/analytics/src/index.test.ts",
+        "docs/posthog.md"
+      ],
+      "adrs": [
+        "docs/adr/0003-intent-evidence.md",
+        "docs/adr/0005-tenancy-and-privacy.md",
+        "docs/adr/0006-orders-and-measurement.md"
+      ],
+      "dependsOn": [
+        "contracts"
+      ],
+      "sourceFingerprint": "e1535c6f24c72095c59fcb8c2e4f1327064740e2e1d3d0887396c504ce357d12"
     }
   ],
   "handoffs": [
     {
-      "summary": "Added a separate source-PR handoff inventory with exact preserved heads, canonical setup successor, review/merge order and outstanding canonical PR dispositions. No source PR is closed and no deferred CRM/intake implementation is merged.",
+      "summary": "Reconciled PostHog PR 14 with deployed main configuration and PR 13 Python guidance. Verified real synthetic shell ingestion from both local builds and prepared the internal staging chart. Member access supports ingestion inspection and charts; restricted project/billing settings remain with an administrator. Existing database and backend behavior are unchanged.",
       "modules": [
+        "analytics",
+        "diner",
+        "console",
         "delivery"
       ],
-      "next": "Merge canonical setup PR6 before this tracker. Then start the owner-controlled Cloudflare Workers + Supabase checkpoint; keep source branches available until their authors confirm successor dispositions."
+      "next": "Obtain independent human approval on the final commit, merge into develop and release the reviewed candidate to main. Build with exact hosted staging origins, upload the two existing Pages projects and verify hosted readback. Confirm billing/deletion ownership before real diners. Design and actual dish/event implementation follow their tickets."
     },
     {
-      "summary": "Restored staging PR15 implementation plan, diner design reference and team guide into the canonical setup without replacing runtime, CI or agent profiles. Preserved canonical migration history and current architecture link; updated manual-content scope and provider handoff. Local setup and hosted readiness remain separate.",
+      "summary": "Clarified the existing staging setup for technical and nontechnical readers. Retained diner/console/API URLs, explained owner naming and each provider, corrected completed-check wording and linked newer planning/design references on develop. Added unassigned ticket boundaries and prerequisites; no runtime, cloud resource, credential or deployment change.",
       "modules": [
         "delivery",
         "diner",
-        "console",
-        "measurement"
+        "database"
       ],
-      "next": "Review and merge the setup PR, then connect Cloudflare Workers + Supabase through the operations checkpoint. Reconcile outstanding staging PRs separately; no provider credential, deployment or permission change is part of this handoff."
+      "next": "Agree weekly tickets from the deployed foundation. Start staff login/editing alongside three-dish preparation, diner fixture UI and event/metric contract review. Publication precedes real exposure; ingestion precedes live reports. Preserve pilot and production gates."
+    },
+    {
+      "summary": "PR #10 merged at bb56cef and API/Pages shells were deployed from that main revision. Hosted tests passed genuine Supabase login, atomic writes, retries/concurrency, cross-restaurant denial and membership revocation. Remote Hyperdrive probes passed context reset and rollback after an injected outbox failure. Logout rejected refresh but accepted the existing JWT until membership removal. Test membership was removed and ephemeral harnesses stopped. R2 staging is private; no paid upgrade or production deployment.",
+      "modules": [
+        "delivery",
+        "backend"
+      ],
+      "next": "Implement staff login UI and review/approval/immutable publication before diner exposure and ingestion. Design, manual assets and event-contract review can proceed in parallel. Before a real pilot, resolve session-lifetime policy, representative latency/load, recovery and cost/incident ownership. Production needs separate resources and release approval."
+    },
+    {
+      "summary": "Updated deployment selection to main for both environments per the maintainer's explicit instruction. Configured verified non-secret staging account, issuer and Hyperdrive bindings. Provider audit found existing Supabase migrations, forced RLS, restricted staging login, an ES256 public key and uncached Hyperdrive; no duplicate database branch was created. Hosted request behavior remains unverified.",
+      "modules": [
+        "delivery",
+        "backend"
+      ],
+      "next": "Review and test the staging configuration, run hosted identity and tenant-isolation checks, and record deployment evidence. Production requires separate resources and human release approval for the same tested main SHA."
+    },
+    {
+      "summary": "Aligned staging to application history through PR #5 and corrected manual deployment selection from develop to staging, including CI push coverage and release documentation. Provider inspection confirmed no Hyperdrive, Pages project or staging Worker; D1 resources do not replace PostgreSQL.",
+      "modules": [
+        "delivery"
+      ],
+      "next": "Configure the isolated staging Supabase/auth/Hyperdrive and frontend/API connections, supply scoped GitHub deployment credentials, then verify the deployed staging flow before activation or production promotion."
     },
     {
       "summary": "Prepared history-preserving core import, marketing split, develop CI, PR 13-derived ruleset proposals and disabled staging deployment gate. Reconciled all eight later source commits through b40e3ca, retaining their history and five updated planning links. Application runtime and backend bindings are unchanged. Owner chooses private GitHub Free; branch rules remain inactive and manual PR/CI gates apply.",
@@ -254,31 +308,6 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "diner"
       ],
       "next": "Confirm the provider decision and sprint scope with linked deliverables, reconcile the completed approval ticket with missing approval/publication code, recover local Docker and stop at the protected cloud-credential checkpoint before hosted integration."
-    },
-    {
-      "summary": "Added a plain-language team guide covering the product, current local command flow, every tracked file, verification, research and agent limits, and ordered next steps. Corrected the stale health-only security overview. Runtime behavior is unchanged.",
-      "modules": [
-        "delivery"
-      ],
-      "next": "Complete documentation review and exact-head CI, merge PR 9 under the owner instruction, then resolve local Docker readiness and the real Supabase/Hyperdrive credential-bound checks."
-    },
-    {
-      "summary": "Implemented the local PR 1 staff/dish command slice: strict contracts, signed JWT verification, current membership authorization, atomic events/projection/receipt/outbox, effect-free replay and local Worker/Postgres tooling. Cloud provisioning and live-provider checks remain explicitly blocked on credentials; no cloud resources created.",
-      "modules": [
-        "contracts",
-        "backend",
-        "database",
-        "delivery"
-      ],
-      "next": "PR 9 has passing Linux CI for 43 SQL assertions, 13 Worker/Postgres integration tests, the local CLI flow and 4 browser checks, plus 35 unit and 20 script tests. Two independent review lanes closed their findings. Obtain human review on the current head. Windows Docker still needs restart/readiness verification; real Supabase identity, provider roles and Hyperdrive pooling are the next credential boundary."
-    },
-    {
-      "summary": "Evaluated all five role prompts before rewriting README as professional repository documentation. Builder initially exceeded assigned ownership in its plan and bypassed the recorder in a proposed command; paired profiles were corrected and the same case passed in a fresh session. Published cases, outcomes and native-client limits; runtime and ADRs are unchanged.",
-      "modules": [
-        "delivery",
-        "agents"
-      ],
-      "next": "Complete native role discovery/tool-restriction checks in compatible authenticated clients. Continue the delivery plan with verified staff/venue authority and an atomic dish-revision command."
     }
   ]
 }

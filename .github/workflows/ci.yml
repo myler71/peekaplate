@@ -4,7 +4,7 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, edited, ready_for_review]
   push:
-    branches: [main, develop]
+    branches: [main, develop, staging]
 
 permissions:
   contents: read
@@ -47,10 +47,12 @@ jobs:
               - 'frontend/**'
               - 'backend/**'
               - 'packages/contracts/**'
+              - 'packages/analytics/**'
               - 'tests/e2e/**'
               - 'scripts/check-bundle*'
               - 'scripts/verify*'
               - 'playwright.config.ts'
+              - 'playwright.posthog.config.ts'
               - 'package.json'
               - 'pnpm-lock.yaml'
               - 'pnpm-workspace.yaml'
