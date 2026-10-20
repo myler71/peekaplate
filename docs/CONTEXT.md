@@ -44,7 +44,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "contracts"
       ],
-      "sourceFingerprint": "5174065869b70846c1e9a1da4f8351aaf073d241f3428ecb3480c8c5194efb7b"
+      "sourceFingerprint": "277a8be5e4b45ef41eba68d87907024a6aa89c030677e64af388f97f6d5f5221"
     },
     {
       "id": "console",
@@ -68,7 +68,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "backend",
       "status": "foundation",
-      "summary": "Hono Worker verifies configured staff JWTs and restaurant membership, then executes atomic dish revision commands under a restricted database role. Pure dish replay is effect-free. Local JWT/real Postgres/workerd tests cover the slice; genuine Supabase auth and Hyperdrive pooling remain a cloud checkpoint. No ingestion or publication endpoint.",
+      "summary": "Hono Worker verifies configured staff JWTs and current restaurant membership, then executes atomic dish revisions under a restricted database role. Staging API uses the Supabase issuer and uncached Hyperdrive. Bounded hosted tests passed genuine login, authorized writes, retries/concurrency, cross-restaurant denial and membership revocation; remote probes verified transaction-context reset and rollback. JWT logout revocation is bounded by expiry, not immediate. No ingestion or publication endpoint.",
       "paths": [
         "backend/src/index.ts",
         "backend/src/index.test.ts",
@@ -91,12 +91,12 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "contracts",
         "database"
       ],
-      "sourceFingerprint": "bb81da3c697f544c38f64e287ae9b4767204ba5a20625f399b38a17be05f7e3c"
+      "sourceFingerprint": "3919fa1e39fd43702f4ea6ccecef4804c79d0347b74ad89d113b8e29cdb7c13d"
     },
     {
       "id": "database",
       "status": "foundation",
-      "summary": "Private Postgres venue/event/command/outbox, actor-scoped memberships and tenant-scoped dish projections. Runtime grants cannot modify membership; share locks serialize revocation. Forward migration validates safe existing runtime-role attributes. Tests cover prior-schema upgrade, RLS, atomic commands and direct connection reuse; managed-provider role/pool verification remains required.",
+      "summary": "Private Postgres venue/event/command/outbox, actor-scoped memberships and tenant-scoped dish projections. Runtime grants cannot modify membership; share locks serialize revocation. Forward migration validates safe existing runtime-role attributes. Tests cover prior-schema upgrade, RLS, atomic commands and direct connection reuse; October 18 staging checks verified effective managed-provider grants and transaction-context reset; physical hosted pool reuse and restore evidence remain pending.",
       "paths": [
         "migrations/202610130001_foundation.sql",
         "tests/db/foundation.sql",
@@ -116,7 +116,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "measurement",
       "status": "planned",
-      "summary": "Planned venue-bound CSV/code linkage and observation pipeline. The source-linked implementation plan specifies screens, ingredient opportunities/activations, proposed v2 contracts/period anchors, database facts, every owner metric family, worked arithmetic and ordered parallel PRs. All eight FigJam pages are accounted for with precise review limits. Draft saves exist; ingestion, reports, imports and experiments do not.",
+      "summary": "Venue-bound redeem codes will link sessions to POS tickets. Unknown linkage stays unknown. Planned owner readout reports coverage and suppresses cells under ten sessions; frozen blocked-switchback assignment precedes causal claims. No POS or experiment implementation exists.",
       "paths": [
         "docs/delivery.md",
         "docs/implementation_plan.md"
@@ -127,12 +127,12 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "backend"
       ],
-      "sourceFingerprint": "b9f5f3e65bf72d986a560e49e910b745fafe069024d67cc60327ec8df89c8d4c"
+      "sourceFingerprint": "a292bc0c5001819c38c6dddbb4540eeb3cc4bde2626bc34aa91398f52304fc8d"
     },
     {
       "id": "delivery",
       "status": "foundation",
-      "summary": "Canonical main/develop contain the migrated local foundation, unchanged runtime, monthly dependency groups and existing CI/agent setup. Staging PR15 planning is restored with current manual-content scope. Next: owner-controlled Cloudflare Workers + Supabase integration, genuine identity/restricted-role/Hyperdrive checks. Private GitHub Free has no enforced branch or protected deployment-environment gates; workflow stays disabled. Publication, analytics and hosted pilot acceptance remain pending. The migration inventory links source PRs 13-16 and their preserved heads: policy carried, plan restored in canonical PR6, CRM/intake deferred for separate review.",
+      "summary": "Main supplies both environments under ADR 0012. API and both Pages shells are deployed to staging from bb56cef. CI, live smoke checks and bounded hosted staff-command acceptance passed, including genuine Supabase login, retries/concurrency, cross-restaurant denial, membership revocation and remote rollback/context-reset probes. Logout blocks refresh but issued JWTs remain valid until expiry. Login UI and pilot/load/recovery checks remain pending; production is unconfigured. Existing R2 staging assets are private and unbound. Actions remains gated; private GitHub Free controls remain manual. Team guide explains retained staging names, service responsibilities, manual release flow, costs and next-ticket dependencies; the detailed planning document remains on develop.",
       "paths": [
         "README.md",
         "SECURITY.md",
@@ -160,20 +160,23 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "docs/repository-migration.md",
         "docs/adr/0010-canonical-repository-and-release-branches.md",
         "docs/adr/README.md",
+        "docs/adr/0011-staging-environment-branch.md",
+        "docs/adr/0012-main-environment-promotion.md",
         "docs/implementation_plan.md",
         "docs/delivery.md",
         "playwright.posthog.config.ts",
         "tests/e2e/posthog.spec.ts"
       ],
       "adrs": [
-        "docs/adr/0007-delivery-and-recovery.md"
+        "docs/adr/0007-delivery-and-recovery.md",
+        "docs/adr/0012-main-environment-promotion.md"
       ],
       "dependsOn": [
         "diner",
         "console",
         "backend"
       ],
-      "sourceFingerprint": "4c2f15ad70a41644866f278ba051a3c4fffe997a49322b3d9465be83cbe03d50"
+      "sourceFingerprint": "a1ae6b7f08935f036a8ed042b01cf36e079d90f944315515e87b63be2fad17a9"
     },
     {
       "id": "agents",
@@ -238,21 +241,36 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "next": "Review PR into develop; configure separate PostHog projects and exact frontend build environments before an authorized staging deployment. Wire dish events only when real controls exist."
     },
     {
-      "summary": "Added a separate source-PR handoff inventory with exact preserved heads, canonical setup successor, review/merge order and outstanding canonical PR dispositions. No source PR is closed and no deferred CRM/intake implementation is merged.",
-      "modules": [
-        "delivery"
-      ],
-      "next": "Merge canonical setup PR6 before this tracker. Then start the owner-controlled Cloudflare Workers + Supabase checkpoint; keep source branches available until their authors confirm successor dispositions."
-    },
-    {
-      "summary": "Restored staging PR15 implementation plan, diner design reference and team guide into the canonical setup without replacing runtime, CI or agent profiles. Preserved canonical migration history and current architecture link; updated manual-content scope and provider handoff. Local setup and hosted readiness remain separate.",
+      "summary": "Clarified the existing staging setup for technical and nontechnical readers. Retained diner/console/API URLs, explained owner naming and each provider, corrected completed-check wording and linked newer planning/design references on develop. Added unassigned ticket boundaries and prerequisites; no runtime, cloud resource, credential or deployment change.",
       "modules": [
         "delivery",
         "diner",
-        "console",
-        "measurement"
+        "database"
       ],
-      "next": "Review and merge the setup PR, then connect Cloudflare Workers + Supabase through the operations checkpoint. Reconcile outstanding staging PRs separately; no provider credential, deployment or permission change is part of this handoff."
+      "next": "Agree weekly tickets from the deployed foundation. Start staff login/editing alongside three-dish preparation, diner fixture UI and event/metric contract review. Publication precedes real exposure; ingestion precedes live reports. Preserve pilot and production gates."
+    },
+    {
+      "summary": "PR #10 merged at bb56cef and API/Pages shells were deployed from that main revision. Hosted tests passed genuine Supabase login, atomic writes, retries/concurrency, cross-restaurant denial and membership revocation. Remote Hyperdrive probes passed context reset and rollback after an injected outbox failure. Logout rejected refresh but accepted the existing JWT until membership removal. Test membership was removed and ephemeral harnesses stopped. R2 staging is private; no paid upgrade or production deployment.",
+      "modules": [
+        "delivery",
+        "backend"
+      ],
+      "next": "Implement staff login UI and review/approval/immutable publication before diner exposure and ingestion. Design, manual assets and event-contract review can proceed in parallel. Before a real pilot, resolve session-lifetime policy, representative latency/load, recovery and cost/incident ownership. Production needs separate resources and release approval."
+    },
+    {
+      "summary": "Updated deployment selection to main for both environments per the maintainer's explicit instruction. Configured verified non-secret staging account, issuer and Hyperdrive bindings. Provider audit found existing Supabase migrations, forced RLS, restricted staging login, an ES256 public key and uncached Hyperdrive; no duplicate database branch was created. Hosted request behavior remains unverified.",
+      "modules": [
+        "delivery",
+        "backend"
+      ],
+      "next": "Review and test the staging configuration, run hosted identity and tenant-isolation checks, and record deployment evidence. Production requires separate resources and human release approval for the same tested main SHA."
+    },
+    {
+      "summary": "Aligned staging to application history through PR #5 and corrected manual deployment selection from develop to staging, including CI push coverage and release documentation. Provider inspection confirmed no Hyperdrive, Pages project or staging Worker; D1 resources do not replace PostgreSQL.",
+      "modules": [
+        "delivery"
+      ],
+      "next": "Configure the isolated staging Supabase/auth/Hyperdrive and frontend/API connections, supply scoped GitHub deployment credentials, then verify the deployed staging flow before activation or production promotion."
     },
     {
       "summary": "Prepared history-preserving core import, marketing split, develop CI, PR 13-derived ruleset proposals and disabled staging deployment gate. Reconciled all eight later source commits through b40e3ca, retaining their history and five updated planning links. Application runtime and backend bindings are unchanged. Owner chooses private GitHub Free; branch rules remain inactive and manual PR/CI gates apply.",
@@ -290,23 +308,6 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "diner"
       ],
       "next": "Confirm the provider decision and sprint scope with linked deliverables, reconcile the completed approval ticket with missing approval/publication code, recover local Docker and stop at the protected cloud-credential checkpoint before hosted integration."
-    },
-    {
-      "summary": "Added a plain-language team guide covering the product, current local command flow, every tracked file, verification, research and agent limits, and ordered next steps. Corrected the stale health-only security overview. Runtime behavior is unchanged.",
-      "modules": [
-        "delivery"
-      ],
-      "next": "Complete documentation review and exact-head CI, merge PR 9 under the owner instruction, then resolve local Docker readiness and the real Supabase/Hyperdrive credential-bound checks."
-    },
-    {
-      "summary": "Implemented the local PR 1 staff/dish command slice: strict contracts, signed JWT verification, current membership authorization, atomic events/projection/receipt/outbox, effect-free replay and local Worker/Postgres tooling. Cloud provisioning and live-provider checks remain explicitly blocked on credentials; no cloud resources created.",
-      "modules": [
-        "contracts",
-        "backend",
-        "database",
-        "delivery"
-      ],
-      "next": "PR 9 has passing Linux CI for 43 SQL assertions, 13 Worker/Postgres integration tests, the local CLI flow and 4 browser checks, plus 35 unit and 20 script tests. Two independent review lanes closed their findings. Obtain human review on the current head. Windows Docker still needs restart/readiness verification; real Supabase identity, provider roles and Hyperdrive pooling are the next credential boundary."
     }
   ]
 }
