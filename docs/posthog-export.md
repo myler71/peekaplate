@@ -2,7 +2,9 @@
 
 ## Status
 
-Migration `20261020070000` is applied to the existing Supabase staging database and recorded in its migration history. Both the raw table and deduplicated view exist. Dedicated login `peekaplate_posthog_staging` is created with the export-group membership. Effective checks confirmed append permission, no access to `app_private`, no update/delete/truncate or schema creation, and no `anon`, `authenticated` or application-runtime access to the analytics schema. **The scheduled export is not active: password entry and live connection remain pending.** No PostHog-to-Supabase transfer is claimed.
+Migration `20261020070000` is applied to the existing Supabase staging database and recorded in its migration history. Both the raw table and deduplicated view exist. Dedicated login `peekaplate_posthog_staging` is created with the export-group membership. Effective checks confirmed append permission, no access to `app_private`, no update/delete/truncate or schema creation, and no `anon`, `authenticated` or application-runtime access to the analytics schema. **The export is paused after its first live test failed TLS certificate verification.** No rows transferred. A corrected connection using the official Supabase CA certificate is awaiting project Admin action; password entry into the original connection did complete. On October 20, the operator reported PostHog rejected the correction with “Editing an existing integration requires project admin access.” Vivien must update the connection herself or grant the operator project Admin access. No permission bypass or successful transfer is claimed.
+
+Destination `01a15822-9737-0001-7711-d5a784eb2635` is configured for hourly Events exports, including only `app_shell_viewed` with `environment = staging`. The bounded test covered October 20, 2026, 06:00–07:00 UTC. Its backfill wrapper showed “Completed,” but the underlying run failed with `PostgreSQLConnectionError` / `certificate verify failed`; database readback confirmed zero raw and deduplicated rows. Always inspect the individual run and destination rows, not just the backfill wrapper.
 
 The diner and console staging sites already send optional shell-view observations to PostHog after consent. Real menu controls and the durable diner-evidence pipeline are separate tickets.
 
@@ -36,6 +38,8 @@ Exporting a row does not make it a verified restaurant fact. There is no owner d
 6. Enable the schedule only after the restricted connection succeeds. Backfill only the bounded synthetic test interval required for verification. Record the destination ID, schedule and successful run time without storing credentials.
 
 The precreated Events table needs only `SELECT, INSERT` and schema `USAGE`: the inspected exporter discovers the table before deciding whether to create it. If a provider update demands broader grants, investigate first. Do not grant general schema creation or application access as a shortcut.
+
+For this connection, the first attempt with system certificate authorities failed. Download the root certificate linked in **Supabase → Database → Settings → SSL configuration**, attach it in PostHog, and retain **Verify certificate authority and server hostname**. Re-run the bounded interval and verify destination rows before resuming the hourly schedule. Do not disable TLS verification to clear the error.
 
 ## Verify the actual transfer
 

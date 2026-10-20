@@ -96,7 +96,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "database",
       "status": "foundation",
-      "summary": "Private Postgres venue/event/command/outbox, actor-scoped memberships and tenant-scoped dish projections. Runtime grants cannot modify membership; share locks serialize revocation. Forward migration validates safe existing runtime-role attributes. Tests cover prior-schema upgrade, RLS, atomic commands and direct connection reuse; October 18 staging checks verified effective managed-provider grants and transaction-context reset; physical hosted pool reuse and restore evidence remain pending. Private PostHog landing table and conflict-aware deduplication view are migration-tested; hosted schema applied; export connection pending. Exporter is separate from app runtime.",
+      "summary": "Private Postgres venue/event/command/outbox, actor-scoped memberships and tenant-scoped dish projections. Runtime grants cannot modify membership; share locks serialize revocation. Forward migration validates safe existing runtime-role attributes. Tests cover prior-schema upgrade, RLS, atomic commands and direct connection reuse; October 18 staging checks verified effective managed-provider grants and transaction-context reset; physical hosted pool reuse and restore evidence remain pending. Private PostHog landing table and conflict-aware deduplication view are migration-tested; hosted schema applied; export paused after TLS verification failure. Exporter is separate from app runtime.",
       "paths": [
         "migrations/202610130001_foundation.sql",
         "tests/db/foundation.sql",
@@ -130,12 +130,12 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "backend"
       ],
-      "sourceFingerprint": "05ddafb1b2147c080752c6cbbcded324fed5bde3f4f840cf23f5f2b4ab6a33a2"
+      "sourceFingerprint": "a1db9286a3bb588838b7455f062dd0156740c94fb90d6a1f9fb9abd327c8206e"
     },
     {
       "id": "delivery",
       "status": "foundation",
-      "summary": "Main supplies staging and production under ADR 0012. Staging Pages, Worker, restricted Supabase/Hyperdrive and staff-command checks are recorded in operations. PRs 14/15 merged under explicit delegated setup approval; hosted PostHog shell views verified at main 2a135fa. Public repository main/develop remain unprotected. Private PostHog export activation is pending; product tickets can start from tested foundations.",
+      "summary": "Main supplies staging and production under ADR 0012. Staging Pages, Worker, restricted Supabase/Hyperdrive and staff-command checks are recorded in operations. PRs 14/15 merged under explicit delegated setup approval; hosted PostHog shell views verified at main 2a135fa. Public repository main/develop remain unprotected. Private PostHog export is paused after TLS verification failure; product tickets can start from tested foundations.",
       "paths": [
         "README.md",
         "SECURITY.md",
@@ -179,7 +179,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "8b01277c74d6451ed1e8f2d435a2e326aaf25687193f739a83d4890700b5a1fa"
+      "sourceFingerprint": "e6b1bebc44db2085fffead25f18cd53b7bca5a773f37d267eaa30dee42d1a2e5"
     },
     {
       "id": "agents",
@@ -212,7 +212,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "analytics",
       "status": "foundation",
-      "summary": "Consent-gated explicit PostHog capture: hosted diner/console shell views verified in staging. Dish adapter awaits real controls. Private Supabase export migration and duplicate/permission tests exist; hosted schema applied, export connection not activated. Optional untrusted observations remain separate from canonical evidence and owner authorization.",
+      "summary": "Consent-gated explicit PostHog capture: hosted diner/console shell views verified in staging. Dish adapter awaits real controls. Private Supabase export migration and duplicate/permission tests exist; hosted schema applied, export paused after TLS failure; correction requires project Admin access; zero rows transferred. Optional untrusted observations remain separate from canonical evidence and owner authorization.",
       "paths": [
         "packages/analytics/package.json",
         "packages/analytics/tsconfig.json",
@@ -231,7 +231,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "contracts"
       ],
-      "sourceFingerprint": "a2a05dcc72b9ab4d958d378ca10939de62e34f54b588894704d121d6b0547e9f"
+      "sourceFingerprint": "12b21587e97a540e463190044ffd79144934f95d0d44a271da631099e4d5f34e"
     }
   ],
   "handoffs": [
@@ -305,13 +305,13 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "next": "Confirm the provider decision and sprint scope with linked deliverables, reconcile the completed approval ticket with missing approval/publication code, recover local Docker and stop at the protected cloud-credential checkpoint before hosted integration."
     },
     {
-      "summary": "PRs 14/15 released hosted PostHog consented shell capture at main 2a135fa, verified by live synthetic capture and provider readback. Added private export landing migration, conflict-aware deduplication view and least-privilege tests. pnpm check and test:db pass; technical/security review found no supported defect and guide review corrections are applied. Hosted migration applied with explicit access approval; tables and effective role boundaries verified. Export credential/connection remain pending.",
+      "summary": "PRs 14/15 released hosted PostHog consented shell capture at main 2a135fa, verified by live synthetic capture and provider readback. Added private export landing migration, conflict-aware deduplication view and least-privilege tests. pnpm check and test:db pass; technical/security review found no supported defect and guide review corrections are applied. Hosted migration applied with explicit access approval; tables and effective role boundaries verified. Export connection created; first run failed TLS verification and schedule is paused. User reported correction requires project Admin access. No rows transferred; no bypass attempted.",
       "modules": [
         "analytics",
         "database",
         "delivery"
       ],
-      "next": "Access approval received and hosted migration applied. Hand off new credential entry, connect verified TLS, run bounded synthetic export/retry and read back Supabase rows. Design/menu/contracts tickets proceed independently. Update hosted status only with evidence."
+      "next": "Vivien must correct the connection or grant project Admin access. Complete the connection with the official Supabase CA, verify a bounded export and duplicate-safe retry, then resume schedule. Do not claim transfer success from backfill wrapper completion alone."
     }
   ]
 }
