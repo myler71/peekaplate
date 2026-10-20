@@ -12,6 +12,7 @@ Accepted decisions express intent, not proof of completed implementation. Review
 | [0006](0006-orders-and-measurement.md) | POS linkage and honest metrics |
 | [0007](0007-delivery-and-recovery.md) | Staging, migration, rollout and recovery gates |
 | [0008](0008-agent-context-and-review.md) | Small grounded context and evidence-led review |
+| [0013](0013-posthog-export-boundary.md) | Private PostHog export copy; duplicate-safe internal analysis |
 
 - [0010 — Canonical repository and release branches](0010-canonical-repository-and-release-branches.md) — Proposed; migration review required.
 

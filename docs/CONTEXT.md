@@ -96,7 +96,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "database",
       "status": "foundation",
-      "summary": "Private Postgres venue/event/command/outbox, actor-scoped memberships and tenant-scoped dish projections. Runtime grants cannot modify membership; share locks serialize revocation. Forward migration validates safe existing runtime-role attributes. Tests cover prior-schema upgrade, RLS, atomic commands and direct connection reuse; October 18 staging checks verified effective managed-provider grants and transaction-context reset; physical hosted pool reuse and restore evidence remain pending.",
+      "summary": "Private Postgres venue/event/command/outbox, actor-scoped memberships and tenant-scoped dish projections. Runtime grants cannot modify membership; share locks serialize revocation. Forward migration validates safe existing runtime-role attributes. Tests cover prior-schema upgrade, RLS, atomic commands and direct connection reuse; October 18 staging checks verified effective managed-provider grants and transaction-context reset; physical hosted pool reuse and restore evidence remain pending. Private PostHog landing table and conflict-aware deduplication view are migration-tested; hosted schema applied; export paused after TLS verification failure. Exporter is separate from app runtime.",
       "paths": [
         "migrations/202610130001_foundation.sql",
         "tests/db/foundation.sql",
@@ -104,14 +104,17 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "scripts/test-db.mjs",
         "scripts/test-db.test.mjs",
         "migrations/20261014210000_staff_commands.sql",
-        "tests/db/staff.sql"
+        "tests/db/staff.sql",
+        "migrations/20261020070000_posthog_exports.sql",
+        "tests/db/posthog.sql"
       ],
       "adrs": [
         "docs/adr/0002-selective-event-sourcing.md",
-        "docs/adr/0005-tenancy-and-privacy.md"
+        "docs/adr/0005-tenancy-and-privacy.md",
+        "docs/adr/0013-posthog-export-boundary.md"
       ],
       "dependsOn": [],
-      "sourceFingerprint": "59f97389cbaa95e02e355b4aaad030f9decd1701006f69fc09d83efcecbe487e"
+      "sourceFingerprint": "3e37b2753902f5d04e03a92dcf439a52a8082cf94a22fb61a3c9a92a211c1a12"
     },
     {
       "id": "measurement",
@@ -127,12 +130,12 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "backend"
       ],
-      "sourceFingerprint": "a292bc0c5001819c38c6dddbb4540eeb3cc4bde2626bc34aa91398f52304fc8d"
+      "sourceFingerprint": "a1db9286a3bb588838b7455f062dd0156740c94fb90d6a1f9fb9abd327c8206e"
     },
     {
       "id": "delivery",
       "status": "foundation",
-      "summary": "Main supplies both environments under ADR 0012. Hosted staging foundation checks cover login, writes, retries, concurrency, tenant denial, membership revocation, rollback and context reset. Issued JWTs remain valid until expiry. Login UI, pilot/load/recovery checks and production remain pending. R2 assets are private and unbound; Actions is gated and GitHub Free controls remain manual. README/team guide explain setup and the accepted Python extension; no Python job exists. Optional PostHog shell capture is verified from local staging builds against the real project; hosted release awaits human review. ADR 0003 still governs durable evidence; PostHog is internal best-effort analytics. Detailed planning is preserved with the deployed foundation.",
+      "summary": "Main supplies staging and production under ADR 0012. Staging Pages, Worker, restricted Supabase/Hyperdrive and staff-command checks are recorded in operations. PRs 14/15 merged under explicit delegated setup approval; hosted PostHog shell views verified at main 2a135fa. Public repository main/develop remain unprotected. Private PostHog export is paused after TLS verification failure; product tickets can start from tested foundations.",
       "paths": [
         "README.md",
         "SECURITY.md",
@@ -176,7 +179,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "e06f71365798054a3bd6cf150b6a70c1ff914040658b62dfcb35341ab73d5b8e"
+      "sourceFingerprint": "e6b1bebc44db2085fffead25f18cd53b7bca5a773f37d267eaa30dee42d1a2e5"
     },
     {
       "id": "agents",
@@ -209,37 +212,29 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "analytics",
       "status": "foundation",
-      "summary": "Disabled-by-default optional PostHog capture with page consent, DNT/GPC, exact origin/mode guards, allowlisted v1 dish projection and bounded best-effort delivery. Local staging builds sent diner and console shell views to real US project 675372; matching records and propertyless processing were verified in PostHog. Hosted activation awaits human review and release. Real dish controls, canonical receipts and owner reports remain unimplemented. See docs/posthog.md for privacy, retention and admin limits.",
+      "summary": "Consent-gated explicit PostHog capture: hosted diner/console shell views verified in staging. Dish adapter awaits real controls. Private Supabase export migration and duplicate/permission tests exist; hosted schema applied, export paused after TLS failure; correction requires project Admin access; zero rows transferred. Optional untrusted observations remain separate from canonical evidence and owner authorization.",
       "paths": [
         "packages/analytics/package.json",
         "packages/analytics/tsconfig.json",
         "packages/analytics/src/index.ts",
         "packages/analytics/src/consent.ts",
         "packages/analytics/src/index.test.ts",
-        "docs/posthog.md"
+        "docs/posthog.md",
+        "docs/posthog-export.md"
       ],
       "adrs": [
         "docs/adr/0003-intent-evidence.md",
         "docs/adr/0005-tenancy-and-privacy.md",
-        "docs/adr/0006-orders-and-measurement.md"
+        "docs/adr/0006-orders-and-measurement.md",
+        "docs/adr/0013-posthog-export-boundary.md"
       ],
       "dependsOn": [
         "contracts"
       ],
-      "sourceFingerprint": "e1535c6f24c72095c59fcb8c2e4f1327064740e2e1d3d0887396c504ce357d12"
+      "sourceFingerprint": "12b21587e97a540e463190044ffd79144934f95d0d44a271da631099e4d5f34e"
     }
   ],
   "handoffs": [
-    {
-      "summary": "Reconciled PostHog PR 14 with deployed main configuration and PR 13 Python guidance. Verified real synthetic shell ingestion from both local builds and prepared the internal staging chart. Member access supports ingestion inspection and charts; restricted project/billing settings remain with an administrator. Existing database and backend behavior are unchanged.",
-      "modules": [
-        "analytics",
-        "diner",
-        "console",
-        "delivery"
-      ],
-      "next": "Obtain independent human approval on the final commit, merge into develop and release the reviewed candidate to main. Build with exact hosted staging origins, upload the two existing Pages projects and verify hosted readback. Confirm billing/deletion ownership before real diners. Design and actual dish/event implementation follow their tickets."
-    },
     {
       "summary": "Clarified the existing staging setup for technical and nontechnical readers. Retained diner/console/API URLs, explained owner naming and each provider, corrected completed-check wording and linked newer planning/design references on develop. Added unassigned ticket boundaries and prerequisites; no runtime, cloud resource, credential or deployment change.",
       "modules": [
@@ -308,6 +303,15 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "diner"
       ],
       "next": "Confirm the provider decision and sprint scope with linked deliverables, reconcile the completed approval ticket with missing approval/publication code, recover local Docker and stop at the protected cloud-credential checkpoint before hosted integration."
+    },
+    {
+      "summary": "PRs 14/15 released hosted PostHog consented shell capture at main 2a135fa, verified by live synthetic capture and provider readback. Added private export landing migration, conflict-aware deduplication view and least-privilege tests. pnpm check and test:db pass; technical/security review found no supported defect and guide review corrections are applied. Hosted migration applied with explicit access approval; tables and effective role boundaries verified. Export connection created; first run failed TLS verification and schedule is paused. User reported correction requires project Admin access. No rows transferred; no bypass attempted.",
+      "modules": [
+        "analytics",
+        "database",
+        "delivery"
+      ],
+      "next": "Vivien must correct the connection or grant project Admin access. Complete the connection with the official Supabase CA, verify a bounded export and duplicate-safe retry, then resume schedule. Do not claim transfer success from backfill wrapper completion alone."
     }
   ]
 }
