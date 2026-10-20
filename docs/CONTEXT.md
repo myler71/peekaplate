@@ -132,7 +132,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "delivery",
       "status": "foundation",
-      "summary": "Main supplies both environments under ADR 0012. API and both Pages shells are deployed to staging from bb56cef. CI, live smoke checks and bounded hosted staff-command acceptance passed, including genuine Supabase login, retries/concurrency, cross-restaurant denial, membership revocation and remote rollback/context-reset probes. Logout blocks refresh but issued JWTs remain valid until expiry. Login UI and pilot/load/recovery checks remain pending; production is unconfigured. Existing R2 staging assets are private and unbound. Actions remains gated; private GitHub Free controls remain manual. Team guide explains retained staging names, service responsibilities, manual release flow, costs and next-ticket dependencies; the detailed planning document remains on develop.",
+      "summary": "Main supplies both environments under ADR 0012. Staging API and Pages shells run bb56cef; bounded hosted checks passed login, writes, retries, concurrency, tenant denial, membership revocation, rollback and context reset. Logout blocks refresh; issued JWTs remain valid until expiry. Login UI, pilot/load/recovery checks and production remain pending. R2 assets are private and unbound; Actions is gated and GitHub Free controls remain manual. README/team guide explain setup, next tickets and the accepted Python extension; no Python job exists. PostHog access/integration is pending, internal analysis is the proposed first use and ADR 0003 still governs durable evidence. Detailed planning remains on develop.",
       "paths": [
         "README.md",
         "SECURITY.md",
@@ -176,7 +176,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "a1ae6b7f08935f036a8ed042b01cf36e079d90f944315515e87b63be2fad17a9"
+      "sourceFingerprint": "79fffab13586dfe731e0d3836d6e26225cc63efa4790198450dd95fb08cba00a"
     },
     {
       "id": "agents",

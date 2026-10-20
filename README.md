@@ -24,17 +24,43 @@ The repository contains diner and staff-console shells and a staff-command slice
 | Shared contracts | Zod, TypeScript | Health, dish revision and initial dish-intent schemas |
 | Database | PostgreSQL, SQL, dbmate | Private venues, staff memberships, dish projections, events, receipts and outbox; restricted runtime role |
 | Processing and analysis | Python, uv, pytest | Accepted scope in [ADR 0001](docs/adr/0001-scope-and-repository.md); no job, package or runtime dependency implemented |
+| Product analytics | PostHog | Planned addition for diner-behaviour analysis; project access and integration are pending |
 
 Frontends and backend share contracts. Frontends do not import backend internals or hold database credentials. Authorization belongs to the backend; venue authority must derive from verified identity and membership. Database policies support this boundary; they do not authenticate callers.
 
 The accepted architecture separates two event paths:
 
 - **Domain events:** selected content, approval, publication, availability and experiment workflows use PostgreSQL event streams. Authorized commands commit events, current projections, retry results and outbox work atomically. Replay rebuilds projections without external effects.
-- **Diner observations:** a browser outbox sends stable event IDs to an ingest Worker. Queue acceptance precedes the client receipt; a consumer creates the R2 archive before indexing in PostgreSQL and acknowledging queue delivery. Exposure records identify the menu actually displayed. Unlinked order outcomes remain unknown.
+- **Diner observations (planned):** a browser outbox sends stable event IDs to an ingest Worker. Queue acceptance precedes the client receipt; a consumer creates the R2 archive before indexing in PostgreSQL and acknowledging queue delivery. Exposure records identify the menu actually displayed. Unlinked order outcomes remain unknown.
 
 Visual tiers are progressive enhancements: **T0** is the complete photo/text menu; **T1** adds shallow movement to reviewed photo cutouts; **T2** separates captured plating stages with limited viewpoints. Three.js is planned to load after an explicit tap. Menu access must survive analytics or viewer failure. The [frontend design reference](docs/frontend-design.md) records evolving design direction, not approved venue content or a completed visual specification.
 
 Detailed boundaries, failure handling and deferred capabilities are documented in [architecture](docs/architecture.md) and the [ADRs](docs/adr/README.md).
+
+### Python contributions
+
+The backend can include both TypeScript and Python. The existing TypeScript/Hono API owns staff authentication, restaurant permissions and application commands. Python is an accepted option for a concrete processing or analysis job, such as checking supplied photos, validating an import or preparing an analytical result. Adding Python does not require rewriting the API or replacing Supabase.
+
+Add the first Python component with its actual task, an isolated `uv` environment, a locked dependency set and `pytest` tests. A Python process cannot directly import the TypeScript/Zod contracts: define a versioned JSON request/result format and test both implementations against the same examples. Job requests must carry backend-authorized restaurant and input references; returned results must be checked against that job before any application change. Use the established command path for business changes rather than writing around permissions, event history or approval rules.
+
+Choose its runtime after checking the task's packages and resource needs:
+
+- **Cloudflare Python Worker:** an option for compatible, bounded work or calls to an external model service. It is a separate deployment, connected to the API through an authenticated interface or private service binding.
+- **Container or specialist compute service:** evaluate only when required libraries or workload limits rule out Workers. Running a model ourselves may need GPU compute; calling a model API does not. Deployment and cost approval are separate from adding Python source code.
+
+[Cloudflare's Python documentation](https://developers.cloudflare.com/workers/languages/python/) and [package compatibility guide](https://developers.cloudflare.com/workers/languages/python/packages/) describe the supported runtime. These are deployment options, not infrastructure already provisioned for this repository. Before staging integration, test timeout/failure handling, safe retries and duplicate results, tenant isolation and the TypeScript/Python data contract. Long processing must not block menu browsing. Existing `pnpm` commands do not install or run Python jobs; add scoped CI checks with the first implementation.
+
+The current visual workflow remains manual and reviewed. A Python task does not authorize automatic publication, invented ingredients or generated edible surfaces. See [ADR 0004](docs/adr/0004-visual-tiers.md).
+
+### PostHog and restaurant reports
+
+PostHog is planned for analysing diner behaviour, such as dish opens, ingredient clicks, comparisons and saves. These are candidate actions to align with the team's taxonomy; only the initial intent schemas exist today. The first proposed use is internal team analysis. No SDK, project configuration or tracking is installed, and the owner dashboard is not implemented.
+
+Integration requires project access, agreed event names/properties and anonymous-session rules, reviewed privacy/retention settings, and separation of synthetic staging data from real diner activity. Start with explicit useful actions; avoid recording every scroll or visual animation frame. Analytics failure must never prevent browsing. Event definitions and metric formulas still need tests: installing an SDK does not make a dish save proof of an order.
+
+PostgreSQL remains the application source of truth. [ADR 0003](docs/adr/0003-intent-evidence.md) still governs the planned durable diner-evidence path; this documentation does not replace it with PostHog or require duplicate browser collection. Before implementation, agree which events go to which destination and how retries are identified. A proposal to replace that path or serve owner reports from PostHog requires a new reviewed ADR, verified formulas and backend-enforced restaurant access. A chart filter is not tenant isolation.
+
+As checked on October 19, 2026, PostHog lists one million analytics events per month in its free allowance. For illustration, 300 menu visits/day × 40 events/visit × 30 days = 360,000 events; this is a planning example, not measured traffic. Track test traffic and automatic events too. Additional events can be dropped at free or configured billing limits, so check [current pricing and limits](https://posthog.com/pricing) before relying on the allowance. PostHog setup and any additional compute remain separate implementation tasks.
 
 ## Repository structure
 
