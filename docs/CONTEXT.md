@@ -96,7 +96,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "database",
       "status": "foundation",
-      "summary": "Private Postgres venue/event/command/outbox, actor-scoped memberships and tenant-scoped dish projections. Runtime grants cannot modify membership; share locks serialize revocation. Forward migration validates safe existing runtime-role attributes. Tests cover prior-schema upgrade, RLS, atomic commands and direct connection reuse; October 18 staging checks verified effective managed-provider grants and transaction-context reset; physical hosted pool reuse and restore evidence remain pending. Private PostHog landing table and conflict-aware deduplication view are migration-tested; hosted application/export pending. Exporter is separate from app runtime.",
+      "summary": "Private Postgres venue/event/command/outbox, actor-scoped memberships and tenant-scoped dish projections. Runtime grants cannot modify membership; share locks serialize revocation. Forward migration validates safe existing runtime-role attributes. Tests cover prior-schema upgrade, RLS, atomic commands and direct connection reuse; October 18 staging checks verified effective managed-provider grants and transaction-context reset; physical hosted pool reuse and restore evidence remain pending. Private PostHog landing table and conflict-aware deduplication view are migration-tested; hosted schema applied; export connection pending. Exporter is separate from app runtime.",
       "paths": [
         "migrations/202610130001_foundation.sql",
         "tests/db/foundation.sql",
@@ -130,7 +130,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "backend"
       ],
-      "sourceFingerprint": "0689d8f202fe8bfe56aa8ae8fb404b06d3323a1c2e99c7aeb85c4e5c69ef45c2"
+      "sourceFingerprint": "05ddafb1b2147c080752c6cbbcded324fed5bde3f4f840cf23f5f2b4ab6a33a2"
     },
     {
       "id": "delivery",
@@ -179,7 +179,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "b879ad8ada0b1331b95fca80901854f28774615939f4713f95322e38ec94b53c"
+      "sourceFingerprint": "8b01277c74d6451ed1e8f2d435a2e326aaf25687193f739a83d4890700b5a1fa"
     },
     {
       "id": "agents",
@@ -212,7 +212,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "analytics",
       "status": "foundation",
-      "summary": "Consent-gated explicit PostHog capture: hosted diner/console shell views verified in staging. Dish adapter awaits real controls. Private Supabase export migration and duplicate/permission tests exist; hosted export is not yet activated. Optional untrusted observations remain separate from canonical evidence and owner authorization.",
+      "summary": "Consent-gated explicit PostHog capture: hosted diner/console shell views verified in staging. Dish adapter awaits real controls. Private Supabase export migration and duplicate/permission tests exist; hosted schema applied, export connection not activated. Optional untrusted observations remain separate from canonical evidence and owner authorization.",
       "paths": [
         "packages/analytics/package.json",
         "packages/analytics/tsconfig.json",
@@ -231,20 +231,10 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "contracts"
       ],
-      "sourceFingerprint": "b5fb39288dd7aba2ba1ad2dd630570d4f50ae02d8e0f124a7c251c560898b614"
+      "sourceFingerprint": "a2a05dcc72b9ab4d958d378ca10939de62e34f54b588894704d121d6b0547e9f"
     }
   ],
   "handoffs": [
-    {
-      "summary": "Reconciled PostHog PR 14 with deployed main configuration and PR 13 Python guidance. Verified real synthetic shell ingestion from both local builds and prepared the internal staging chart. Member access supports ingestion inspection and charts; restricted project/billing settings remain with an administrator. Existing database and backend behavior are unchanged.",
-      "modules": [
-        "analytics",
-        "diner",
-        "console",
-        "delivery"
-      ],
-      "next": "Obtain independent human approval on the final commit, merge into develop and release the reviewed candidate to main. Build with exact hosted staging origins, upload the two existing Pages projects and verify hosted readback. Confirm billing/deletion ownership before real diners. Design and actual dish/event implementation follow their tickets."
-    },
     {
       "summary": "Clarified the existing staging setup for technical and nontechnical readers. Retained diner/console/API URLs, explained owner naming and each provider, corrected completed-check wording and linked newer planning/design references on develop. Added unassigned ticket boundaries and prerequisites; no runtime, cloud resource, credential or deployment change.",
       "modules": [
@@ -313,6 +303,15 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "diner"
       ],
       "next": "Confirm the provider decision and sprint scope with linked deliverables, reconcile the completed approval ticket with missing approval/publication code, recover local Docker and stop at the protected cloud-credential checkpoint before hosted integration."
+    },
+    {
+      "summary": "PRs 14/15 released hosted PostHog consented shell capture at main 2a135fa, verified by live synthetic capture and provider readback. Added private export landing migration, conflict-aware deduplication view and least-privilege tests. pnpm check and test:db pass; technical/security review found no supported defect and guide review corrections are applied. Hosted migration applied with explicit access approval; tables and effective role boundaries verified. Export credential/connection remain pending.",
+      "modules": [
+        "analytics",
+        "database",
+        "delivery"
+      ],
+      "next": "Access approval received and hosted migration applied. Hand off new credential entry, connect verified TLS, run bounded synthetic export/retry and read back Supabase rows. Design/menu/contracts tickets proceed independently. Update hosted status only with evidence."
     }
   ]
 }

@@ -24,7 +24,7 @@ The repository contains diner and staff-console shells and a staff-command slice
 | Shared contracts | Zod, TypeScript | Health, dish revision and initial dish-intent schemas |
 | Database | PostgreSQL, SQL, dbmate | Private venues, staff memberships, dish projections, events, receipts and outbox; restricted runtime role |
 | Processing and analysis | Python, uv, pytest | Accepted scope in [ADR 0001](docs/adr/0001-scope-and-repository.md); no job, package or runtime dependency implemented |
-| Product analytics | PostHog, shared TypeScript capture module | Opt-in shell views and tested v1 dish adapter; live ingestion verified from both hosted staging sites; private Supabase export migration prepared, activation pending. |
+| Product analytics | PostHog, shared TypeScript capture module | Opt-in shell views and tested v1 dish adapter; live ingestion verified from both hosted staging sites; private Supabase export tables created, connection activation pending. |
 
 Frontends and backend share contracts. Frontends do not import backend internals or hold database credentials. Authorization belongs to the backend; venue authority must derive from verified identity and membership. Database policies support this boundary; they do not authenticate callers.
 

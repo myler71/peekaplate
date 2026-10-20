@@ -2,7 +2,7 @@
 
 ## Status
 
-The repository now includes the landing-table migration and permission/duplicate tests. **The hosted migration and scheduled export are not yet activated.** Do not use this document as evidence that Supabase has received PostHog data. Update this status only after the checks below pass.
+Migration `20261020070000` is applied to the existing Supabase staging database and recorded in its migration history. Both the raw table and deduplicated view exist. Dedicated login `peekaplate_posthog_staging` is created with the export-group membership. Effective checks confirmed append permission, no access to `app_private`, no update/delete/truncate or schema creation, and no `anon`, `authenticated` or application-runtime access to the analytics schema. **The scheduled export is not active: password entry and live connection remain pending.** No PostHog-to-Supabase transfer is claimed.
 
 The diner and console staging sites already send optional shell-view observations to PostHog after consent. Real menu controls and the durable diner-evidence pipeline are separate tickets.
 
