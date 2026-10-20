@@ -1,6 +1,6 @@
 # PeekaPlate
 
-Canonical application repository: `vivienk/peekaplate` (private). Marketing lives in `vivienk/peekaplate-marketing`. Application migration and the initial staging deployment are complete; see the [migration and release checklist](docs/repository-migration.md) and [staging evidence](docs/operations.md#staging-deployment-record).
+Canonical application repository: `vivienk/peekaplate`. Marketing lives in `vivienk/peekaplate-marketing`. Application migration and the initial staging deployment are complete; see the [migration and release checklist](docs/repository-migration.md) and [staging evidence](docs/operations.md#staging-deployment-record).
 
 **3D is the hook. The loop is the product.**
 

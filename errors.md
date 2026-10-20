@@ -190,3 +190,7 @@ These records describe local validation limits, not application failures.
 ```json
 {"id":"OBS-20261019-POSTHOG-LIVE-001","status":"observation","area":"live-capture-verification","observation":"The first isolated browser probe timed out waiting for a capture response. Its cause was not captured and is not established.","followup":"Added sanitized request-failure diagnostics to the local probe. A rerun returned HTTP 200 for one diner and one console shell event; both matching records were read back in the real staging project.","limit":"No production traffic or application-code fix. The passing examples prove connectivity, not a delivery guarantee. Retain bounded failure behavior; investigate if this recurs.","sources":["docs/posthog.md","packages/analytics/src/index.ts"]}
 ```
+
+```json
+{"id":"ERR-20261019-RELEASE-001","status":"resolved","area":"release-context","cause":"The release merge included a newer main README edit, so the delivery fingerprint calculated on the feature head no longer matched the proposed merged tree.","prevention":"Check the release merge tree against the reviewed head, preserve target-branch edits, and refresh affected context before promotion.","regression":"Merged the current main README change into the release candidate and refreshed the delivery fingerprint; context validation must pass on the resulting release tree.","evidence":"https://github.com/vivienk/peekaplate/actions/runs/39381320009","sources":["README.md","docs/CONTEXT.md"]}
+```
