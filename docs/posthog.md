@@ -1,6 +1,8 @@
 # Optional PostHog product analytics
 
-This integration is disabled until an operator supplies a real project token, host, environment and exact frontend origin. It is a best-effort internal product-analytics channel, **not** the durable observation receipt or owner reporting source under [ADR 0003](adr/0003-intent-evidence.md). It never changes staff commands, database events, outbox processing or replay. Do not run both a browser mirror and future server mirror for the same action.
+This integration is a best-effort internal product-analytics channel, **not** the durable observation receipt or owner reporting source under [ADR 0003](adr/0003-intent-evidence.md). It never changes staff commands, database events, outbox processing or replay. Do not run both a browser mirror and future server mirror for the same action.
+
+**Setup status, October 19, 2026 (October 20 UTC):** the existing US project `675372`, currently named **Default project**, received synthetic events from both local staging builds. The [internal integration dashboard](https://us.posthog.com/project/675372/dashboard/2233365) is for staging only. The hosted Pages sites have not yet received this integration; final human PR approval and the normal release process still apply. Repository defaults keep analytics disabled.
 
 ## What exists and what does not
 
@@ -13,14 +15,16 @@ The [implementation plan](implementation_plan.md#5-proposed-event-contract-exact
 ## Privacy and failure behavior
 
 - Consent is off initially and exists only in page memory; reloading requires a fresh choice. No cookie, localStorage, sessionStorage, fingerprint or cross-device identity is created. A random page-scoped ID is generated only when capture starts. Withdrawal aborts pending requests and discards identity; already transmitted events cannot be unsent.
-- DNT and GPC prevent capture and are checked for every attempt. A newly observed privacy signal revokes consent. PostHog receives the network connection IP even though the payload sets `$ip=null` and disables GeoIP; configure project-level IP discard before enabling. Do not describe this as completely anonymous transport.
+- DNT and GPC prevent capture and are checked for every attempt. A blocked capture attempt revokes consent. PostHog receives the network connection IP even though the payload sets `$ip=null` and disables GeoIP; project-level IP discard must also be enabled. Do not describe this as completely anonymous transport.
 - Only explicit capture API requests are made. No JavaScript SDK, autocapture, replay, heatmaps, automatic pageviews, identity/account properties, remote settings, feature flags, DOM text, query strings or referrer enrichment. Requests omit credentials/referrers and reject redirects.
 - Properties are constructed from an allowlist. The adapter excludes the evidence session ID, timestamps, arbitrary renderer strings, experiment arm/block text and all unknown properties. This deliberately loses evidence context and cannot replace the complete canonical event. PostHog person-profile processing is disabled.
 - Four in-flight requests maximum, a three-second timeout, 500 attempts per page and at-most-once attempts per dish event ID. Failure returns a bounded result; no retries, persistent queue, console payload logs or blocking UI. Lost events, reloads, opt-outs, blockers and capped traffic mean counts are incomplete. `sent` means HTTP success, not verified ingestion or a durable evidence receipt.
 
 ## Separate staging and production configuration
 
-Create two PostHog projects: PeekaPlate Staging and PeekaPlate Production. Copy each **public project ingestion token** (`phc_…`) from project settings; never put a personal API key, project secret, database key or service-role key in `VITE_*`. Public ingestion tokens are intentionally included in browser bundles. No genuine token is committed or fabricated here.
+Reuse project `675372` for staging; do not create a duplicate. A later production release needs a separate project and token. PostHog's free organization supports one project, so confirm the actual plan and approve any required cost before adding another. This task made no upgrade. Vivien can rename the existing project **PeekaPlate Staging** without changing its token or integration. See [project separation and limits](https://posthog.com/docs/settings/projects).
+
+Copy the **public project ingestion token** (`phc_…`) from the intended project's settings; never put a personal API key, project secret, database key or service-role key in `VITE_*`. Public ingestion tokens are intentionally included in browser bundles. The real test configuration is in ignored local build files, not committed to Git. The token permits event submission, not reading project data.
 
 Start from each frontend's `.env.example`. Supply build-time values independently for diner and console:
 
@@ -44,29 +48,43 @@ pnpm --filter @peekaplate/console exec vite build --mode staging
 
 Production uses `--mode production` with separately supplied values. The ordinary `pnpm build` remains safe with analytics disabled when no values are provided. These are static Vite builds: setting provider runtime variables **after** uploading assets cannot change tracking; rebuild and upload the reviewed artifacts. To disable, set `VITE_POSTHOG_ENABLED=false`, rebuild and redeploy both surfaces. Do not enable the existing Worker deployment workflow for this frontend-only integration.
 
-## Current environment audit (October 19, 2026)
+## Verified setup and release boundary
 
-Read-only GitHub inspection found `main`, `develop` and `staging` diverged, with no enforced protection on those branches, no Actions environments, and no repository variable/secret entries. This PR starts from `develop` per CONTRIBUTING and changes none of those branch refs or provider resources. Reconcile release branches through a separate reviewed release PR. Main's newer operations document records existing directly uploaded staging deployments; this task independently confirmed HTTP success for:
+PR 14 began from `develop`. Its setup update incorporates the existing `main` deployment configuration and PR 13's Python guidance so that integration does not remove the deployed foundation or leave contradictory documentation. Feature review still targets `develop`; a reviewed release then reaches `main`. Only an exact reviewed `main` commit supplies shared staging, under [ADR 0012](adr/0012-main-environment-promotion.md).
+
+Existing hosted services were checked independently:
 
 - [Diner staging](https://peekaplate-diner-staging.pages.dev/): foundation message, no published menu.
 - [Console staging](https://peekaplate-console-staging.pages.dev/): staff shell and asset references.
 - [API health](https://peekaplate-api-staging.vxkong.workers.dev/health): foundation health response.
 
-The frontend allowed origins are those two Pages origins respectively. No production application URL or production project credentials were verified. The marketing domain is not the core diner app. PR 13 separately proposes Python/PostHog documentation; reconcile its “not installed” wording after this implementation merges. This PR does not include or supersede that contributor's Python work.
+The frontend allowed origins for release are those two Pages origins respectively. No production application URL or production PostHog project was verified. The marketing domain is not the core diner app. No Worker, database, migration or R2 change is needed for this optional frontend capture.
 
-## Manual PostHog workspace steps and validation
+Observed provider and runtime checks:
 
-1. An organization administrator creates/selects the two projects and chooses their data region. Provide project access to internal analysts only, with least privilege. No PostHog connector or project credentials were available for this task.
-2. In each project's privacy settings, enable **Discard client IP data**, confirm GeoIP is unnecessary, and keep replay/autocapture and person-profile enrichment off. Agree retention and deletion ownership before enabling; the architecture's 30-day proposal is not an approved retention policy. Update the site's privacy notice for PostHog, opt-in, region, retention and deletion handling.
-3. Set the real public tokens and hosts in separate build environments as above, then rebuild a reviewed commit. Keep query/personal API credentials server-only if a future authorized reporting service needs them; this integration needs no query credential.
-4. On staging, inspect browser Network and PostHog Live events together. Before consent: zero requests. Opt in: one `app_shell_viewed`, correct `surface`, `environment=staging`, no URLs/account fields and no person profile. Reload: no automatic capture. Opt out: no subsequent capture. DNT/GPC: no capture. Block the host: the screen remains usable. Confirm no event appears in the production project.
-5. When real dish controls ship, repeat known actions with pinned approved references and verify one v1 event per actual interaction. Never use synthetic fixtures against production. Confirm client caps, blockers and opt-in missingness in any analysis.
+- Sai has Member access: event inspection and dashboard creation work; project settings and billing are restricted. No permission workaround is necessary for integration testing.
+- **Discard client IP data** was already on in project privacy settings. It was inspected, not changed. Payloads also disable GeoIP and person-profile processing.
+- Isolated Chromium opened real local builds on ports 4177 and 4178. Before consent there were no capture requests. Opt-in produced HTTP 200 for one diner and one console `app_shell_viewed`; opt-out and reload produced no further requests.
+- PostHog's event list showed both matching generated page IDs. Stored properties included `environment=staging`, the correct surface, `evidence_status=unverified_client_observation` and no URL/account fields. The inspected raw record used `person_mode=propertyless`; GeoIP was disabled.
+- Brave's active privacy signal kept capture off. The user's privacy preference was not changed.
+- The first live capture probe timed out; a later instrumented run passed for both surfaces. The initial cause was not established. These checks demonstrate connectivity and the tested privacy behavior, not delivery reliability or complete analytics counts.
 
-Tests intercept a clearly labelled synthetic project token; they do not establish real PostHog ingestion, workspace settings, retention or dashboard creation. Those remain manual acceptance gates.
+Automated repository browser tests intercept synthetic capture requests. The separate live checks above establish real project ingestion only for the stated synthetic examples. No production or real-diner data was sent.
+
+Repository verification after reconciling the branches: **PASS** `pnpm check` (50 application tests, 21 script tests, types, lint, context and local links); **PASS** `pnpm verify build test:e2e` (both builds, Worker dry-run and eight browser cases); **PASS** `pnpm verify test:db` (43 pgTAP assertions, 13 Worker/database integration cases and the local demo lifecycle). These checks do not establish production readiness, load capacity or the future menu journey.
+
+## Remaining owner and release actions
+
+1. **Human review:** obtain the required independent human approval comment on the final PR commit, merge through the documented release flow, and rebuild the frontends with their exact hosted origins. Repeat the consent/readback checks on the hosted URLs. A local preview is not a deployed release.
+2. **Administration:** Vivien can rename the project and confirm it remains staging-only. Confirm the actual billing plan, usage cap/alerts and who handles deletion requests. Billing was inaccessible to Member access; no account-specific spending limit was verified.
+3. **Privacy before real diners:** approve the public notice, region and retention/deletion policy. PostHog documents one-year event retention for Free and seven years for paid plans; it does not offer a shorter automatic retention setting. A 30-day proposal is therefore not implemented by this setup. A different policy needs an explicit, tested deletion process or a different collection decision. See [retention](https://posthog.com/docs/data/events-retention) and [data storage controls](https://posthog.com/docs/privacy/data-storage).
+4. **Real controls:** when menu controls ship, test each agreed trigger against pinned approved content and check one observation per actual action. Do not rename historical v1 portion events into general comparison events. Build the durable PostgreSQL evidence path separately; PostHog HTTP success is not its receipt.
+
+Team members need PostHog membership only if they will inspect its data or manage charts. Developers can use synthetic fixtures and intercepted tests without account access. Supabase access is separate: application users obtain permitted data through the backend, not through a browser service-role credential. This integration requires no personal PostHog API key or Supabase schema change.
 
 ## Internal analysis versus owner analytics
 
-Create an internal “Integration health” dashboard in staging with event count of `app_shell_viewed`, broken down by `surface` and filtered to `environment=staging`. Label it **opted-in placeholder page views**, not unique diners/owners. The generated distinct ID measures a page lifetime, not a visit or person. Repeat capture after toggling consent can add another technical view.
+The internal [Integration health - staging dashboard](https://us.posthog.com/project/675372/dashboard/2233365) counts `app_shell_viewed`, broken down by `surface` and filtered to `environment=staging`. It labels these **opted-in placeholder page views**, not unique diners/owners. The generated distinct ID measures a page lifetime, not a visit or person. Repeat capture after toggling consent can add another technical view. Do not use the provider's generic starter dashboard as proof of menu usage; its automatic events are not collected here.
 
 Once real dish callers exist, exploratory counts of `dish_open` and `portion_compare` can be broken down by `dish_revision_hash` and displayed tier. These are client observations, not verified restaurant facts, consideration rates or orders. Do not expose PostHog shared dashboards to restaurant owners or use client fields as tenant authority. The public ingestion API can be spoofed.
 

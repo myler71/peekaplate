@@ -1,6 +1,6 @@
 # PeekaPlate: team guide
 
-Infrastructure updated October 18, 2026; Python and analytics guidance updated October 19. The team research and board inventory below remains the dated October 14 snapshot.
+Infrastructure updated October 18, 2026; Python and PostHog setup guidance updated October 19 (verification recorded October 20 UTC). The team research and board inventory below remains the dated October 14 snapshot.
 
 PeekaPlate is meant to help a restaurant explain its food and learn how people use its menu. The team has been researching that idea and designing the experience. Sai started the code setup. We now have the project structure, checks for new code, and one tested way to save a staff member's draft dish change.
 
@@ -41,7 +41,7 @@ The visual experience is one part of this loop. Accurate food information, a usa
 | Saving a dish | Backend draft-save flow tested locally and online with Supabase identity | Connecting it to the staff screen |
 | Food visuals | Design direction and written rules | Reviewed assets and the optional interactive viewer |
 | Diner tracking | Initial rules for event data | Collecting, storing and reporting actual browsing actions |
-| PostHog analytics | Planned addition; access and integration pending | Connect agreed diner events and verify useful reports |
+| PostHog analytics | Opt-in tracking code; real test events verified in the staging PostHog project from local builds | Reviewed hosted release, then connect actual menu controls as they are built |
 | Python processing | Accepted extension in the architecture | Implement, test and choose a runtime for the first specific job |
 | Owner report | Research/design requirements | A report built from real, permitted evidence |
 
@@ -229,9 +229,11 @@ Before connecting a job to staging, test a successful result, bad input, a timeo
 
 ### What PostHog adds, and what it does not
 
-**PostHog is a planned analytics tool, not an installed part of staging yet.** It can turn recorded actions into charts and show where people stop along a journey. For example, the team could examine menu visits, dish opens and dish saves. An event means one recorded action, not one customer or one sale. Anonymous tracking does not require a diner account, but it does not establish a person's real identity or reliably recognise them across devices. [PostHog's anonymous-event documentation](https://posthog.com/docs/data/anonymous-vs-identified-events) explains that distinction.
+**The PostHog connection is implemented and has received real test events from local builds. It is awaiting a reviewed release to the hosted staging pages.** For now, the two screens are starter pages. Clicking **Allow optional analytics** sends one `app_shell_viewed` event: a small record saying which screen was viewed and that this is staging. PostHog turns those records into an internal chart. It does not mean a diner opened a published menu or ordered food.
 
-The first proposed use is for the team to understand diner behaviour. The event list must follow [Adam's taxonomy and measurement plan](https://app.clickup.com/90141746115/docs/2kydvry3-1494?view=open) and the [implementation plan](https://github.com/vivienk/peekaplate/blob/develop/docs/implementation_plan.md), including ingredient interactions and comparisons where those controls exist. Agree names, when an event fires and the dish/menu version it refers to before wiring buttons. Turning on generic click tracking does not deliver that specification.
+The flow is **page → consent check → PostHog → internal chart**. It does not pass through Supabase, and it does not change the trusted database records. Tracking starts off, stops when withdrawn, and resets when the page reloads. Browser privacy signals can block it. The menu must work even if PostHog is unavailable.
+
+When the real menu is built, its actions must follow [Adam's taxonomy and measurement plan](https://app.clickup.com/90141746115/docs/2kydvry3-1494?view=open) and the [implementation plan](implementation_plan.md), including ingredient interactions and comparisons. Agree the names, exact triggers and content versions before wiring each control. The current v1 adapter is tested for `dish_open` and `portion_compare`; it has no real dish-control caller yet. A general dish comparison must not be labelled as physical portion measurement.
 
 These responsibilities remain separate:
 
@@ -239,14 +241,18 @@ These responsibilities remain separate:
 | --- | --- |
 | Main backend and Supabase | Permissions and trusted application records, including dish revision history |
 | Planned diner-evidence pipeline | Recoverable observations of the exact content shown, under [ADR 0003](adr/0003-intent-evidence.md) |
-| PostHog | Planned tools for exploring behaviour and building analytics charts |
+| PostHog | Optional internal charts; current test events describe starter-page views |
 | Owner dashboard | A future product screen with agreed calculations and access restricted to the owner's restaurant |
 
 PostHog can supply analytics through an API, but using it for owner reports is still a decision to review. A filter saying "Restaurant A" is not a security boundary. Our backend must establish which restaurant the signed-in owner can access. The current durable-event plan remains in place until a new architecture decision explicitly changes it. Decide the collection route before implementation so one action is not accidentally recorded twice.
 
 **Capacity example:** 300 menu visits per day, with 40 events per visit over 30 days, would produce 360,000 events. PostHog lists a one-million-event monthly free allowance as checked on October 19, 2026. That should leave room for a small pilot under these assumptions; it is not a forecast or an unlimited service. Include test and automatically collected events in usage, and monitor the allowance because extra events can be dropped when a free or configured billing limit is reached. See [current pricing](https://posthog.com/pricing).
 
-**What is needed next:** obtain access to the PeekaPlate PostHog project, agree the collection route and event definitions, review privacy/retention settings, and distinguish test data from real diner activity. Then connect a few working menu actions and check the resulting counts against known examples. The menu must remain usable when analytics is blocked or unavailable. The Python work can progress separately once its first task is defined; it does not depend on PostHog access.
+**Where to see it:** the [internal staging dashboard](https://us.posthog.com/project/675372/dashboard/2233365) uses Vivien's existing US project, currently named **Default project**. Only synthetic staging activity belongs there. Members can inspect events and create charts; administrators control project settings and billing. The public ingestion token lets the app send events but does not give anyone permission to read analytics. Contributors can run the normal local app with tracking disabled; they do not all need cloud credentials.
+
+**Files behind this:** [analytics/index.ts](../packages/analytics/src/index.ts) checks configuration and consent, builds the allowed event fields and limits network requests. [analytics/consent.ts](../packages/analytics/src/consent.ts) provides the opt-in button. [diner/main.ts](../frontend/diner/src/main.ts) and [console/main.tsx](../frontend/console/src/main.tsx) connect it to each screen. [Unit tests](../packages/analytics/src/index.test.ts) and [browser tests](../tests/e2e/posthog.spec.ts) check allowed, blocked and failed capture. [posthog.md](posthog.md) is the operator's setup and verification record.
+
+**What comes next:** finish review and release the staging builds; then finalize the diner design states, build approved menu controls and connect their agreed events. The durable evidence pipeline and owner calculations remain separate implementation work. Vivien can rename the project **PeekaPlate Staging** later and confirm billing and retention ownership; Member access was enough to test the connection and prepare the internal chart. Before real diner use, approve the privacy notice and deletion policy. Python work can proceed separately once its first job is defined.
 
 ### What T0, T1 and T2 mean
 

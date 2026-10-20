@@ -186,3 +186,7 @@ These records describe local validation limits, not application failures.
 ```json
 {"id":"ERR-20261019-DOCS-001","status":"resolved","area":"context-documentation","references":{"check":"context:check","timestamp":"2026-10-19T22:41:42.253Z"},"cause":"Appending guidance exceeded the delivery node's 1000-character summary limit; context refresh and the first full check correctly rejected it.","prevention":"Keep node summaries below the validator's limit, put details in source docs and stop dependent checks if context refresh fails.","regression":"Shortened the summary without changing implementation status. pnpm context:refresh and pnpm check passed, including context validation, local links, 35 application tests and 21 repository-script tests. No runtime fix was needed.","sources":["docs/CONTEXT.md","scripts/context.mjs"]}
 ```
+
+```json
+{"id":"OBS-20261019-POSTHOG-LIVE-001","status":"observation","area":"live-capture-verification","observation":"The first isolated browser probe timed out waiting for a capture response. Its cause was not captured and is not established.","followup":"Added sanitized request-failure diagnostics to the local probe. A rerun returned HTTP 200 for one diner and one console shell event; both matching records were read back in the real staging project.","limit":"No production traffic or application-code fix. The passing examples prove connectivity, not a delivery guarantee. Retain bounded failure behavior; investigate if this recurs.","sources":["docs/posthog.md","packages/analytics/src/index.ts"]}
+```

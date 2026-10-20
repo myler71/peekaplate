@@ -132,7 +132,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "delivery",
       "status": "foundation",
-      "summary": "Main supplies both environments under ADR 0012. Staging API and Pages shells run bb56cef; bounded hosted checks passed login, writes, retries, concurrency, tenant denial, membership revocation, rollback and context reset. Logout blocks refresh; issued JWTs remain valid until expiry. Login UI, pilot/load/recovery checks and production remain pending. R2 assets are private and unbound; Actions is gated and GitHub Free controls remain manual. README/team guide explain setup, next tickets and the accepted Python extension; no Python job exists. PostHog access/integration is pending, internal analysis is the proposed first use and ADR 0003 still governs durable evidence. Detailed planning remains on develop.",
+      "summary": "Main supplies both environments under ADR 0012. Hosted staging foundation checks cover login, writes, retries, concurrency, tenant denial, membership revocation, rollback and context reset. Issued JWTs remain valid until expiry. Login UI, pilot/load/recovery checks and production remain pending. R2 assets are private and unbound; Actions is gated and GitHub Free controls remain manual. README/team guide explain setup and the accepted Python extension; no Python job exists. Optional PostHog shell capture is verified from local staging builds against the real project; hosted release awaits human review. ADR 0003 still governs durable evidence; PostHog is internal best-effort analytics. Detailed planning is preserved with the deployed foundation.",
       "paths": [
         "README.md",
         "SECURITY.md",
@@ -176,7 +176,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "79fffab13586dfe731e0d3836d6e26225cc63efa4790198450dd95fb08cba00a"
+      "sourceFingerprint": "25f4a81896fbc2e19fa71ddf1b5f6f4a00e6f98409f446a93abb99024c984fb8"
     },
     {
       "id": "agents",
@@ -209,7 +209,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "analytics",
       "status": "foundation",
-      "summary": "Disabled-by-default optional PostHog capture with explicit page consent, DNT/GPC, exact origin/mode guards, allowlisted v1 dish projection and bounded best-effort delivery. Both shells emit app_shell_viewed only after consent. No real project credentials, ingestion verification, canonical receipts or owner reports.",
+      "summary": "Disabled-by-default optional PostHog capture with page consent, DNT/GPC, exact origin/mode guards, allowlisted v1 dish projection and bounded best-effort delivery. Local staging builds sent diner and console shell views to real US project 675372; matching records and propertyless processing were verified in PostHog. Hosted activation awaits human review and release. Real dish controls, canonical receipts and owner reports remain unimplemented. See docs/posthog.md for privacy, retention and admin limits.",
       "paths": [
         "packages/analytics/package.json",
         "packages/analytics/tsconfig.json",
@@ -226,19 +226,19 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "contracts"
       ],
-      "sourceFingerprint": "2e20cca094103b9d4f671f0b5fca3b9e44fb00600d2b568a37df6b6ba64386e8"
+      "sourceFingerprint": "e1535c6f24c72095c59fcb8c2e4f1327064740e2e1d3d0887396c504ce357d12"
     }
   ],
   "handoffs": [
     {
-      "summary": "Added optional privacy-gated PostHog capture for existing shells and tested v1 dish adapter. Real dish controls and owner reports do not exist; canonical evidence architecture is unchanged. Separate project tokens, project privacy review and live staging ingestion remain required.",
+      "summary": "Reconciled PostHog PR 14 with deployed main configuration and PR 13 Python guidance. Verified real synthetic shell ingestion from both local builds and prepared the internal staging chart. Member access supports ingestion inspection and charts; restricted project/billing settings remain with an administrator. Existing database and backend behavior are unchanged.",
       "modules": [
         "analytics",
         "diner",
         "console",
         "delivery"
       ],
-      "next": "Review PR into develop; configure separate PostHog projects and exact frontend build environments before an authorized staging deployment. Wire dish events only when real controls exist."
+      "next": "Obtain independent human approval on the final commit, merge into develop and release the reviewed candidate to main. Build with exact hosted staging origins, upload the two existing Pages projects and verify hosted readback. Confirm billing/deletion ownership before real diners. Design and actual dish/event implementation follow their tickets."
     },
     {
       "summary": "Clarified the existing staging setup for technical and nontechnical readers. Retained diner/console/API URLs, explained owner naming and each provider, corrected completed-check wording and linked newer planning/design references on develop. Added unassigned ticket boundaries and prerequisites; no runtime, cloud resource, credential or deployment change.",

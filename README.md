@@ -24,7 +24,7 @@ The repository contains diner and staff-console shells and a staff-command slice
 | Shared contracts | Zod, TypeScript | Health, dish revision and initial dish-intent schemas |
 | Database | PostgreSQL, SQL, dbmate | Private venues, staff memberships, dish projections, events, receipts and outbox; restricted runtime role |
 | Processing and analysis | Python, uv, pytest | Accepted scope in [ADR 0001](docs/adr/0001-scope-and-repository.md); no job, package or runtime dependency implemented |
-| Product analytics | PostHog | Planned addition for diner-behaviour analysis; project access and integration are pending |
+| Product analytics | PostHog, shared TypeScript capture module | Opt-in shell views and tested v1 dish adapter; real staging-project ingestion verified from local builds. Hosted activation awaits release review. |
 
 Frontends and backend share contracts. Frontends do not import backend internals or hold database credentials. Authorization belongs to the backend; venue authority must derive from verified identity and membership. Database policies support this boundary; they do not authenticate callers.
 
@@ -54,13 +54,13 @@ The current visual workflow remains manual and reviewed. A Python task does not 
 
 ### PostHog and restaurant reports
 
-PostHog is planned for analysing diner behaviour, such as dish opens, ingredient clicks, comparisons and saves. These are candidate actions to align with the team's taxonomy; only the initial intent schemas exist today. The first proposed use is internal team analysis. No SDK, project configuration or tracking is installed, and the owner dashboard is not implemented.
+PostHog provides optional internal product analytics. The shared `packages/analytics` module sends explicit capture requests without an SDK, automatic click tracking or session replay. After a visitor opts in, each existing shell can send `app_shell_viewed`. This means a placeholder screen was opened; it is not a menu visit, a signed-in owner or a sale. The tested v1 adapter supports `dish_open` and `portion_compare`, but real dish controls are not built or connected yet.
 
-Integration requires project access, agreed event names/properties and anonymous-session rules, reviewed privacy/retention settings, and separation of synthetic staging data from real diner activity. Start with explicit useful actions; avoid recording every scroll or visual animation frame. Analytics failure must never prevent browsing. Event definitions and metric formulas still need tests: installing an SDK does not make a dish save proof of an order.
+The existing US PostHog project is reserved for synthetic staging checks. Real events from local diner and console builds have been read back in PostHog; the hosted pages still require a reviewed release. Consent starts off, resets on reload and respects browser privacy signals. Missing or mismatched configuration disables capture. Read [setup, verification and remaining release gates](docs/posthog.md) before enabling it. Ingredient interactions, selections and comparisons must follow the agreed taxonomy when their actual controls ship.
 
-PostgreSQL remains the application source of truth. [ADR 0003](docs/adr/0003-intent-evidence.md) still governs the planned durable diner-evidence path; this documentation does not replace it with PostHog or require duplicate browser collection. Before implementation, agree which events go to which destination and how retries are identified. A proposal to replace that path or serve owner reports from PostHog requires a new reviewed ADR, verified formulas and backend-enforced restaurant access. A chart filter is not tenant isolation.
+PostgreSQL remains the application source of truth. [ADR 0003](docs/adr/0003-intent-evidence.md) governs the planned durable diner-evidence path. PostHog is a best-effort analytics copy; it does not replace that path or add PostHog tables to Supabase. Use one PostHog sending route per action, never both browser and server mirrors. Serving owner reports from PostHog would require a new reviewed ADR, verified formulas and backend-enforced restaurant access. A chart filter is not tenant isolation.
 
-As checked on October 19, 2026, PostHog lists one million analytics events per month in its free allowance. For illustration, 300 menu visits/day × 40 events/visit × 30 days = 360,000 events; this is a planning example, not measured traffic. Track test traffic and automatic events too. Additional events can be dropped at free or configured billing limits, so check [current pricing and limits](https://posthog.com/pricing) before relying on the allowance. PostHog setup and any additional compute remain separate implementation tasks.
+As checked on October 19, 2026, PostHog lists one million analytics events per month in its free allowance. For illustration, 300 menu visits/day × 40 events/visit × 30 days = 360,000 events; this is a planning example, not measured traffic. Track test traffic too. Check [current pricing and limits](https://posthog.com/pricing) before relying on the allowance. The organization's actual billing plan and spending limits require an administrator to confirm; this setup purchased no upgrade.
 
 ## Repository structure
 

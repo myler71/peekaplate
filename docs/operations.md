@@ -111,6 +111,16 @@ The repository owner supplies real account values and enables controls before au
 
 Production is a separate decision with separate credentials/resources. There is no production deployment workflow in this foundation.
 
+## Optional PostHog staging release
+
+The existing US PostHog project `675372` is used only for synthetic staging data. Local staging builds sent verified diner and console shell views; this does not mean the hosted Pages deployments contain the integration yet. The [setup record](posthog.md) identifies current access, privacy settings, the internal dashboard and remaining approval gates.
+
+After the final PR receives independent human approval and the release reaches `main`, build that exact commit with `--mode staging`. Supply the five `VITE_POSTHOG_*` values from each frontend's `.env.example`; use its exact Pages origin and the staging project's public ingestion token. Build-time configuration is required: runtime variables cannot change uploaded static JavaScript. Never add personal API keys or database secrets to these values.
+
+Upload only `frontend/diner/dist` and `frontend/console/dist` to their existing, explicitly named Pages projects, using `--branch main` and the reviewed commit hash. No Worker, database or migration deployment is required for PostHog. Verify zero capture before consent, one correct event after opt-in, withdrawal/reload, browser privacy blocking and real PostHog readback on both hosted URLs. Record deployment IDs and the exact SHA. To roll back analytics, rebuild with `VITE_POSTHOG_ENABLED=false` and redeploy, or restore the previous reviewed Pages release.
+
+Member access is sufficient for these synthetic checks and internal charts. An administrator still needs to confirm project naming, staging-only use, the actual billing limits and deletion responsibility. No paid upgrade was purchased. Production requires its own project and release approval; real diner collection also needs an approved privacy/retention policy.
+
 ## GitHub merge controls
 
 The current owner chooses GitHub Free and private repositories. GitHub does not enable branch protection/rulesets for these private repos on this plan, so `main` and `develop` remain unenforced. The ruleset files below are retained for a future plan change, not presented as active policy. For now, keep write access limited; require reviewed PRs, passing `ci`, and an independent human approval comment before merges; preserve migration/release history with merge commits. These are team process controls, not GitHub enforcement, and admins can bypass them. Protect production credentials in provider settings and keep production promotion behind explicit human release sign-off. Configuration files and CODEOWNERS do not establish enforcement.
