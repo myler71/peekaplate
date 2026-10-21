@@ -68,7 +68,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "backend",
       "status": "foundation",
-      "summary": "Hono Worker verifies configured staff JWTs and current restaurant membership, then executes atomic dish revisions under a restricted database role. Staging API uses the Supabase issuer and uncached Hyperdrive. Bounded hosted tests passed genuine login, authorized writes, retries/concurrency, cross-restaurant denial and membership revocation; remote probes verified transaction-context reset and rollback. JWT logout revocation is bounded by expiry, not immediate. No ingestion or publication endpoint. Added staging/local-only team analytics GET endpoints with verified individual sessions, fixed server project, strict seven-day/100-row bounds and DB reader grants. No direct runtime analytics SELECT; safe response schemas remove visitor/person/IP fields. Hosted activation pending.",
+      "summary": "Hono Worker verifies configured staff JWTs and current restaurant membership, then executes atomic dish revisions under a restricted database role. Staging API uses the Supabase issuer and uncached Hyperdrive. Bounded hosted tests passed genuine login, authorized writes, retries/concurrency, cross-restaurant denial and membership revocation; remote probes verified transaction-context reset and rollback. JWT logout revocation is bounded by expiry, not immediate. No ingestion or publication endpoint. Added staging/local-only team analytics GET endpoints with individual GitHub tokens, live fixed-repository collaborator checks, fixed server project and strict seven-day/100-row bounds. No direct runtime analytics SELECT; safe response schemas remove visitor/person/IP fields. Hosted activation pending.",
       "paths": [
         "backend/src/index.ts",
         "backend/src/index.test.ts",
@@ -82,7 +82,9 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "backend/local.test.mjs",
         "backend/package.json",
         "backend/src/team-analytics.ts",
-        "backend/src/team-analytics.test.ts"
+        "backend/src/team-analytics.test.ts",
+        "backend/src/team-auth.ts",
+        "backend/src/team-auth.test.ts"
       ],
       "adrs": [
         "docs/adr/0002-selective-event-sourcing.md",
@@ -94,12 +96,12 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "contracts",
         "database"
       ],
-      "sourceFingerprint": "ca194438d278188308a758dc569fd970697d073a9162407f4cd0e2246b21b6ef"
+      "sourceFingerprint": "77cb68920d844e6544413d589c2afbd2d882eb19aab137613916bd8b0580af62"
     },
     {
       "id": "database",
       "status": "foundation",
-      "summary": "Private Postgres venue/event/command/outbox, actor-scoped memberships and tenant-scoped dish projections. Runtime grants cannot modify membership; share locks serialize revocation. Tests cover prior-schema upgrade, RLS, atomic commands and direct connection reuse; hosted grants/context reset verified, physical pool reuse and restore pending. Private PostHog landing table and conflict-aware view are migration-tested and applied. Exporter is separate from app runtime. Restricted PostHog pooler authentication, two successful hosted exports, actual deduplicated view and effective grants verified. Eight raw copies yield four unique events; hourly schedule enabled. See docs/posthog-export.md for evidence limits. New forward migration defines private per-user project grants and fixed read function owned by a non-login reader; runtime only receives function execution. Hosted migration not applied.",
+      "summary": "Private Postgres venue/event/command/outbox, actor-scoped memberships and tenant-scoped dish projections. Runtime grants cannot modify membership; share locks serialize revocation. Tests cover prior-schema upgrade, RLS, atomic commands and direct connection reuse; hosted grants/context reset verified, physical pool reuse and restore pending. Private PostHog landing table and conflict-aware view are migration-tested and applied. Exporter is separate from app runtime. Restricted PostHog pooler authentication, two successful hosted exports, actual deduplicated view and effective grants verified. Eight raw copies yield four unique events; hourly schedule enabled. See docs/posthog-export.md for evidence limits. New forward migration defines operator-controlled staging project scope and fixed read function owned by a non-login reader; runtime only receives function execution. Hosted migration not applied.",
       "paths": [
         "migrations/202610130001_foundation.sql",
         "tests/db/foundation.sql",
@@ -120,7 +122,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "docs/adr/0014-team-analytics-access.md"
       ],
       "dependsOn": [],
-      "sourceFingerprint": "09f0c604b96895c01843c0a3a79dba129ad4c85cefd093266f35ddeae6d9428b"
+      "sourceFingerprint": "c0c9ad16cf42340cde0603f6b7282f5fa8a42e37960e4639410b334d854830f3"
     },
     {
       "id": "measurement",
@@ -185,7 +187,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "19a9ec3df8c5b68d8b968641d83f95890cf957a69cd3ce1ac0c73f7da8e81add"
+      "sourceFingerprint": "fe5f75b4b4fa0fd71d2270bf157bcca32cad8d1fce961d84bdefe01887693fc9"
     },
     {
       "id": "agents",
@@ -218,7 +220,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "analytics",
       "status": "foundation",
-      "summary": "Consent-gated explicit PostHog capture: hosted diner/console shell views verified in staging. Dish adapter awaits real controls. Private export schema and duplicate/permission tests exist. Two hosted exports of one synthetic interval passed: eight raw copies, four deduplicated events, known diner/console records each matched once, no missing/conflicting/out-of-scope rows. Restricted grants verified; hourly schedule enabled. Next automatic run not observed. Hourly internal copy does not power live owner reports; validated evidence/projections and owner authorization remain planned. Internal inspection API returns safe deduplicated records/counts after per-user authorization; no PostHog management token or owner-report endpoint.",
+      "summary": "Consent-gated explicit PostHog capture: hosted diner/console shell views verified in staging. Dish adapter awaits real controls. Private export schema and duplicate/permission tests exist. Two hosted exports of one synthetic interval passed: eight raw copies, four deduplicated events, known diner/console records each matched once, no missing/conflicting/out-of-scope rows. Restricted grants verified; hourly schedule enabled. Next automatic run not observed. Hourly internal copy does not power live owner reports; validated evidence/projections and owner authorization remain planned. Internal inspection API returns safe deduplicated records/counts after live repo-collaborator authorization; no PostHog management token or owner-report endpoint.",
       "paths": [
         "packages/analytics/package.json",
         "packages/analytics/tsconfig.json",
@@ -239,7 +241,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "contracts"
       ],
-      "sourceFingerprint": "828b0365caa3f5b085be78b373545943dbe55c02784e63f8a8001debf0c86efa"
+      "sourceFingerprint": "bb94daf29a260d4b169fd5a61422a20f32ab61bfd79464d6565f227f0aa095d1"
     }
   ],
   "handoffs": [
@@ -314,7 +316,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "next": "Review PR 18 and merge under the human-comment policy. Jeffin owns contract/collection decisions; Zhiliang wires approved real UI events with tests. Each adds a ticket comment with PR and evidence when done. Observe the next automatic export; confirm monitoring, retention/deletion and billing limits before real diner data. Owner evidence pipeline/projections/API remain product work. Handoff drafts are local and unsent."
     },
     {
-      "summary": "Added a staged team analytics read API over the hourly PostHog Supabase copy. Reuses Supabase JWT verification and restricted Hyperdrive. New forward migration gives runtime only checked function execution; users require operator-managed project reader grants. GitHub API reports repository write/no admin, no environments and no repository Actions secrets. Provider migration, reviewed release and teammate grants are not yet activated. No shared credential distributed.",
+      "summary": "Added staging-only team analytics GET APIs over the hourly PostHog Supabase copy. All current vivienk/peekaplate collaborators are eligible through individual GitHub user tokens and uncached identity/collaboration checks. Staff Supabase authentication is unchanged. A private fixed SQL function bounds staging scope and safe fields; runtime still cannot SELECT raw analytics. GitHub has no configured environments/secrets and current operator lacks admin. Hosted migration, checker secret, reviewed release and live authorization tests remain unactivated.",
       "modules": [
         "backend",
         "contracts",
@@ -322,7 +324,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "analytics",
         "delivery"
       ],
-      "next": "Finish local DB/browser/build tests, pinned authorization/correctness review and PR. Admin creates staging GitHub environment and supplies scoped Cloudflare deployment token; operator applies migration, deploys reviewed main SHA, performs hosted positive/negative/revocation checks, then enrolls approved individual Auth users. Owner reports and real UI tracking remain separate tickets."
+      "next": "Finish final DB/build/browser verification and two read-only reviewers, then open a single PR against develop. Vivien creates staging environment; supply scoped Cloudflare token plus repository Metadata-read TEAM_GITHUB_TOKEN to GitHub environment secrets. Deploy reviewed main release with checker secret, apply forward migration and verify collaborator/non-collaborator/removal behavior. No manual teammate allowlist or Supabase account enrollment required."
     }
   ]
 }

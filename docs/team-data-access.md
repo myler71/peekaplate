@@ -2,12 +2,14 @@
 
 ## What teammates receive
 
-Use one Cloudflare Worker API URL with an individual Supabase Auth session. A database operator grants that user's UUID access to the staging PostHog project. Repository collaboration, PostHog membership and application access are separate permissions. No shared API password, database login, export password, service-role key or Cloudflare token is distributed to contributors.
+All current collaborators of `vivienk/peekaplate` are eligible, including new collaborators added later. Authenticate with your own GitHub user token; the Worker asks GitHub to verify the token's identity and checks collaborator status on every request. Public repository visibility, a username or a Supabase account alone never grants access. Removed collaborators fail the next membership check. Provider errors/rate limits fail closed. There is no cached member list and no three/four-person allowlist.
+
+No database login, export password, service-role key or shared team API password is distributed. Internal GitHub authentication is separate from the existing Supabase staff/restaurant login, which remains unchanged.
 
 ```mermaid
 flowchart LR
-  LOGIN["Individual Supabase sign-in"] --> API["Worker verifies session"]
-  API --> GRANT["Check current staging reader grant"]
+  LOGIN["Individual GitHub token"] --> API["Worker verifies GitHub identity"]
+  API --> GRANT["Check current repo collaborator status"]
   PH["PostHog: hourly export"] --> DB["Supabase: deduplicated observations"]
   GRANT --> DB
   DB --> SAFE["Bounded safe events or technical counts"]
@@ -17,55 +19,43 @@ These endpoints inspect optional staging observations. Counts describe captured 
 
 ## API contract
 
-Both endpoints require `Authorization: Bearer <your own Supabase access token>`:
+Both endpoints require `Authorization: Bearer <your own GitHub user token>`:
 
 | Endpoint | Result |
 | --- | --- |
 | `GET /team/analytics/events?from=2026-10-20T06:00:00Z&until=2026-10-20T07:00:00Z&limit=50` | Latest safe, deduplicated event records; default 50, maximum 100; `truncated=true` means the window contains more records. Narrow the time range to inspect them. |
 | `GET /team/analytics/summary?from=2026-10-20T06:00:00Z&until=2026-10-20T07:00:00Z` | Event counts grouped by event name and diner/console surface, using the same eligible records. |
 
-Use UTC `Z` timestamps with a positive range of at most seven days. The range includes `from` and excludes `until`. Duplicate or unknown query parameters are rejected. The server selects the PostHog project; callers cannot choose actor, role, project or SQL. Responses are `no-store` and identify the source as `posthog_supabase_export`, the environment as `staging`, and freshness as `hourly_export_delay`. `computedAt` is query time, not the last successful import time. A zero count does not prove collection was complete.
+Use UTC `Z` timestamps with a positive range of at most seven days. The range includes `from` and excludes `until`. Duplicate or unknown query parameters are rejected. The server selects the PostHog project; callers cannot choose a GitHub username, actor, role, project or SQL. Responses are `no-store` and identify the source as `posthog_supabase_export`, the environment as `staging`, and freshness as `hourly_export_delay`. `computedAt` is query time, not the last successful import time. A zero count does not prove collection was complete.
 
 An event contains `id`, `event`, `timestamp`, `surface` and an allowlisted `properties` object. Supported properties are `schema_version`, `event_id`, `publication_hash`, `dish_revision_hash`, `displayed_tier`, `manifest_hash` and `availability_version`, when valid and present. No `distinct_id`, person fields, IP, URL or arbitrary properties are returned. Currently hosted capture/export includes only `app_shell_viewed`; `dish_open` and `portion_compare` require real UI callers and an intentional export-filter update.
 
-Errors: 401 means missing/invalid session; 403 means no current reader grant; 400 means invalid query; 503 means configuration, database or response-validation failure. The endpoints return 404 outside explicitly configured local/staging Workers. This API has no data-write or grant-administration endpoint, no arbitrary SQL and no permissive browser CORS. Use a local API client; a future browser inspector must have reviewed origin controls.
+Errors: 401 means missing/invalid GitHub user token; 403 means not a current repository collaborator; 400 means invalid query; 503 means configuration, database or response-validation failure. The endpoints return 404 outside explicitly configured local/staging Workers. This API has no data-write or grant-administration endpoint, no arbitrary SQL and no permissive browser CORS. Use a local API client; a future browser inspector must have reviewed origin controls.
 
 ## How a teammate uses it
 
-1. An operator creates or invites an individual user in **Supabase Authentication**, then grants that user's UUID below. Each user sets their own credentials. PostHog invitations alone do not create this account.
-2. In a local API client such as Postman, sign in with `POST <SUPABASE_URL>/auth/v1/token?grant_type=password`, header `apikey: <project publishable/anon key>` and JSON body containing your own `email` and `password`. Keep this request and the returned session private; do not sync credentials into a public collection or attach results to tickets. Authentication happens directly with Supabase; this Worker does not collect passwords.
-3. Use the returned `access_token` as the Bearer token for the two GET requests. When it expires, sign in again or use the normal Supabase refresh flow. Never commit or share access/refresh tokens.
-4. Test in PostHog first; the Supabase inspection API will reflect data only after an export succeeds. Check the [export run history and recovery notes](posthog-export.md).
+1. Accept the repository collaborator invitation. PostHog membership remains a separate invitation if you need its event browser; this API does not administer PostHog or grant database dashboard access.
+2. Use a personal, expiring GitHub user token in your local API client's Bearer authorization field. A fine-grained token with public-repository read/metadata access is sufficient for the caller identity lookup; no code-write or administration scope is required. Do not use the shared deployment/checker token or a GitHub Actions bot token. GitHub CLI users may use their own existing authenticated credential locally, but must never print or attach it to tickets, chat or shared collections. Revoke it if exposed.
+3. Call the two GET endpoints with the required UTC window. Keep authorization in your API client's private/local secret storage. No separate Supabase account or database password is needed for this internal tool.
+4. Test capture in PostHog first; Supabase will reflect it only after a successful hourly export. Check the [export run history and recovery notes](posthog-export.md).
 
-Base URL after the reviewed release is deployed: `https://peekaplate-api-staging.vxkong.workers.dev`. Availability is a separate release check; a PR or successful local test does not activate a hosted endpoint.
+Base URL after the reviewed release is deployed: `https://peekaplate-api-staging.vxkong.workers.dev`. A PR/local test does not activate a hosted endpoint. There is no browser sign-in screen in this slice; use a local API client. A future UI must use a reviewed OAuth flow and origin controls rather than embedding privileged tokens.
 
-## Operator: grants and revocation
+## Operator: scope and revocation
 
-Apply migration `20261021130000` through the reviewed process. As the database operator, use the actual Supabase Auth UUID, not an email, GitHub name or browser-supplied identity:
+Apply migration `20261021130000` before the reviewed Worker deployment. The private `team_api_private.project_scope` row enables only staging PostHog project `675372`. No teammate list is copied into the public repository or manually maintained in Supabase. The Worker obtains the caller's login from GitHub's authenticated `/user` response, then calls the fixed repository's collaborator-check endpoint using the private server token. Client-supplied usernames or editable profile fields are never authority.
 
-```sql
--- Replace the placeholder UUID with the verified teammate's Auth user ID.
-INSERT INTO team_api_private.reader_grant(actor_id, project_id)
-VALUES ('00000000-0000-4000-8000-000000000001', 675372)
-ON CONFLICT DO NOTHING;
+To withdraw a person's eligibility, remove repository collaboration; the next uncached check denies access. A request already authorized may finish. To disable inspection for everyone, the database operator can delete the staging project-scope row, or remove the Worker server token. Keep Hyperdrive query caching disabled so scope changes are not served from query cache. No API endpoint can modify this scope.
 
--- Revoke a user's access; the next request checks the database again.
-DELETE FROM team_api_private.reader_grant
-WHERE actor_id = '00000000-0000-4000-8000-000000000001'
-  AND project_id = 675372;
-```
-
-Do not run these examples unchanged. Grant only approved internal staging readers. This is project-wide diagnostic access, not restaurant membership. Keep real diner collection disabled until retention/deletion and staff access policies are approved. Revoke departing contributors promptly. A request already reading a snapshot may finish after revocation; later requests are denied. Logout alone does not immediately revoke an already-issued access JWT.
-
-The application runtime receives only `USAGE` on `team_api_private` and `EXECUTE` on one fixed, checked function. It still cannot select raw analytics, enumerate grants or grant itself access. The function is owned by a non-login role with only the required reads and a fixed `pg_catalog` search path. The export account and restaurant-command privileges remain separate. Never add `team_api_private` or `analytics_private` to Supabase's exposed API schemas. Hyperdrive query caching must remain disabled so grant changes are checked on every request.
+The application runtime receives only `USAGE` on `team_api_private` and `EXECUTE` on one fixed read function. It still cannot select raw analytics or change project scope. The function is owned by a non-login role with only required reads and a fixed `pg_catalog` search path. Its database boundary limits the project/environment and returned fields; the Worker owns GitHub identity/collaborator authorization. The export and restaurant-command privileges remain separate. Never expose `team_api_private` or `analytics_private` through Supabase's Data API. This is project-wide internal diagnostic access, not restaurant membership. Do not use it with real diner data until access/retention policies are approved.
 
 ## GitHub and provider configuration
 
-GitHub Secrets supplies CI/deployment jobs; it is not a vault teammates retrieve passwords from. An admin must create **Settings → Environments → staging**, limit deployments to `main`, and configure available approval controls before enabling deployment. Put the scoped `CLOUDFLARE_API_TOKEN` there as an **environment secret**, and `CLOUDFLARE_ACCOUNT_ID` as an **environment variable**. The existing deployment workflow already reads these names. No Supabase admin, export password or PostHog personal API key is needed by this feature or by routine CI.
+GitHub Secrets supplies CI/deployment jobs; it is not a vault teammates retrieve passwords from. An admin must create **Settings → Environments → staging**, limit deployments to `main`, and configure available approval controls before enabling deployment. Put scoped `CLOUDFLARE_API_TOKEN` and `TEAM_GITHUB_TOKEN` values there as **environment secrets**, and `CLOUDFLARE_ACCOUNT_ID` as an **environment variable**. The checker token must belong to an account with push access, be limited to `vivienk/peekaplate` and have only repository **Metadata: read** for the collaborator check. Its expiry/rotation is an operator responsibility. Store the same checker token as a Cloudflare Worker secret named `TEAM_GITHUB_TOKEN`; it is never returned by the API. No Supabase admin, export password or PostHog personal API key is needed by this feature or by routine CI. The workflow writes the checker secret into a private temporary file and passes it through Wrangler’s additive deploy secrets-file option, then removes the file.
 
-Worker configuration uses the existing restricted Hyperdrive binding and Supabase Auth issuer, plus `APP_ENV=staging` and `POSTHOG_PROJECT_ID=675372`. Database credentials stay inside Hyperdrive. The ordinary test suite uses disposable local credentials and signing keys; it needs no hosted secrets.
+Worker configuration uses the existing restricted Hyperdrive binding and Supabase Auth issuer, plus `APP_ENV=staging` and `POSTHOG_PROJECT_ID=675372`. Database credentials stay inside Hyperdrive. The ordinary test suite uses disposable local credentials, signing keys and a local GitHub API fixture; it needs no hosted secrets. `LOCAL_GITHUB_API_URL` is accepted only in local mode and only for HTTP loopback test servers. Staging always calls the fixed GitHub API origin.
 
-Share the API URL, Supabase URL, PostHog project link and project publishable/anon key as non-secret setup configuration. Publishable keys do not grant privileged access; per-user login and current reader grants still control these endpoints. Never distribute a Supabase service-role or secret key as frontend configuration. Contributors can develop locally with synthetic fixtures before receiving any hosted access.
+Share the API URL and PostHog project link as non-secret setup configuration. This inspection API needs no Supabase browser key. Never distribute a Supabase service-role or secret key as frontend configuration. Contributors can develop locally with synthetic fixtures before receiving any hosted access.
 
 On October 21, the authenticated GitHub account had repository write access but no admin permission; no GitHub environments or repository Actions secrets were listed. Environment activation and the Cloudflare deployment token are operator steps, not completed by this source change. No paid plan or new Cloudflare resource is required by this design; actual existing quotas still apply.
 
@@ -73,8 +63,10 @@ On October 21, the authenticated GitHub account had repository write access but 
 
 - Apply the forward migration before deploying the Worker; preserve the existing exporter and restaurant permissions.
 - Deploy only the reviewed release under [ADR 0012](adr/0012-main-environment-promotion.md); confirm Hyperdrive query caching is disabled.
-- Grant one synthetic user temporarily, verify 200 and bounded redacted results, verify another signed-in user gets 403 and no token gets 401, then revoke the first user and verify 403.
+- Use an approved collaborator’s individual GitHub token to verify 200 and bounded redacted results, a non-collaborator’s valid token to verify 403, and no/invalid token to verify 401. Verify removal denies the next check using a controlled test account.
 - Confirm production returns 404, PostHog export continues, and raw tables remain inaccessible to public/application roles.
-- Record the deployed SHA and evidence. Individual teammate enrollment is a separate access operation; no real teammates are granted access by the migration.
+- Record the deployed SHA and evidence. All accepted repo collaborators are eligible after activation; the migration grants no public or database-console access.
 
 Decision: [ADR 0014](adr/0014-team-analytics-access.md). This does not change the owner-metric suppression threshold or implement S3-DATA-02.
+
+Provider references: [GitHub collaborator check](https://docs.github.com/en/rest/collaborators/collaborators#check-if-a-user-is-a-repository-collaborator), [GitHub environment secrets](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets).

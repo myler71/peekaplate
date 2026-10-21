@@ -5,19 +5,18 @@ REVOKE ALL ON SCHEMA team_api_private FROM PUBLIC;
 CREATE ROLE peekaplate_analytics_reader NOLOGIN NOINHERIT
   NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS;
 GRANT peekaplate_analytics_reader TO CURRENT_USER;
-CREATE TABLE team_api_private.reader_grant (
-  actor_id uuid NOT NULL,
-  project_id integer NOT NULL CHECK (project_id > 0),
-  PRIMARY KEY (actor_id, project_id)
+CREATE TABLE team_api_private.project_scope (
+  project_id integer PRIMARY KEY CHECK (project_id > 0)
 );
-REVOKE ALL ON team_api_private.reader_grant FROM PUBLIC;
+INSERT INTO team_api_private.project_scope VALUES (675372);
+REVOKE ALL ON team_api_private.project_scope FROM PUBLIC;
 GRANT USAGE ON SCHEMA team_api_private, analytics_private TO peekaplate_analytics_reader;
-GRANT SELECT ON team_api_private.reader_grant,
+GRANT SELECT ON team_api_private.project_scope,
   analytics_private.posthog_events_deduplicated TO peekaplate_analytics_reader;
 CREATE INDEX posthog_events_timestamp ON analytics_private.posthog_events (team_id, timestamp);
 
 CREATE FUNCTION team_api_private.read_analytics(
-  p_actor uuid, p_project integer, p_kind text,
+  p_project integer, p_kind text,
   p_from timestamptz, p_until timestamptz, p_limit integer
 ) RETURNS jsonb
 LANGUAGE plpgsql SECURITY DEFINER
@@ -28,8 +27,8 @@ DECLARE
   v_counts jsonb := '[]'::jsonb;
   v_truncated boolean := false;
 BEGIN
-  IF NOT EXISTS (SELECT 1 FROM team_api_private.reader_grant
-    WHERE actor_id = p_actor AND project_id = p_project) THEN
+  IF NOT EXISTS (SELECT 1 FROM team_api_private.project_scope
+    WHERE project_id = p_project) THEN
     RAISE EXCEPTION 'forbidden' USING ERRCODE = '42501';
   END IF;
   IF p_kind IS NULL OR p_kind NOT IN ('events', 'summary')
@@ -90,14 +89,14 @@ BEGIN
   );
 END;
 $$;
-REVOKE ALL ON FUNCTION team_api_private.read_analytics(uuid,integer,text,timestamptz,timestamptz,integer) FROM PUBLIC;
+REVOKE ALL ON FUNCTION team_api_private.read_analytics(integer,text,timestamptz,timestamptz,integer) FROM PUBLIC;
 -- Transfer ownership to a non-login role with only the required read privileges.
 GRANT CREATE ON SCHEMA team_api_private TO peekaplate_analytics_reader;
-ALTER FUNCTION team_api_private.read_analytics(uuid,integer,text,timestamptz,timestamptz,integer)
+ALTER FUNCTION team_api_private.read_analytics(integer,text,timestamptz,timestamptz,integer)
   OWNER TO peekaplate_analytics_reader;
 REVOKE CREATE ON SCHEMA team_api_private FROM peekaplate_analytics_reader;
 GRANT USAGE ON SCHEMA team_api_private TO peekaplate_runtime;
-GRANT EXECUTE ON FUNCTION team_api_private.read_analytics(uuid,integer,text,timestamptz,timestamptz,integer)
+GRANT EXECUTE ON FUNCTION team_api_private.read_analytics(integer,text,timestamptz,timestamptz,integer)
   TO peekaplate_runtime;
 
 -- migrate:down

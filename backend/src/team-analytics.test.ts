@@ -11,7 +11,8 @@ describe('team analytics HTTP boundary', () => {
   it('requires a verified individual session before reading analytics', async () => {
     const readAnalytics = vi.fn();
     const app = createApp({
-      verify: async () => {
+      verify: vi.fn(),
+      verifyTeam: async () => {
         throw new AuthenticationError();
       },
       execute: vi.fn(),
@@ -33,7 +34,12 @@ describe('team analytics HTTP boundary', () => {
 
   it('rejects broad ranges and client-supplied authority', async () => {
     const readAnalytics = vi.fn();
-    const app = createApp({ verify: async () => actor, execute: vi.fn(), readAnalytics });
+    const app = createApp({
+      verify: vi.fn(),
+      verifyTeam: async () => {},
+      execute: vi.fn(),
+      readAnalytics,
+    });
     for (const suffix of [
       '',
       `${query}&projectId=2`,

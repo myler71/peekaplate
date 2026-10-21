@@ -21,6 +21,8 @@ const viewer = crypto.randomUUID();
 let server: Server;
 let env: Bindings;
 let signingKey: CryptoKey;
+let collaboratorEnabled = true;
+const githubCalls: string[] = [];
 let worker: Awaited<ReturnType<typeof unstable_dev>>;
 
 function command(patch = {}) {
@@ -83,6 +85,25 @@ beforeAll(async () => {
   signingKey = keys.privateKey;
   const jwk = { ...(await exportJWK(keys.publicKey)), kid: 'integration', alg: 'ES256' };
   server = createServer((req, res) => {
+    githubCalls.push(req.url ?? '');
+    if (req.url === '/user') {
+      if (req.headers.authorization !== 'Bearer fixture-member') {
+        res.writeHead(401).end();
+        return;
+      }
+      res
+        .writeHead(200, { 'Content-Type': 'application/json' })
+        .end(JSON.stringify({ id: 42, login: 'fixture-member', type: 'User' }));
+      return;
+    }
+    if (req.url === '/repos/vivienk/peekaplate/collaborators/fixture-member') {
+      res
+        .writeHead(
+          req.headers.authorization === 'Bearer fixture-server' && collaboratorEnabled ? 204 : 404,
+        )
+        .end();
+      return;
+    }
     if (req.url !== '/auth/v1/.well-known/jwks.json') {
       res.writeHead(404).end();
       return;
@@ -109,6 +130,8 @@ beforeAll(async () => {
       AUTH_ISSUER: env.AUTH_ISSUER!,
       LOCAL_DATABASE_URL: runtimeUrl!,
       POSTHOG_PROJECT_ID: '675372',
+      TEAM_GITHUB_TOKEN: 'fixture-server',
+      LOCAL_GITHUB_API_URL: `http://127.0.0.1:${address.port}/`,
     },
     experimental: {
       disableExperimentalWarning: true,
@@ -131,7 +154,6 @@ afterAll(async () => {
 describe('real team analytics API', () => {
   const window = '?from=2026-10-20T06:00:00Z&until=2026-10-20T07:00:00Z';
   it('returns bounded redacted staging data and denies other actors/projects and revoked access', async () => {
-    await admin.query('INSERT INTO team_api_private.reader_grant VALUES ($1,675372)', [actor]);
     await admin.query(`INSERT INTO analytics_private.posthog_events(uuid,event,properties,team_id,timestamp,distinct_id,ip)
       SELECT 'team-fixture-' || n, 'app_shell_viewed',
         '{"environment":"staging","surface":"diner","schema_version":1,"private":"hidden"}'::jsonb,
@@ -142,10 +164,12 @@ describe('real team analytics API', () => {
       ('production','app_shell_viewed','{"environment":"production","surface":"diner"}',675372,'2026-10-20T06:30:00Z')`);
     const get = async (kind: string, subject = actor, suffix = '') =>
       fetch(`http://127.0.0.1:${worker.port}/team/analytics/${kind}${window}${suffix}`, {
-        headers: { Authorization: `Bearer ${await token(subject)}` },
+        headers: {
+          Authorization: `Bearer ${subject === actor ? 'fixture-member' : 'fixture-outsider'}`,
+        },
       });
     const response = await get('events', actor, '&limit=2');
-    expect(response.status).toBe(200);
+    expect(response.status, `Fixture paths: ${githubCalls.join(',')}`).toBe(200);
     expect(response.headers.get('Cache-Control')).toBe('no-store');
     const body = (await response.json()) as { events: unknown[]; truncated: boolean };
     expect(body.events).toHaveLength(2);
@@ -157,13 +181,13 @@ describe('real team analytics API', () => {
       counts: [{ event: 'app_shell_viewed', surface: 'diner', count: 3 }],
       events: [],
     });
-    expect((await get('events', viewer)).status).toBe(403);
+    expect((await get('events', viewer)).status).toBe(401);
     expect((await get('events', actor, '&projectId=2')).status).toBe(400);
     const client = new Client({ connectionString: runtimeUrl });
     await client.connect();
     try {
       await expect(
-        readTeamAnalytics(client, actor, 2, 'events', {
+        readTeamAnalytics(client, 2, 'events', {
           from: '2026-10-20T06:00:00Z',
           until: '2026-10-20T07:00:00Z',
           limit: 50,
@@ -176,7 +200,7 @@ describe('real team analytics API', () => {
     } finally {
       await client.end();
     }
-    await admin.query('DELETE FROM team_api_private.reader_grant WHERE actor_id=$1', [actor]);
+    collaboratorEnabled = false;
     expect((await get('summary')).status).toBe(403);
   });
 });

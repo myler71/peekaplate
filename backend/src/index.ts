@@ -11,6 +11,7 @@ import { Client } from 'pg';
 import { AuthenticationError, AuthUnavailableError, createStaffVerifier } from './auth';
 import { CommandError, createDishRevision } from './dish-command';
 import { readTeamAnalytics } from './team-analytics';
+import { verifyTeamCollaborator } from './team-auth';
 
 export type Bindings = {
   APP_ENV?: string;
@@ -18,6 +19,8 @@ export type Bindings = {
   LOCAL_DATABASE_URL?: string;
   HYPERDRIVE?: { connectionString: string };
   POSTHOG_PROJECT_ID?: string;
+  TEAM_GITHUB_TOKEN?: string;
+  LOCAL_GITHUB_API_URL?: string;
 };
 
 type Dependencies = {
@@ -29,12 +32,12 @@ type Dependencies = {
     env: Bindings,
   ) => ReturnType<typeof createDishRevision>;
   readAnalytics?: (
-    actorId: string,
     projectId: number,
     kind: 'events' | 'summary',
-    query: Parameters<typeof readTeamAnalytics>[4],
+    query: Parameters<typeof readTeamAnalytics>[3],
     env: Bindings,
   ) => ReturnType<typeof readTeamAnalytics>;
+  verifyTeam?: (authorization: string, env: Bindings) => Promise<void>;
 };
 
 let verifier: { issuer: string; local: boolean; verify: ReturnType<typeof createStaffVerifier> };
@@ -63,14 +66,15 @@ const dependencies: Dependencies = {
       await client.end();
     }
   },
-  async readAnalytics(actorId, projectId, kind, query, env) {
+  verifyTeam: verifyTeamCollaborator,
+  async readAnalytics(projectId, kind, query, env) {
     const connectionString =
       env.APP_ENV === 'local' ? env.LOCAL_DATABASE_URL : env.HYPERDRIVE?.connectionString;
     if (!connectionString) throw new AuthUnavailableError();
     const client = new Client({ connectionString, connectionTimeoutMillis: 5000 });
     try {
       await client.connect();
-      return await readTeamAnalytics(client, actorId, projectId, kind, query);
+      return await readTeamAnalytics(client, projectId, kind, query);
     } finally {
       await client.end();
     }
@@ -102,7 +106,8 @@ export function createApp(services: Dependencies = dependencies) {
     const authorization = c.req.header('Authorization');
     if (!authorization || !/^Bearer \S+$/i.test(authorization))
       return c.json({ error: 'unauthorized' }, 401);
-    const actorId = await services.verify(authorization, env);
+    if (!services.verifyTeam) throw new AuthUnavailableError();
+    await services.verifyTeam(authorization, env);
     const kind = c.req.param('kind');
     if (kind !== 'events' && kind !== 'summary') return c.json({ error: 'not_found' }, 404);
     const params = new URL(c.req.url).searchParams;
@@ -119,7 +124,7 @@ export function createApp(services: Dependencies = dependencies) {
     ) {
       throw new AuthUnavailableError();
     }
-    const result = await services.readAnalytics(actorId, projectId, kind, parsed.data, env);
+    const result = await services.readAnalytics(projectId, kind, parsed.data, env);
     return c.json(TeamAnalyticsResponseSchema.parse(result));
   });
   app.post('/venues/:venueId/dishes/:dishId/revisions', async (c) => {

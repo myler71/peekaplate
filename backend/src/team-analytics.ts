@@ -8,7 +8,6 @@ import { CommandError } from './dish-command';
 
 export async function readTeamAnalytics(
   client: Client,
-  actorId: string,
   projectId: number,
   kind: 'events' | 'summary',
   query: TeamAnalyticsQuery,
@@ -19,8 +18,8 @@ export async function readTeamAnalytics(
     started = true;
     await client.query("SET LOCAL statement_timeout = '5s'");
     const result = await client.query<{ result: unknown }>(
-      'SELECT team_api_private.read_analytics($1::uuid, $2::integer, $3::text, $4::timestamptz, $5::timestamptz, $6::integer) AS result',
-      [actorId, projectId, kind, query.from, query.until, query.limit],
+      'SELECT team_api_private.read_analytics($1::integer, $2::text, $3::timestamptz, $4::timestamptz, $5::integer) AS result',
+      [projectId, kind, query.from, query.until, query.limit],
     );
     const response = TeamAnalyticsResponseSchema.parse(result.rows[0]?.result);
     await client.query('COMMIT');
