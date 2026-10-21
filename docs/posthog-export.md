@@ -2,9 +2,23 @@
 
 ## Status
 
-Migration `20261020070000` is applied to the existing Supabase staging database and recorded in its migration history. Both the raw table and deduplicated view exist. Dedicated login `peekaplate_posthog_staging` is created with the export-group membership. Effective checks confirmed append permission, no access to `app_private`, no update/delete/truncate or schema creation, and no `anon`, `authenticated` or application-runtime access to the analytics schema. **The export is paused after its first live test failed TLS certificate verification.** No rows transferred. A corrected connection using the official Supabase CA certificate is awaiting project Admin action; password entry into the original connection did complete. On October 20, the operator reported PostHog rejected the correction with “Editing an existing integration requires project admin access.” Vivien must update the connection herself or grant the operator project Admin access. No permission bypass or successful transfer is claimed.
+**Verified October 21, 2026: staging export and repeated-interval checks passed; the hourly schedule is enabled.** Migration `20261020070000` is applied and recorded in Supabase. The dedicated `peekaplate_posthog_staging` login uses the existing restricted export group. The official Supabase CA and hostname verification are retained; grants were not broadened.
 
-Destination `01a15822-9737-0001-7711-d5a784eb2635` is configured for hourly Events exports, including only `app_shell_viewed` with `environment = staging`. The bounded test covered October 20, 2026, 06:00–07:00 UTC. Its backfill wrapper showed “Completed,” but the underlying run failed with `PostgreSQLConnectionError` / `certificate verify failed`; database readback confirmed zero raw and deduplicated rows. Always inspect the individual run and destination rows, not just the backfill wrapper.
+Destination `01a15822-9737-0001-7711-d5a784eb2635` exports Events hourly, including only `app_shell_viewed` with `environment = staging`. [Run history](https://us.posthog.com/project/675372/pipeline/batch-exports/01a15822-9737-0001-7711-d5a784eb2635?tab=runs) records these successful checks for October 20, 2026, 06:00–07:00 UTC:
+
+| Check | Observed result |
+| --- | --- |
+| Initial successful run `01a15d4f-261f-0000-b88a-3f67d622bc39` | Completed; four exported rows; Supabase raw readback four rows and four event identities |
+| Repeat run `01a15d53-eb5b-0000-0e3e-3ccb4c589db6` | Completed; Supabase raw count eight, deduplicated view count four |
+| Known diner and console test records | Each matched once in the view by `distinct_id`, event, project, environment and surface |
+| Out-of-scope rows, missing identities, conflicting identities | Zero in each check |
+| Effective exporter permissions | Append allowed; update/delete/truncate, schema creation and application-schema access denied |
+| Public and application-runtime access | `anon`, `authenticated` and `peekaplate_runtime` have no analytics-schema access |
+| Schedule | Hourly enabled and saved after successful verification |
+
+Earlier attempts failed certificate verification, then a missing database password, then password authentication. A privately generated replacement credential was set by the operator and verified through an independent PostgreSQL connection before the successful hosted exports. The original authentication mismatch/cache cause was not established. Inspect individual runs and database rows: an earlier backfill wrapper showed “Completed” while its underlying run failed.
+
+These checks prove the bounded synthetic transfer and retry behavior. The next automatic hourly run, sustained monitoring, production traffic and account-specific spending limits have not been verified.
 
 The diner and console staging sites already send optional shell-view observations to PostHog after consent. Real menu controls and the durable diner-evidence pipeline are separate tickets.
 
@@ -28,10 +42,30 @@ Both kinds of data live in the same Supabase database:
 
 Exporting a row does not make it a verified restaurant fact. There is no owner dashboard endpoint for these tables yet. Developers can use synthetic local fixtures; they do not need the export password.
 
+## Why the owner dashboard must not wait for this export
+
+The hourly copy serves internal analysis and reconciliation. It is **not the delivery path for a live owner dashboard**. An action just after an export window closes can wait almost another hour, plus processing time; failed runs can delay it further.
+
+The accepted owner-report path is still planned:
+
+```mermaid
+flowchart LR
+    UI["Diner action"] --> API["Worker validates event and restaurant authority"]
+    API --> Q["Queue accepts event; browser gets receipt"]
+    Q --> C["Consumer archives in R2, then inserts in Supabase"]
+    C --> P["Projection: agreed dashboard totals"]
+    P --> READ["Backend checks owner's restaurant access"]
+    READ --> DASH["Owner dashboard refreshes"]
+```
+
+For example, opening a dish produces an observation with a stable event ID and the exact published dish version. After validation and storage, its eligible view count can increase once, even if delivery retries. The dashboard reads that restaurant's updated count through its authorized API. This path does not wait for a PostHog batch.
+
+The aim is prompt updates, with an explicit freshness target agreed and tested in the event/dashboard tickets. No seconds-level latency has been measured yet. Queue delays, processing failures and dashboard refresh frequency all affect what an owner sees. Show the last successful update and a delayed-data state rather than presenting stale totals as live. The event pipeline, projections and owner-query endpoint remain implementation work under [ADR 0003](adr/0003-intent-evidence.md).
+
 ## Connection setup
 
 1. Apply [the forward migration](../migrations/20261020070000_posthog_exports.sql) through the reviewed migration process. Reuse the existing staging Supabase project; do not provision another database.
-2. Create a dedicated `peekaplate_posthog_staging` LOGIN with `INHERIT`, membership in `peekaplate_posthog_export`, and no superuser, role creation, database creation, replication or RLS bypass. Set a unique password privately. Do not reuse the application, `postgres` or service-role credential. Grant database `CONNECT` if not already inherited from PUBLIC.
+2. Create a dedicated `peekaplate_posthog_staging` LOGIN with `INHERIT`, membership in `peekaplate_posthog_export`, and no superuser, role creation, database creation, replication or RLS bypass. Set a unique password privately using SCRAM-SHA-256 encryption, and enter the same password in PostHog. Creating a LOGIN does not itself set a password. Check only that a password exists and that the role has not expired; never display its stored verifier. Do not reuse the application, `postgres` or service-role credential. Grant database `CONNECT` if not already inherited from PUBLIC.
 3. Use the verified Supabase direct or **session-pooler** host/port and database `postgres`. Copy the provider's exact connection settings; the session pooler may require a project-qualified username. Do not guess the host or use Hyperdrive as the exporter destination.
 4. In PostHog project `675372`, choose **Data management → Destinations → Postgres batch export**. Create a PostgreSQL connection with **Verify certificate authority and server hostname**. Use the trusted CA bundle or the provider certificate; do not turn verification off to solve a connection error.
 5. Choose **Events**, hourly, schema `analytics_private`, table `posthog_events`, and property filter `environment = staging`. Initially include `app_shell_viewed` only. Add `dish_open` / `portion_compare` only when their real callers are implemented and reviewed.
@@ -40,6 +74,12 @@ Exporting a row does not make it a verified restaurant fact. There is no owner d
 The precreated Events table needs only `SELECT, INSERT` and schema `USAGE`: the inspected exporter discovers the table before deciding whether to create it. If a provider update demands broader grants, investigate first. Do not grant general schema creation or application access as a shortcut.
 
 For this connection, the first attempt with system certificate authorities failed. Download the root certificate linked in **Supabase → Database → Settings → SSL configuration**, attach it in PostHog, and retain **Verify certificate authority and server hostname**. Re-run the bounded interval and verify destination rows before resuming the hourly schedule. Do not disable TLS verification to clear the error.
+
+Certificate recheck on October 21 UTC: the local `Supabase Root 2021 CA` expires April 26, 2031. A credential-free PostgreSQL TLS negotiation against `aws-0-us-east-2.pooler.supabase.com:5432`, using this CA with hostname verification, passed with TLS 1.3. No database authentication or SQL was attempted. The `2021` name does not indicate expiry; this check confirms the local CA works for the inspected host, not that a new PostHog form has saved it or that its password is correct.
+
+An earlier independent credential check returned `28P01`. After the private credential correction, the same restricted session-pooler connection authenticated successfully with CA and hostname verification; both hosted export runs above then passed. Native DNS resolved the direct host to IPv6, but the direct connection returned `ENETUNREACH`, so direct authentication was not tested. No credential is stored in project files; the successful pooler route requires no new IPv4 add-on.
+
+For password failures after a rotation, first confirm LOGIN, expiry and password format without displaying the stored verifier. [Supabase documents temporary pooler credential caching](https://supabase.com/docs/guides/troubleshooting/supavisor-error-password-authentication-failed-after-password-rotation). Avoid rapid repeated rotations or retry loops. Re-enter the exact database password privately in the existing PostHog connection, preserving the host, qualified username, CA and hostname verification. If failures persist, an authorized operator can test a direct connection privately to distinguish credential failure from pooler failure; escalate a pooler-only failure to Supabase. A temporary cache is a possible cause, not an established diagnosis for this incident.
 
 ## Verify the actual transfer
 

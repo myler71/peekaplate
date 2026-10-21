@@ -1,8 +1,8 @@
 # Local and staging operations
 
-## PostHog export handoff — October 20, 2026
+## PostHog export handoff — October 21, 2026
 
-The private analytics migration is applied to staging and the restricted exporter account exists. The first live export failed TLS certificate verification; zero rows arrived. The hourly schedule is paused. Correcting the integration is blocked by PostHog project Admin access, as reported by the operator. Vivien must correct it or grant that access. Follow [the export runbook](posthog-export.md): attach the official Supabase CA with certificate and hostname verification, test the bounded interval, verify rows and duplicate-safe retry, then resume the schedule. The menu and event-contract tickets can proceed independently; this does not certify owner dashboards or production readiness.
+The private analytics export is verified in staging. Two successful runs of the same synthetic interval produced eight raw copies and four deduplicated events; the known diner and console records each matched once. All 14 read-only row/permission checks passed. The hourly schedule is enabled, with the official Supabase CA and hostname verification retained. See [the export runbook](posthog-export.md) for run IDs, recovery history and evidence limits. No grants were broadened. The next automatic scheduled run and sustained monitoring remain to be observed. Menu and event-contract tickets can proceed; the hourly internal copy is separate from the planned promptly updated owner-report pipeline.
 
 Repository transition: [migration and release checklist](repository-migration.md) records repository and deployment gates. Under [ADR 0012](adr/0012-main-environment-promotion.md), `main` supplies both environments: test an exact commit in staging, then promote that same commit to production after human approval. The staging workflow requires `STAGING_DEPLOYMENT_APPROVED=true`; keep it disabled until its controls are verified. Production deployment remains unconfigured.
 

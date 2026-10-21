@@ -96,7 +96,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "database",
       "status": "foundation",
-      "summary": "Private Postgres venue/event/command/outbox, actor-scoped memberships and tenant-scoped dish projections. Runtime grants cannot modify membership; share locks serialize revocation. Forward migration validates safe existing runtime-role attributes. Tests cover prior-schema upgrade, RLS, atomic commands and direct connection reuse; October 18 staging checks verified effective managed-provider grants and transaction-context reset; physical hosted pool reuse and restore evidence remain pending. Private PostHog landing table and conflict-aware deduplication view are migration-tested; hosted schema applied; export paused after TLS verification failure. Exporter is separate from app runtime.",
+      "summary": "Private Postgres venue/event/command/outbox, actor-scoped memberships and tenant-scoped dish projections. Runtime grants cannot modify membership; share locks serialize revocation. Tests cover prior-schema upgrade, RLS, atomic commands and direct connection reuse; hosted grants/context reset verified, physical pool reuse and restore pending. Private PostHog landing table and conflict-aware view are migration-tested and applied. Exporter is separate from app runtime. Restricted PostHog pooler authentication, two successful hosted exports, actual deduplicated view and effective grants verified. Eight raw copies yield four unique events; hourly schedule enabled. See docs/posthog-export.md for evidence limits.",
       "paths": [
         "migrations/202610130001_foundation.sql",
         "tests/db/foundation.sql",
@@ -130,12 +130,12 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "backend"
       ],
-      "sourceFingerprint": "a1db9286a3bb588838b7455f062dd0156740c94fb90d6a1f9fb9abd327c8206e"
+      "sourceFingerprint": "0408b5208254ea544057b4dd17e070e1577666b1d2a5ebf064d5cca10c8f08b0"
     },
     {
       "id": "delivery",
       "status": "foundation",
-      "summary": "Main supplies staging and production under ADR 0012. Staging Pages, Worker, restricted Supabase/Hyperdrive and staff-command checks are recorded in operations. PRs 14/15 merged under explicit delegated setup approval; hosted PostHog shell views verified at main 2a135fa. Public repository main/develop remain unprotected. Private PostHog export is paused after TLS verification failure; product tickets can start from tested foundations.",
+      "summary": "Main supplies staging and production under ADR 0012. Staging Pages, Worker, restricted Supabase/Hyperdrive and staff-command checks are recorded in operations. PRs 14/15 merged under explicit delegated setup approval; hosted PostHog shell views verified at main 2a135fa. Public repository main/develop remain unprotected. Export transfer, duplicate-safe repeat and permission checks passed; hourly staging schedule enabled. Product tickets can start. Hourly analytics export is separate from planned prompt owner-report updates; no freshness benchmark exists.",
       "paths": [
         "README.md",
         "SECURITY.md",
@@ -179,7 +179,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "e6b1bebc44db2085fffead25f18cd53b7bca5a773f37d267eaa30dee42d1a2e5"
+      "sourceFingerprint": "90b64a04ed96b5f5dd2f980e1f9b1b92ada769122d74f5a78133ff1c330a9ee0"
     },
     {
       "id": "agents",
@@ -212,7 +212,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "analytics",
       "status": "foundation",
-      "summary": "Consent-gated explicit PostHog capture: hosted diner/console shell views verified in staging. Dish adapter awaits real controls. Private Supabase export migration and duplicate/permission tests exist; hosted schema applied, export paused after TLS failure; correction requires project Admin access; zero rows transferred. Optional untrusted observations remain separate from canonical evidence and owner authorization.",
+      "summary": "Consent-gated explicit PostHog capture: hosted diner/console shell views verified in staging. Dish adapter awaits real controls. Private export schema and duplicate/permission tests exist. Two hosted exports of one synthetic interval passed: eight raw copies, four deduplicated events, known diner/console records each matched once, no missing/conflicting/out-of-scope rows. Restricted grants verified; hourly schedule enabled. Next automatic run not observed. Hourly internal copy does not power live owner reports; validated evidence/projections and owner authorization remain planned.",
       "paths": [
         "packages/analytics/package.json",
         "packages/analytics/tsconfig.json",
@@ -231,19 +231,10 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "contracts"
       ],
-      "sourceFingerprint": "12b21587e97a540e463190044ffd79144934f95d0d44a271da631099e4d5f34e"
+      "sourceFingerprint": "e9e14bb462be3aa45c90eafff2ad84ca06f28a745082035817dd2e465f59a42d"
     }
   ],
   "handoffs": [
-    {
-      "summary": "Clarified the existing staging setup for technical and nontechnical readers. Retained diner/console/API URLs, explained owner naming and each provider, corrected completed-check wording and linked newer planning/design references on develop. Added unassigned ticket boundaries and prerequisites; no runtime, cloud resource, credential or deployment change.",
-      "modules": [
-        "delivery",
-        "diner",
-        "database"
-      ],
-      "next": "Agree weekly tickets from the deployed foundation. Start staff login/editing alongside three-dish preparation, diner fixture UI and event/metric contract review. Publication precedes real exposure; ingestion precedes live reports. Preserve pilot and production gates."
-    },
     {
       "summary": "PR #10 merged at bb56cef and API/Pages shells were deployed from that main revision. Hosted tests passed genuine Supabase login, atomic writes, retries/concurrency, cross-restaurant denial and membership revocation. Remote Hyperdrive probes passed context reset and rollback after an injected outbox failure. Logout rejected refresh but accepted the existing JWT until membership removal. Test membership was removed and ephemeral harnesses stopped. R2 staging is private; no paid upgrade or production deployment.",
       "modules": [
@@ -312,6 +303,15 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "delivery"
       ],
       "next": "Vivien must correct the connection or grant project Admin access. Complete the connection with the official Supabase CA, verify a bounded export and duplicate-safe retry, then resume schedule. Do not claim transfer success from backfill wrapper completion alone."
+    },
+    {
+      "summary": "October 21, 2026: restricted pooler login and PostHog export recovered using a privately generated credential, official Supabase CA and hostname verification. Runs 01a15d4f-261f-0000-b88a-3f67d622bc39 and 01a15d53-eb5b-0000-0e3e-3ccb4c589db6 completed the October 20 06:00–07:00 UTC interval. Actual Supabase view: eight raw copies, four unique events, one matching diner/console record each. All 14 row/permission checks passed; hourly schedule enabled. No runtime, migration, grants or production change. Earlier failures remain in errors.md; original cache/mismatch cause unproven.",
+      "modules": [
+        "analytics",
+        "database",
+        "delivery"
+      ],
+      "next": "Review PR 18 and merge under the human-comment policy. Jeffin owns contract/collection decisions; Zhiliang wires approved real UI events with tests. Each adds a ticket comment with PR and evidence when done. Observe the next automatic export; confirm monitoring, retention/deletion and billing limits before real diner data. Owner evidence pipeline/projections/API remain product work. Handoff drafts are local and unsent."
     }
   ]
 }
