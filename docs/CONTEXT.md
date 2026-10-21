@@ -96,7 +96,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "database",
       "status": "foundation",
-      "summary": "Private Postgres venue/event/command/outbox, actor-scoped memberships and tenant-scoped dish projections. Runtime grants cannot modify membership; share locks serialize revocation. Forward migration validates safe existing runtime-role attributes. Tests cover prior-schema upgrade, RLS, atomic commands and direct connection reuse; October 18 staging checks verified effective managed-provider grants and transaction-context reset; physical hosted pool reuse and restore evidence remain pending. Private PostHog landing table and conflict-aware deduplication view are migration-tested; hosted schema applied; export paused after TLS verification failure. Exporter is separate from app runtime.",
+      "summary": "Private Postgres venue/event/command/outbox, actor-scoped memberships and tenant-scoped dish projections. Runtime grants cannot modify membership; share locks serialize revocation. Tests cover prior-schema upgrade, RLS, atomic commands and direct connection reuse; hosted grants/context reset verified, physical pool reuse and restore pending. Private PostHog landing table and conflict-aware view are migration-tested and applied. Exporter is separate from app runtime. Admin/TLS and password-presence corrections verified; LOGIN enabled, SCRAM set, no expiry. Hosted export still paused after two password-authentication failures. Live transfer/retry proof pending.",
       "paths": [
         "migrations/202610130001_foundation.sql",
         "tests/db/foundation.sql",
@@ -130,12 +130,12 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "backend"
       ],
-      "sourceFingerprint": "a1db9286a3bb588838b7455f062dd0156740c94fb90d6a1f9fb9abd327c8206e"
+      "sourceFingerprint": "19fec211033ac5c72ad20f2c8d5751895571065e667538f99ab28f4e7fc38742"
     },
     {
       "id": "delivery",
       "status": "foundation",
-      "summary": "Main supplies staging and production under ADR 0012. Staging Pages, Worker, restricted Supabase/Hyperdrive and staff-command checks are recorded in operations. PRs 14/15 merged under explicit delegated setup approval; hosted PostHog shell views verified at main 2a135fa. Public repository main/develop remain unprotected. Private PostHog export is paused after TLS verification failure; product tickets can start from tested foundations.",
+      "summary": "Main supplies staging and production under ADR 0012. Staging Pages, Worker, restricted Supabase/Hyperdrive and staff-command checks are recorded in operations. PRs 14/15 merged under explicit delegated setup approval; hosted PostHog shell views verified at main 2a135fa. Public repository main/develop remain unprotected. Export Admin/TLS and password-presence issues cleared; password authentication still blocks live transfer. Product tickets can start. Hourly analytics export is separate from planned prompt owner-report updates; no freshness benchmark exists.",
       "paths": [
         "README.md",
         "SECURITY.md",
@@ -179,7 +179,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "e6b1bebc44db2085fffead25f18cd53b7bca5a773f37d267eaa30dee42d1a2e5"
+      "sourceFingerprint": "0d84884b6ce2334424a3c0c6f0c351b99a0bdf1490d4b717d19bc5f373063251"
     },
     {
       "id": "agents",
@@ -212,7 +212,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "analytics",
       "status": "foundation",
-      "summary": "Consent-gated explicit PostHog capture: hosted diner/console shell views verified in staging. Dish adapter awaits real controls. Private Supabase export migration and duplicate/permission tests exist; hosted schema applied, export paused after TLS failure; correction requires project Admin access; zero rows transferred. Optional untrusted observations remain separate from canonical evidence and owner authorization.",
+      "summary": "Consent-gated explicit PostHog capture: hosted diner/console shell views verified in staging. Dish adapter awaits real controls. Private export schema and duplicate/permission tests exist. Admin access, official CA and restricted-login SCRAM password verified. Two later attempts failed password authentication. Schedule paused; matching rows and repeat-interval proof pending. Hourly internal copy does not power live owner reports; validated evidence/projections and owner authorization remain planned.",
       "paths": [
         "packages/analytics/package.json",
         "packages/analytics/tsconfig.json",
@@ -231,19 +231,10 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "contracts"
       ],
-      "sourceFingerprint": "12b21587e97a540e463190044ffd79144934f95d0d44a271da631099e4d5f34e"
+      "sourceFingerprint": "dc2544b4fdb28cd408dcec1fe299e1d0989636412575ca97ff9dfdfeef150a91"
     }
   ],
   "handoffs": [
-    {
-      "summary": "Clarified the existing staging setup for technical and nontechnical readers. Retained diner/console/API URLs, explained owner naming and each provider, corrected completed-check wording and linked newer planning/design references on develop. Added unassigned ticket boundaries and prerequisites; no runtime, cloud resource, credential or deployment change.",
-      "modules": [
-        "delivery",
-        "diner",
-        "database"
-      ],
-      "next": "Agree weekly tickets from the deployed foundation. Start staff login/editing alongside three-dish preparation, diner fixture UI and event/metric contract review. Publication precedes real exposure; ingestion precedes live reports. Preserve pilot and production gates."
-    },
     {
       "summary": "PR #10 merged at bb56cef and API/Pages shells were deployed from that main revision. Hosted tests passed genuine Supabase login, atomic writes, retries/concurrency, cross-restaurant denial and membership revocation. Remote Hyperdrive probes passed context reset and rollback after an injected outbox failure. Logout rejected refresh but accepted the existing JWT until membership removal. Test membership was removed and ephemeral harnesses stopped. R2 staging is private; no paid upgrade or production deployment.",
       "modules": [
@@ -312,6 +303,15 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "delivery"
       ],
       "next": "Vivien must correct the connection or grant project Admin access. Complete the connection with the official Supabase CA, verify a bounded export and duplicate-safe retry, then resume schedule. Do not claim transfer success from backfill wrapper completion alone."
+    },
+    {
+      "summary": "October 20 local / October 21 UTC export follow-up: Admin access and official Supabase CA with hostname verification verified. Operator corrected the missing database password; read-only check now confirms SCRAM, LOGIN enabled and no expiry. Runs 01a15d25-6f43-0000-b5f1-ce8d7e959bca and 01a15d2e-9c4d-0000-1eeb-641c9338cae1 still failed password authentication for the October 20 06:00-07:00 UTC interval. Last readback: zero rows. Existing schedule stays paused. Documented hourly internal copy versus planned prompt owner reports. No runtime, migration, grants or production change.",
+      "modules": [
+        "analytics",
+        "database",
+        "delivery"
+      ],
+      "next": "Operator re-enters the exact database password in the existing PostHog integration with its official CA and hostname verification. Do not rotate again without diagnosis. Verify successful run plus matching rows, repeat interval and check deduplicated counts, then enable schedule. Handoff drafts remain local and disclose the blocker; each contributor adds their own ticket evidence after completing scope. Never treat hourly export as live owner reporting."
     }
   ]
 }
