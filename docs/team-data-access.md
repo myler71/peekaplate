@@ -1,5 +1,11 @@
 # Team access to staging analytics
 
+## Current availability
+
+**Prepared and tested locally; not yet live.** On October 21, the hosted Worker health check returned 200, but the new analytics endpoint returned 404. The Worker had no configured secrets, GitHub listed no deployment environments or repository Actions secrets, and the operator account had write access without admin permission. Do not distribute the endpoint as ready until the activation checklist below passes.
+
+The access rule includes **every accepted repository collaborator**, not a named group. New collaborators qualify automatically; pending invitations must be accepted first. Nobody needs a Supabase database account for this API. PostHog dashboard access is a separate invitation and is not granted by this API.
+
 ## What teammates receive
 
 All current collaborators of `vivienk/peekaplate` are eligible, including new collaborators added later. Authenticate with your own GitHub user token; the Worker asks GitHub to verify the token's identity and checks collaborator status on every request. Public repository visibility, a username or a Supabase account alone never grants access. Removed collaborators fail the next membership check. Provider errors/rate limits fail closed. There is no cached member list and no three/four-person allowlist.
@@ -58,6 +64,18 @@ Worker configuration uses the existing restricted Hyperdrive binding and Supabas
 Share the API URL and PostHog project link as non-secret setup configuration. This inspection API needs no Supabase browser key. Never distribute a Supabase service-role or secret key as frontend configuration. Contributors can develop locally with synthetic fixtures before receiving any hosted access.
 
 On October 21, the authenticated GitHub account had repository write access but no admin permission; no GitHub environments or repository Actions secrets were listed. Environment activation and the Cloudflare deployment token are operator steps, not completed by this source change. No paid plan or new Cloudflare resource is required by this design; actual existing quotas still apply.
+
+## Repository owner: activate and hand over
+
+1. Open [repository environment settings](https://github.com/vivienk/peekaplate/settings/environments) and create `staging`. Restrict deployment branches to `main` and require an independent deployment reviewer using the controls available for the repository. Keep `STAGING_DEPLOYMENT_APPROVED` off until these controls are configured.
+2. Inside the `staging` environment, add secrets `CLOUDFLARE_API_TOKEN` and `TEAM_GITHUB_TOKEN`. The Cloudflare token must be scoped to the existing PeekaPlate account and Worker deployment permissions. The **repository owner** should create the expiring GitHub checker token for resource owner `vivienk`, selected repository `peekaplate`, repository permission **Metadata: read**, and no code-write/admin permission. Do not paste either value into a PR, issue, chat or tracked file.
+3. In the same environment, set variable `CLOUDFLARE_ACCOUNT_ID` to the existing staging account ID from [backend/wrangler.jsonc](../backend/wrangler.jsonc). Once deployment controls are verified, set repository variable `STAGING_DEPLOYMENT_APPROVED=true`. These variables are configuration, not passwords.
+4. Apply forward migration `20261021130000` to the existing staging Supabase database using [the database change procedure](operations.md#database-change-procedure), including migration-history recording. The Worker uses its existing Hyperdrive connection; no new database, database login or export credential is required. If using the SQL editor, execute only the migration's `migrate:up` section; the intentionally unsupported `migrate:down` section raises an error and must not be included.
+5. Review the final PR commit and its CI, then merge to `develop`. Promote the reviewed release to `main` under ADR 0012. Merging this feature PR alone does not deploy it. From [Actions](https://github.com/vivienk/peekaplate/actions), run **Deploy staging Worker** on that exact `main` commit. The workflow injects the checker secret into the Worker; contributors never receive it.
+6. Run the hosted acceptance checks below and record the deployed SHA/version and results in the PR. Confirm `events` and `summary` return 200 for a current collaborator, no/invalid token returns 401, a valid non-collaborator token returns 403, and removing a controlled test collaborator denies its next request. Verify redacted responses and the existing staff/export behavior. Never remove a real teammate merely to test this.
+7. Announce access only after these checks pass. Send collaborators the API URL and this guide. Each person uses their **own** GitHub token in a private local API client. They receive no database password, checker token or deployment secret. PostHog event-browser membership is granted separately when their work requires it.
+
+If activation is delayed, collaborators can continue with the repository's local synthetic fixtures. An empty result after deployment can mean the selected window has no exported observations; check the hourly PostHog export before treating it as a tracking defect.
 
 ## Release acceptance
 

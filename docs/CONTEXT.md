@@ -187,7 +187,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "fe5f75b4b4fa0fd71d2270bf157bcca32cad8d1fce961d84bdefe01887693fc9"
+      "sourceFingerprint": "9a5bd75d4724890e7c236f01a85bbaf9fd71963c5e0b3416c31e05aeecbfb984"
     },
     {
       "id": "agents",
@@ -241,7 +241,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "contracts"
       ],
-      "sourceFingerprint": "bb94daf29a260d4b169fd5a61422a20f32ab61bfd79464d6565f227f0aa095d1"
+      "sourceFingerprint": "47351eb70296f29fd4328beeb09f5bae752148a2973a902ed7a7624dce27f918"
     }
   ],
   "handoffs": [
@@ -324,7 +324,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "analytics",
         "delivery"
       ],
-      "next": "DB tests cover duplicate collapse, safe property serialization, scope isolation and collaborator removal; all15 team SQL assertions and14 Worker integration cases passed after correcting unsupported Worker redirect:error to manual. Finish final build/browser verification and delta review, then open a single PR against develop. Vivien creates staging environment; supply scoped Cloudflare token plus repository Metadata-read TEAM_GITHUB_TOKEN to GitHub environment secrets. Deploy reviewed main release with checker secret, apply forward migration and verify collaborator/non-collaborator/removal behavior. No manual teammate allowlist or Supabase account enrollment required."
+      "next": "DB tests cover duplicate collapse, safe property serialization, scope isolation and collaborator removal; all15 team SQL assertions and14 Worker integration cases passed after correcting unsupported Worker redirect:error to manual. Finish final build/browser verification and delta review, then open a single PR against develop. Vivien creates staging environment; supply scoped Cloudflare token plus repository Metadata-read TEAM_GITHUB_TOKEN to GitHub environment secrets. Deploy reviewed main release with checker secret, apply forward migration and verify collaborator/non-collaborator/removal behavior. No manual teammate allowlist or Supabase account enrollment required. Follow-up live inspection found Worker health200, analytics route404 and no Worker secrets; activation remains incomplete. User delegated the provider setup and merge to Vivien; point to the owner activation checklist and do not announce hosted availability before acceptance tests."
     }
   ]
 }
