@@ -251,3 +251,11 @@ These records describe local validation limits, not application failures.
 ```json
 {"id":"OBS-20261021-PROBE-TOOLS-001","status":"observation","area":"operator-tooling","observation":"Direct ESM import of the installed CommonJS PostgreSQL client failed with require is not defined. Loading it with createRequire succeeded and allowed the bounded authentication probe. A fresh browser-control inventory still timed out; native file-picker interaction remained unreliable.","prevention":"Use createRequire for the installed CommonJS client in this runtime. Report provider results separately from automation failures; never infer a successful file attachment from an input call."}
 ```
+
+```json
+{"id":"OBS-20261021-PRIVATE-SETUP-001","status":"resolved","area":"operator-tooling","observation":"PowerShell could not load its Security module for Set-Acl. Execution stopped before generating or writing a credential.","prevention":"Establish and verify private filesystem permissions before writing sensitive setup material. Preserve existing nonempty setup directories rather than regenerating credentials.","regression":"The .NET filesystem ACL API succeeded. Verification confirmed inheritance disabled and one explicit access rule for the current user before the private setup file was used. No credential was written to the repository."}
+```
+
+```json
+{"id":"OBS-20261021-EXPORT-AUTH-004","status":"resolved","area":"hosted-posthog-export","references":["OBS-20261021-EXPORT-AUTH-003","OBS-20261021-EXPORT-PROBE-001"],"observation":"A private credential correction restored verified-TLS restricted pooler authentication. Two hosted exports completed the same bounded synthetic interval. Supabase readback found eight raw copies, four deduplicated events and each known diner/console test record once. All 14 row/permission checks passed; hourly schedule enabled.","regression":"Runs 01a15d4f-261f-0000-b88a-3f67d622bc39 and 01a15d53-eb5b-0000-0e3e-3ccb4c589db6. No missing/conflicting identities or out-of-scope rows. No broader grants.","limit":"Original cache or credential-mismatch cause is unproven. Direct-host IPv6 was unreachable. Next automatic hourly run not observed.","sources":["docs/posthog-export.md","docs/operations.md"]}
+```

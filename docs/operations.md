@@ -1,8 +1,8 @@
 # Local and staging operations
 
-## PostHog export handoff — October 20, 2026
+## PostHog export handoff — October 21, 2026
 
-The private analytics migration is applied to staging and the restricted exporter account exists. Admin access and the official Supabase CA correction are verified. A read-only check now confirms a SCRAM password, LOGIN enabled and no expiry. Two subsequent export attempts still failed password authentication; the saved credentials and pooler authentication path need correction. The hourly schedule remains paused. Follow [the export runbook](posthog-export.md): verify the same private password in the existing connection, then prove the bounded transfer, matching rows and duplicate-safe retry before resuming the schedule. No successful export is claimed. Menu and event-contract tickets can proceed independently. The hourly analytics copy is separate from the planned promptly updated owner-report pipeline.
+The private analytics export is verified in staging. Two successful runs of the same synthetic interval produced eight raw copies and four deduplicated events; the known diner and console records each matched once. All 14 read-only row/permission checks passed. The hourly schedule is enabled, with the official Supabase CA and hostname verification retained. See [the export runbook](posthog-export.md) for run IDs, recovery history and evidence limits. No grants were broadened. The next automatic scheduled run and sustained monitoring remain to be observed. Menu and event-contract tickets can proceed; the hourly internal copy is separate from the planned promptly updated owner-report pipeline.
 
 Repository transition: [migration and release checklist](repository-migration.md) records repository and deployment gates. Under [ADR 0012](adr/0012-main-environment-promotion.md), `main` supplies both environments: test an exact commit in staging, then promote that same commit to production after human approval. The staging workflow requires `STAGING_DEPLOYMENT_APPROVED=true`; keep it disabled until its controls are verified. Production deployment remains unconfigured.
 

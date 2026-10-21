@@ -2,11 +2,23 @@
 
 ## Status
 
-Migration `20261020070000` is applied to the existing Supabase staging database and recorded in its migration history. Both the raw table and deduplicated view exist. Dedicated login `peekaplate_posthog_staging` is created with the export-group membership. Effective checks confirmed append permission, no access to `app_private`, no update/delete/truncate or schema creation, and no `anon`, `authenticated` or application-runtime access to the analytics schema. **The export remains paused; successful transfer is not yet verified.** Admin access was confirmed and the existing connection was updated with the official Supabase CA, retaining certificate and hostname verification. The next bounded run passed TLS but failed with `EAUTHQUERY: unsupported or invalid secret format`; diagnosis found no database password. The operator then set it privately. A subsequent read-only check confirms SCRAM, LOGIN enabled and no expiry, without displaying the verifier. Two later runs still failed `password authentication failed`. The saved connection credential and pooler authentication path remain unresolved; no broader grants are needed.
+**Verified October 21, 2026: staging export and repeated-interval checks passed; the hourly schedule is enabled.** Migration `20261020070000` is applied and recorded in Supabase. The dedicated `peekaplate_posthog_staging` login uses the existing restricted export group. The official Supabase CA and hostname verification are retained; grants were not broadened.
 
-Destination `01a15822-9737-0001-7711-d5a784eb2635` is configured for hourly Events exports, including only `app_shell_viewed` with `environment = staging`. The bounded test covered October 20, 2026, 06:00–07:00 UTC. Its backfill wrapper showed “Completed,” but the underlying run failed with `PostgreSQLConnectionError` / `certificate verify failed`; database readback confirmed zero raw and deduplicated rows. Always inspect the individual run and destination rows, not just the backfill wrapper.
+Destination `01a15822-9737-0001-7711-d5a784eb2635` exports Events hourly, including only `app_shell_viewed` with `environment = staging`. [Run history](https://us.posthog.com/project/675372/pipeline/batch-exports/01a15822-9737-0001-7711-d5a784eb2635?tab=runs) records these successful checks for October 20, 2026, 06:00–07:00 UTC:
 
-Run `01a15d01-7dc1-0000-2e18-a56c0872e0f5` established the earlier missing-password issue. After the password correction, runs `01a15d25-6f43-0000-b5f1-ce8d7e959bca` and `01a15d2e-9c4d-0000-1eeb-641c9338cae1` failed password authentication for the same interval. The latter check occurred October 21 UTC (October 20 local). Last database readback was zero raw and deduplicated rows. Matching synthetic rows, repeated-interval deduplication and schedule resumption remain unverified.
+| Check | Observed result |
+| --- | --- |
+| Initial successful run `01a15d4f-261f-0000-b88a-3f67d622bc39` | Completed; four exported rows; Supabase raw readback four rows and four event identities |
+| Repeat run `01a15d53-eb5b-0000-0e3e-3ccb4c589db6` | Completed; Supabase raw count eight, deduplicated view count four |
+| Known diner and console test records | Each matched once in the view by `distinct_id`, event, project, environment and surface |
+| Out-of-scope rows, missing identities, conflicting identities | Zero in each check |
+| Effective exporter permissions | Append allowed; update/delete/truncate, schema creation and application-schema access denied |
+| Public and application-runtime access | `anon`, `authenticated` and `peekaplate_runtime` have no analytics-schema access |
+| Schedule | Hourly enabled and saved after successful verification |
+
+Earlier attempts failed certificate verification, then a missing database password, then password authentication. A privately generated replacement credential was set by the operator and verified through an independent PostgreSQL connection before the successful hosted exports. The original authentication mismatch/cache cause was not established. Inspect individual runs and database rows: an earlier backfill wrapper showed “Completed” while its underlying run failed.
+
+These checks prove the bounded synthetic transfer and retry behavior. The next automatic hourly run, sustained monitoring, production traffic and account-specific spending limits have not been verified.
 
 The diner and console staging sites already send optional shell-view observations to PostHog after consent. Real menu controls and the durable diner-evidence pipeline are separate tickets.
 
@@ -65,7 +77,7 @@ For this connection, the first attempt with system certificate authorities faile
 
 Certificate recheck on October 21 UTC: the local `Supabase Root 2021 CA` expires April 26, 2031. A credential-free PostgreSQL TLS negotiation against `aws-0-us-east-2.pooler.supabase.com:5432`, using this CA with hostname verification, passed with TLS 1.3. No database authentication or SQL was attempted. The `2021` name does not indicate expiry; this check confirms the local CA works for the inspected host, not that a new PostHog form has saved it or that its password is correct.
 
-A separate credential check with the installed PostgreSQL client also returned `28P01` for the restricted export account on the configured pooler, independently of PostHog. A direct-host attempt could not resolve the database address (`ENOENT`), so it did not establish whether pooler caching contributes. Credentials were not saved to project files. Export activation remains blocked until a working credential is verified on both sides.
+An earlier independent credential check returned `28P01`. After the private credential correction, the same restricted session-pooler connection authenticated successfully with CA and hostname verification; both hosted export runs above then passed. Native DNS resolved the direct host to IPv6, but the direct connection returned `ENETUNREACH`, so direct authentication was not tested. No credential is stored in project files; the successful pooler route requires no new IPv4 add-on.
 
 For password failures after a rotation, first confirm LOGIN, expiry and password format without displaying the stored verifier. [Supabase documents temporary pooler credential caching](https://supabase.com/docs/guides/troubleshooting/supavisor-error-password-authentication-failed-after-password-rotation). Avoid rapid repeated rotations or retry loops. Re-enter the exact database password privately in the existing PostHog connection, preserving the host, qualified username, CA and hostname verification. If failures persist, an authorized operator can test a direct connection privately to distinguish credential failure from pooler failure; escalate a pooler-only failure to Supabase. A temporary cache is a possible cause, not an established diagnosis for this incident.
 

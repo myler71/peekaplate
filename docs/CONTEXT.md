@@ -96,7 +96,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "database",
       "status": "foundation",
-      "summary": "Private Postgres venue/event/command/outbox, actor-scoped memberships and tenant-scoped dish projections. Runtime grants cannot modify membership; share locks serialize revocation. Tests cover prior-schema upgrade, RLS, atomic commands and direct connection reuse; hosted grants/context reset verified, physical pool reuse and restore pending. Private PostHog landing table and conflict-aware view are migration-tested and applied. Exporter is separate from app runtime. Admin/TLS and password-presence corrections verified; LOGIN enabled, SCRAM set, no expiry. Hosted export still paused after two password-authentication failures. Live transfer/retry proof pending.",
+      "summary": "Private Postgres venue/event/command/outbox, actor-scoped memberships and tenant-scoped dish projections. Runtime grants cannot modify membership; share locks serialize revocation. Tests cover prior-schema upgrade, RLS, atomic commands and direct connection reuse; hosted grants/context reset verified, physical pool reuse and restore pending. Private PostHog landing table and conflict-aware view are migration-tested and applied. Exporter is separate from app runtime. Restricted PostHog pooler authentication, two successful hosted exports, actual deduplicated view and effective grants verified. Eight raw copies yield four unique events; hourly schedule enabled. See docs/posthog-export.md for evidence limits.",
       "paths": [
         "migrations/202610130001_foundation.sql",
         "tests/db/foundation.sql",
@@ -130,12 +130,12 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "backend"
       ],
-      "sourceFingerprint": "19fec211033ac5c72ad20f2c8d5751895571065e667538f99ab28f4e7fc38742"
+      "sourceFingerprint": "0408b5208254ea544057b4dd17e070e1577666b1d2a5ebf064d5cca10c8f08b0"
     },
     {
       "id": "delivery",
       "status": "foundation",
-      "summary": "Main supplies staging and production under ADR 0012. Staging Pages, Worker, restricted Supabase/Hyperdrive and staff-command checks are recorded in operations. PRs 14/15 merged under explicit delegated setup approval; hosted PostHog shell views verified at main 2a135fa. Public repository main/develop remain unprotected. Export Admin/TLS and password-presence issues cleared; password authentication still blocks live transfer. Product tickets can start. Hourly analytics export is separate from planned prompt owner-report updates; no freshness benchmark exists.",
+      "summary": "Main supplies staging and production under ADR 0012. Staging Pages, Worker, restricted Supabase/Hyperdrive and staff-command checks are recorded in operations. PRs 14/15 merged under explicit delegated setup approval; hosted PostHog shell views verified at main 2a135fa. Public repository main/develop remain unprotected. Export transfer, duplicate-safe repeat and permission checks passed; hourly staging schedule enabled. Product tickets can start. Hourly analytics export is separate from planned prompt owner-report updates; no freshness benchmark exists.",
       "paths": [
         "README.md",
         "SECURITY.md",
@@ -179,7 +179,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "0d84884b6ce2334424a3c0c6f0c351b99a0bdf1490d4b717d19bc5f373063251"
+      "sourceFingerprint": "90b64a04ed96b5f5dd2f980e1f9b1b92ada769122d74f5a78133ff1c330a9ee0"
     },
     {
       "id": "agents",
@@ -212,7 +212,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "analytics",
       "status": "foundation",
-      "summary": "Consent-gated explicit PostHog capture: hosted diner/console shell views verified in staging. Dish adapter awaits real controls. Private export schema and duplicate/permission tests exist. Admin access, official CA and restricted-login SCRAM password verified. Two later attempts failed password authentication. Schedule paused; matching rows and repeat-interval proof pending. Hourly internal copy does not power live owner reports; validated evidence/projections and owner authorization remain planned.",
+      "summary": "Consent-gated explicit PostHog capture: hosted diner/console shell views verified in staging. Dish adapter awaits real controls. Private export schema and duplicate/permission tests exist. Two hosted exports of one synthetic interval passed: eight raw copies, four deduplicated events, known diner/console records each matched once, no missing/conflicting/out-of-scope rows. Restricted grants verified; hourly schedule enabled. Next automatic run not observed. Hourly internal copy does not power live owner reports; validated evidence/projections and owner authorization remain planned.",
       "paths": [
         "packages/analytics/package.json",
         "packages/analytics/tsconfig.json",
@@ -231,7 +231,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "contracts"
       ],
-      "sourceFingerprint": "30c3706eb189005168c6ebe3218dd60c91914851b303688f7e5d046240d6369e"
+      "sourceFingerprint": "e9e14bb462be3aa45c90eafff2ad84ca06f28a745082035817dd2e465f59a42d"
     }
   ],
   "handoffs": [
@@ -305,13 +305,13 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "next": "Vivien must correct the connection or grant project Admin access. Complete the connection with the official Supabase CA, verify a bounded export and duplicate-safe retry, then resume schedule. Do not claim transfer success from backfill wrapper completion alone."
     },
     {
-      "summary": "October 20 local / October 21 UTC export follow-up: Admin access and official Supabase CA with hostname verification verified. Operator corrected the missing database password; read-only check now confirms SCRAM, LOGIN enabled and no expiry. Runs 01a15d25-6f43-0000-b5f1-ce8d7e959bca and 01a15d2e-9c4d-0000-1eeb-641c9338cae1 still failed password authentication for the October 20 06:00-07:00 UTC interval. Last readback: zero rows. Existing schedule stays paused. Documented hourly internal copy versus planned prompt owner reports. No runtime, migration, grants or production change.",
+      "summary": "October 21, 2026: restricted pooler login and PostHog export recovered using a privately generated credential, official Supabase CA and hostname verification. Runs 01a15d4f-261f-0000-b88a-3f67d622bc39 and 01a15d53-eb5b-0000-0e3e-3ccb4c589db6 completed the October 20 06:00–07:00 UTC interval. Actual Supabase view: eight raw copies, four unique events, one matching diner/console record each. All 14 row/permission checks passed; hourly schedule enabled. No runtime, migration, grants or production change. Earlier failures remain in errors.md; original cache/mismatch cause unproven.",
       "modules": [
         "analytics",
         "database",
         "delivery"
       ],
-      "next": "Operator re-enters the exact database password in the existing PostHog integration with its official CA and hostname verification. Do not rotate again without diagnosis. Verify successful run plus matching rows, repeat interval and check deduplicated counts, then enable schedule. Handoff drafts remain local and disclose the blocker; each contributor adds their own ticket evidence after completing scope. Never treat hourly export as live owner reporting."
+      "next": "Review PR 18 and merge under the human-comment policy. Jeffin owns contract/collection decisions; Zhiliang wires approved real UI events with tests. Each adds a ticket comment with PR and evidence when done. Observe the next automatic export; confirm monitoring, retention/deletion and billing limits before real diner data. Owner evidence pipeline/projections/API remain product work. Handoff drafts are local and unsent."
     }
   ]
 }
