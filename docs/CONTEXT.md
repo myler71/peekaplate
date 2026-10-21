@@ -168,7 +168,8 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "docs/implementation_plan.md",
         "docs/delivery.md",
         "playwright.posthog.config.ts",
-        "tests/e2e/posthog.spec.ts"
+        "tests/e2e/posthog.spec.ts",
+        "docs/ocr-delivery.md"
       ],
       "adrs": [
         "docs/adr/0007-delivery-and-recovery.md",
@@ -179,7 +180,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "90b64a04ed96b5f5dd2f980e1f9b1b92ada769122d74f5a78133ff1c330a9ee0"
+      "sourceFingerprint": "63e19dec8dff20c96b9535771869e11dc61ea9558560394fa958d0917215b4e9"
     },
     {
       "id": "agents",
@@ -232,9 +233,63 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "contracts"
       ],
       "sourceFingerprint": "e9e14bb462be3aa45c90eafff2ad84ca06f28a745082035817dd2e465f59a42d"
+    },
+    {
+      "id": "processing",
+      "status": "foundation",
+      "summary": "Bounded Python ingestion ported from preserved source 28b91d0 with OCR.space Engine 3, source snapshots and needs_review drafts. OCR overlays preserve approximate uploaded-pixel regions with explicit unavailable/invalid states. Offline frozen-report evaluation uses reviewed one-to-one alignment, exact source/report hashes, per-field errors and source-condition groups; it never certifies acceptance. Eighteen standard-library tests pass locally; full locked dependency and application checks await CI. No provider credential, representative accuracy benchmark, backend integration or public asset delivery is supplied.",
+      "paths": [
+        "processing/.env.example",
+        "processing/.gitignore",
+        "processing/.python-version",
+        "processing/README.md",
+        "processing/evaluate_menu.py",
+        "processing/pyproject.toml",
+        "processing/src/peekaplate_processing/__init__.py",
+        "processing/src/peekaplate_processing/captures.py",
+        "processing/src/peekaplate_processing/errors.py",
+        "processing/src/peekaplate_processing/extract_menus.py",
+        "processing/src/peekaplate_processing/images.py",
+        "processing/src/peekaplate_processing/menu_text.py",
+        "processing/src/peekaplate_processing/ocr_regions.py",
+        "processing/src/peekaplate_processing/ocr_space.py",
+        "processing/src/peekaplate_processing/pdf.py",
+        "processing/src/peekaplate_processing/schemas.py",
+        "processing/src/peekaplate_processing/sources.py",
+        "processing/src/peekaplate_processing/storage.py",
+        "processing/src/peekaplate_processing/website.py",
+        "processing/tests/fixture_factory.py",
+        "processing/tests/fixtures/menu-photo-expected.txt",
+        "processing/tests/fixtures/menu.txt",
+        "processing/tests/fixtures/website-menu.html",
+        "processing/tests/test_captures.py",
+        "processing/tests/test_configuration.py",
+        "processing/tests/test_evaluation.py",
+        "processing/tests/test_extract_menu.py",
+        "processing/tests/test_ingestion.py",
+        "processing/tests/test_ocr_regions.py",
+        "processing/tests/test_ocr_space.py",
+        "processing/tests/test_schemas.py",
+        "processing/tests/test_sources.py",
+        "processing/uv.lock"
+      ],
+      "adrs": [
+        "docs/adr/0001-scope-and-repository.md",
+        "docs/adr/0004-visual-tiers.md"
+      ],
+      "dependsOn": [],
+      "sourceFingerprint": "d7881a55db2b11fb95316617779337a653f199a31b8e8e4f500b999f283f2bc9"
     }
   ],
   "handoffs": [
+    {
+      "summary": "Ported preserved Python ingestion without importing the old application branch, added OCR overlay evidence and a frozen-report field evaluator. Standard-library tests pass locally; source accuracy and full dependency/application verification remain pending.",
+      "modules": [
+        "processing",
+        "delivery"
+      ],
+      "next": "Run full CI, obtain human review, agree ingestion/review schema and rubric, then evaluate permitted representative sources using a privately configured OCR.space key. Hand source/error evidence to Uneeza and Sai; coordinate original-photo preparation with Marwan."
+    },
     {
       "summary": "PR #10 merged at bb56cef and API/Pages shells were deployed from that main revision. Hosted tests passed genuine Supabase login, atomic writes, retries/concurrency, cross-restaurant denial and membership revocation. Remote Hyperdrive probes passed context reset and rollback after an injected outbox failure. Logout rejected refresh but accepted the existing JWT until membership removal. Test membership was removed and ephemeral harnesses stopped. R2 staging is private; no paid upgrade or production deployment.",
       "modules": [
@@ -303,15 +358,6 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "delivery"
       ],
       "next": "Vivien must correct the connection or grant project Admin access. Complete the connection with the official Supabase CA, verify a bounded export and duplicate-safe retry, then resume schedule. Do not claim transfer success from backfill wrapper completion alone."
-    },
-    {
-      "summary": "October 21, 2026: restricted pooler login and PostHog export recovered using a privately generated credential, official Supabase CA and hostname verification. Runs 01a15d4f-261f-0000-b88a-3f67d622bc39 and 01a15d53-eb5b-0000-0e3e-3ccb4c589db6 completed the October 20 06:00–07:00 UTC interval. Actual Supabase view: eight raw copies, four unique events, one matching diner/console record each. All 14 row/permission checks passed; hourly schedule enabled. No runtime, migration, grants or production change. Earlier failures remain in errors.md; original cache/mismatch cause unproven.",
-      "modules": [
-        "analytics",
-        "database",
-        "delivery"
-      ],
-      "next": "Review PR 18 and merge under the human-comment policy. Jeffin owns contract/collection decisions; Zhiliang wires approved real UI events with tests. Each adds a ticket comment with PR and evidence when done. Observe the next automatic export; confirm monitoring, retention/deletion and billing limits before real diner data. Owner evidence pipeline/projections/API remain product work. Handoff drafts are local and unsent."
     }
   ]
 }
