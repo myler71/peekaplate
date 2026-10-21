@@ -259,3 +259,60 @@ These records describe local validation limits, not application failures.
 ```json
 {"id":"OBS-20261021-EXPORT-AUTH-004","status":"resolved","area":"hosted-posthog-export","references":["OBS-20261021-EXPORT-AUTH-003","OBS-20261021-EXPORT-PROBE-001"],"observation":"A private credential correction restored verified-TLS restricted pooler authentication. Two hosted exports completed the same bounded synthetic interval. Supabase readback found eight raw copies, four deduplicated events and each known diner/console test record once. All 14 row/permission checks passed; hourly schedule enabled.","regression":"Runs 01a15d4f-261f-0000-b88a-3f67d622bc39 and 01a15d53-eb5b-0000-0e3e-3ccb4c589db6. No missing/conflicting identities or out-of-scope rows. No broader grants.","limit":"Original cache or credential-mismatch cause is unproven. Direct-host IPv6 was unreachable. Next automatic hourly run not observed.","sources":["docs/posthog-export.md","docs/operations.md"]}
 ```
+
+<!-- automatic observation; not root cause -->
+```json
+{"kind":"automatic-check-observation","check":"test:db","timestamp":"2026-10-21T19:35:09.347Z","exitCode":1}
+```
+
+<!-- automatic observation; not root cause -->
+```json
+{"kind":"automatic-check-observation","check":"test:db","timestamp":"2026-10-21T19:36:48.316Z","exitCode":1}
+```
+
+<!-- automatic observation; not root cause -->
+```json
+{"kind":"automatic-check-observation","check":"test:db","timestamp":"2026-10-21T19:37:36.494Z","exitCode":1}
+```
+
+```json
+{"id":"OBS-20261021-TEAM-API-001","status":"resolved","area":"team-analytics-tests","observation":"The initial new HTTP tests returned 404 instead of required authentication/query errors because the team endpoint did not exist. The first database runs stopped because Docker was not running; native startup did not start the engine. The Docker desktop start command recovered it. A later SQL test assumed a Supabase anon role existed in plain local PostgreSQL.","prevention":"Use the installed Docker CLI startup command and explicit untrusted fixture roles in provider-independent database tests. Keep authentication and database authorization as separate tested boundaries.","regression":"Focused HTTP tests now pass; all 12 new SQL assertions and 14 real Worker/Postgres integration cases passed. Complete database harness cleanup/local smoke confirmation is recorded separately in PR evidence.","sources":["backend/src/team-analytics.test.ts","backend/src/dish.integration.ts","tests/db/team-analytics.sql"]}
+```
+
+```json
+{"id":"OBS-20261021-GITHUB-ENV-001","status":"open","area":"team-access-activation","observation":"Staging environment secret/variable reads returned 404. Repository metadata confirms write but no admin access; environment listing was empty and repository Actions secret listing was empty.","followup":"Repository administrator creates the staging environment and configures a scoped deployment token without sharing it with contributors. No permission bypass or shared privileged API key is introduced.","sources":["docs/team-data-access.md"]}
+```
+
+<!-- automatic observation; not root cause -->
+```json
+{"kind":"automatic-check-observation","check":"test:db","timestamp":"2026-10-21T19:43:03.732Z","exitCode":1}
+```
+
+<!-- automatic observation; not root cause -->
+```json
+{"kind":"automatic-check-observation","check":"test:db","timestamp":"2026-10-21T19:44:04.172Z","exitCode":1}
+```
+
+<!-- automatic observation; not root cause -->
+```json
+{"kind":"automatic-check-observation","check":"test:db","timestamp":"2026-10-21T19:44:46.070Z","exitCode":1}
+```
+
+<!-- automatic observation; not root cause -->
+```json
+{"kind":"automatic-check-observation","check":"test:db","timestamp":"2026-10-21T19:45:30.517Z","exitCode":1}
+```
+
+<!-- automatic observation; not root cause -->
+```json
+{"kind":"automatic-check-observation","check":"test:db","timestamp":"2026-10-21T19:46:06.911Z","exitCode":1}
+```
+
+<!-- automatic observation; not root cause -->
+```json
+{"kind":"automatic-check-observation","check":"test:db","timestamp":"2026-10-21T19:47:30.134Z","exitCode":1}
+```
+
+```json
+{"id":"OBS-20261021-TEAM-API-002","status":"resolved","area":"worker-provider-fetch","observation":"Node-mocked GitHub authorization tests passed, but real workerd returned a sanitized 503 before reaching the local provider fixture. Workerd rejected redirect:error; its error explicitly required manual or follow.","cause":"Browser-style RequestRedirect error is unsupported by the configured Workers runtime.","regression":"Changed provider fetch to redirect:manual; user responses must be OK and membership exactly204, so redirects remain denied without forwarding credentials. Real Worker/PostgreSQL integration and all15 new SQL assertions passed after the correction. Added safe-property malformed/value fixtures.","prevention":"Exercise network-bound code in the actual Worker runtime; mocked fetch cannot establish support for native request options.","sources":["backend/src/team-auth.ts","backend/src/team-auth.test.ts","backend/src/dish.integration.ts","tests/db/team-analytics.sql"]}
+```
