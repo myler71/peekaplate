@@ -96,7 +96,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "contracts",
         "database"
       ],
-      "sourceFingerprint": "77cb68920d844e6544413d589c2afbd2d882eb19aab137613916bd8b0580af62"
+      "sourceFingerprint": "92f22213bceebd5fb3a213a5a135dc4ebc35532f191e73ffc157d646f0b8b551"
     },
     {
       "id": "database",
@@ -122,7 +122,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "docs/adr/0014-team-analytics-access.md"
       ],
       "dependsOn": [],
-      "sourceFingerprint": "c0c9ad16cf42340cde0603f6b7282f5fa8a42e37960e4639410b334d854830f3"
+      "sourceFingerprint": "fccd1d02035493216fcb1fae4fb672e25ec554da17005a27354ae2a4f975f7f8"
     },
     {
       "id": "measurement",
@@ -324,7 +324,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "analytics",
         "delivery"
       ],
-      "next": "Finish final DB/build/browser verification and two read-only reviewers, then open a single PR against develop. Vivien creates staging environment; supply scoped Cloudflare token plus repository Metadata-read TEAM_GITHUB_TOKEN to GitHub environment secrets. Deploy reviewed main release with checker secret, apply forward migration and verify collaborator/non-collaborator/removal behavior. No manual teammate allowlist or Supabase account enrollment required."
+      "next": "DB tests cover duplicate collapse, safe property serialization, scope isolation and collaborator removal; all15 team SQL assertions and14 Worker integration cases passed after correcting unsupported Worker redirect:error to manual. Finish final build/browser verification and delta review, then open a single PR against develop. Vivien creates staging environment; supply scoped Cloudflare token plus repository Metadata-read TEAM_GITHUB_TOKEN to GitHub environment secrets. Deploy reviewed main release with checker secret, apply forward migration and verify collaborator/non-collaborator/removal behavior. No manual teammate allowlist or Supabase account enrollment required."
     }
   ]
 }

@@ -181,6 +181,29 @@ describe('real team analytics API', () => {
       counts: [{ event: 'app_shell_viewed', surface: 'diner', count: 3 }],
       events: [],
     });
+    await admin.query(`INSERT INTO analytics_private.posthog_events(uuid,event,properties,team_id,timestamp)
+      VALUES ('valid-dish','dish_open',jsonb_build_object('environment','staging','surface','diner',
+        'event_id','00000000-0000-4000-8000-000000000001','publication_hash',repeat('a',64),
+        'dish_revision_hash',repeat('b',64),'manifest_hash',repeat('c',64),'displayed_tier','T1',
+        'availability_version',42),675372,'2026-10-20T06:35:00Z')`);
+    const dishResponse = await get('events');
+    expect(dishResponse.status).toBe(200);
+    expect(await dishResponse.json()).toMatchObject({
+      events: [
+        {
+          event: 'dish_open',
+          properties: {
+            availability_version: 42,
+            displayed_tier: 'T1',
+            publication_hash: 'a'.repeat(64),
+            event_id: '00000000-0000-4000-8000-000000000001',
+          },
+        },
+        {},
+        {},
+        {},
+      ],
+    });
     expect((await get('events', viewer)).status).toBe(401);
     expect((await get('events', actor, '&projectId=2')).status).toBe(400);
     const client = new Client({ connectionString: runtimeUrl });

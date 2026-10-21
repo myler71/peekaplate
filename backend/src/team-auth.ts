@@ -34,7 +34,8 @@ export async function verifyTeamCollaborator(
         'X-GitHub-Api-Version': '2022-11-28',
         'User-Agent': 'PeekaPlate-Team-Analytics',
       },
-      redirect: 'error',
+      // Workers supports manual/follow; 3xx responses below fail closed without forwarding tokens.
+      redirect: 'manual',
       signal: AbortSignal.timeout(3000),
     });
   try {

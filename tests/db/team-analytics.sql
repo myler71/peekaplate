@@ -1,6 +1,6 @@
 BEGIN;
 CREATE EXTENSION IF NOT EXISTS pgtap;
-SELECT plan(11);
+SELECT plan(15);
 INSERT INTO analytics_private.posthog_events(uuid,event,properties,team_id,timestamp,distinct_id,ip) VALUES
  ('safe','app_shell_viewed','{"environment":"staging","surface":"diner","schema_version":1,"private_text":"never return"}',675372,'2026-10-20T06:00:00Z','hidden visitor','127.0.0.1'),
  ('safe','app_shell_viewed','{"environment":"staging","surface":"diner","schema_version":1,"private_text":"never return"}',675372,'2026-10-20T06:00:00Z','hidden visitor','127.0.0.1'),
@@ -15,6 +15,18 @@ SELECT is(team_api_private.read_analytics(675372,'summary','2026-10-20T06:00:00Z
 SELECT throws_like($$SELECT * FROM team_api_private.project_scope$$,'permission denied for table project_scope','runtime cannot enumerate or enable project scopes');
 SELECT throws_like($$SELECT * FROM analytics_private.posthog_events$$,'permission denied for schema analytics_private','runtime still cannot read raw analytics');
 SELECT throws_like($$SELECT team_api_private.read_analytics(675372,'events','2026-10-01T00:00:00Z','2026-10-20T07:00:00Z',50)$$,'invalid_request','SQL also rejects broad ranges');
+RESET ROLE;
+INSERT INTO analytics_private.posthog_events(uuid,event,properties,team_id,timestamp)
+SELECT 'property-' || n, 'dish_open', jsonb_build_object(
+  'environment','staging','surface','diner','event_id','00000000-0000-4000-8000-000000000001',
+  'publication_hash',repeat('a',64),'dish_revision_hash',repeat('b',64),'manifest_hash',repeat('c',64),
+  'displayed_tier','T1','availability_version',v),675372,'2026-10-20T07:30:00Z'
+FROM (VALUES (1,'"invalid"'::jsonb),(2,'{}'::jsonb),(3,'0.5'::jsonb),(4,'9007199254740992'::jsonb),(5,'42'::jsonb)) fixture(n,v);
+SET LOCAL ROLE peekaplate_runtime;
+SELECT is((SELECT count(*)::int FROM jsonb_array_elements(team_api_private.read_analytics(675372,'events','2026-10-20T07:00:00Z','2026-10-20T08:00:00Z',50)->'events') e WHERE e->'properties' ? 'availability_version'),1,'invalid, fractional and oversize versions excluded without failing the report');
+SELECT is(team_api_private.read_analytics(675372,'events','2026-10-20T07:00:00Z','2026-10-20T08:00:00Z',50)->'events'->0->'properties'->>'event_id','00000000-0000-4000-8000-000000000001','valid event UUID survives SQL projection');
+SELECT is(team_api_private.read_analytics(675372,'events','2026-10-20T07:00:00Z','2026-10-20T08:00:00Z',50)->'events'->0->'properties'->>'publication_hash',repeat('a',64),'valid content hash survives SQL projection');
+SELECT is(team_api_private.read_analytics(675372,'events','2026-10-20T07:00:00Z','2026-10-20T08:00:00Z',50)->'events'->0->'properties'->>'displayed_tier','T1','valid tier survives SQL projection');
 RESET ROLE;
 DELETE FROM team_api_private.project_scope;
 SET LOCAL ROLE peekaplate_runtime;

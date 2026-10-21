@@ -17,6 +17,7 @@ describe('repository collaborator authorization', () => {
     expect(request.mock.calls[0]?.[1]?.headers).toMatchObject({
       Authorization: 'Bearer personal-token',
     });
+    expect(request.mock.calls[0]?.[1]?.redirect).toBe('manual');
     expect(request.mock.calls[1]?.[0]).toBe(
       'https://api.github.com/repos/vivienk/peekaplate/collaborators/member',
     );
