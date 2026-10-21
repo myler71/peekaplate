@@ -2,18 +2,22 @@ import {
   CreateDishRevisionSchema,
   DishRevisionScopeSchema,
   type HealthResponse,
+  TeamAnalyticsQuerySchema,
+  TeamAnalyticsResponseSchema,
 } from '@peekaplate/contracts';
 import { Hono } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
 import { Client } from 'pg';
 import { AuthenticationError, AuthUnavailableError, createStaffVerifier } from './auth';
 import { CommandError, createDishRevision } from './dish-command';
+import { readTeamAnalytics } from './team-analytics';
 
 export type Bindings = {
   APP_ENV?: string;
   AUTH_ISSUER?: string;
   LOCAL_DATABASE_URL?: string;
   HYPERDRIVE?: { connectionString: string };
+  POSTHOG_PROJECT_ID?: string;
 };
 
 type Dependencies = {
@@ -24,6 +28,13 @@ type Dependencies = {
     input: Parameters<typeof createDishRevision>[3],
     env: Bindings,
   ) => ReturnType<typeof createDishRevision>;
+  readAnalytics?: (
+    actorId: string,
+    projectId: number,
+    kind: 'events' | 'summary',
+    query: Parameters<typeof readTeamAnalytics>[4],
+    env: Bindings,
+  ) => ReturnType<typeof readTeamAnalytics>;
 };
 
 let verifier: { issuer: string; local: boolean; verify: ReturnType<typeof createStaffVerifier> };
@@ -52,6 +63,18 @@ const dependencies: Dependencies = {
       await client.end();
     }
   },
+  async readAnalytics(actorId, projectId, kind, query, env) {
+    const connectionString =
+      env.APP_ENV === 'local' ? env.LOCAL_DATABASE_URL : env.HYPERDRIVE?.connectionString;
+    if (!connectionString) throw new AuthUnavailableError();
+    const client = new Client({ connectionString, connectionTimeoutMillis: 5000 });
+    try {
+      await client.connect();
+      return await readTeamAnalytics(client, actorId, projectId, kind, query);
+    } finally {
+      await client.end();
+    }
+  },
 };
 
 export function createApp(services: Dependencies = dependencies) {
@@ -72,6 +95,33 @@ export function createApp(services: Dependencies = dependencies) {
     '/venues/*',
     bodyLimit({ maxSize: 16_384, onError: (c) => c.json({ error: 'body_too_large' }, 413) }),
   );
+  app.get('/team/analytics/:kind', async (c) => {
+    const env = c.env ?? {};
+    if (!['local', 'staging'].includes(env.APP_ENV ?? ''))
+      return c.json({ error: 'not_found' }, 404);
+    const authorization = c.req.header('Authorization');
+    if (!authorization || !/^Bearer \S+$/i.test(authorization))
+      return c.json({ error: 'unauthorized' }, 401);
+    const actorId = await services.verify(authorization, env);
+    const kind = c.req.param('kind');
+    if (kind !== 'events' && kind !== 'summary') return c.json({ error: 'not_found' }, 404);
+    const params = new URL(c.req.url).searchParams;
+    const parsed = TeamAnalyticsQuerySchema.safeParse(Object.fromEntries(params));
+    if (!parsed.success || [...params.keys()].length !== new Set(params.keys()).size) {
+      return c.json({ error: 'invalid_request' }, 400);
+    }
+    const projectId = Number(env.POSTHOG_PROJECT_ID);
+    if (
+      !/^[1-9][0-9]*$/.test(env.POSTHOG_PROJECT_ID ?? '') ||
+      !Number.isSafeInteger(projectId) ||
+      projectId > 2147483647 ||
+      !services.readAnalytics
+    ) {
+      throw new AuthUnavailableError();
+    }
+    const result = await services.readAnalytics(actorId, projectId, kind, parsed.data, env);
+    return c.json(TeamAnalyticsResponseSchema.parse(result));
+  });
   app.post('/venues/:venueId/dishes/:dishId/revisions', async (c) => {
     const authorization = c.req.header('Authorization');
     if (!authorization || !/^Bearer \S+$/i.test(authorization)) {

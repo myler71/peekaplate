@@ -6,6 +6,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { unstable_dev } from 'wrangler';
 import { createDishRevision, replayDish } from './dish-command';
 import type { Bindings } from './index';
+import { readTeamAnalytics } from './team-analytics';
 
 const runtimeUrl = process.env.PEEKAPLATE_DB_TEST_URL;
 const adminUrl = process.env.PEEKAPLATE_DB_ADMIN_URL;
@@ -103,7 +104,12 @@ beforeAll(async () => {
     port: 0,
     inspectorPort: 0,
     logLevel: 'error',
-    vars: { APP_ENV: 'local', AUTH_ISSUER: env.AUTH_ISSUER!, LOCAL_DATABASE_URL: runtimeUrl! },
+    vars: {
+      APP_ENV: 'local',
+      AUTH_ISSUER: env.AUTH_ISSUER!,
+      LOCAL_DATABASE_URL: runtimeUrl!,
+      POSTHOG_PROJECT_ID: '675372',
+    },
     experimental: {
       disableExperimentalWarning: true,
       forceLocal: true,
@@ -120,6 +126,59 @@ afterAll(async () => {
     await new Promise<void>((resolve, reject) =>
       server.close((error) => (error ? reject(error) : resolve())),
     );
+});
+
+describe('real team analytics API', () => {
+  const window = '?from=2026-10-20T06:00:00Z&until=2026-10-20T07:00:00Z';
+  it('returns bounded redacted staging data and denies other actors/projects and revoked access', async () => {
+    await admin.query('INSERT INTO team_api_private.reader_grant VALUES ($1,675372)', [actor]);
+    await admin.query(`INSERT INTO analytics_private.posthog_events(uuid,event,properties,team_id,timestamp,distinct_id,ip)
+      SELECT 'team-fixture-' || n, 'app_shell_viewed',
+        '{"environment":"staging","surface":"diner","schema_version":1,"private":"hidden"}'::jsonb,
+        675372, '2026-10-20T06:30:00Z'::timestamptz, 'hidden-person', '127.0.0.1'
+      FROM generate_series(1,3) n, generate_series(1,2) copies`);
+    await admin.query(`INSERT INTO analytics_private.posthog_events(uuid,event,properties,team_id,timestamp)
+      VALUES ('other-project','app_shell_viewed','{"environment":"staging","surface":"diner"}',2,'2026-10-20T06:30:00Z'),
+      ('production','app_shell_viewed','{"environment":"production","surface":"diner"}',675372,'2026-10-20T06:30:00Z')`);
+    const get = async (kind: string, subject = actor, suffix = '') =>
+      fetch(`http://127.0.0.1:${worker.port}/team/analytics/${kind}${window}${suffix}`, {
+        headers: { Authorization: `Bearer ${await token(subject)}` },
+      });
+    const response = await get('events', actor, '&limit=2');
+    expect(response.status).toBe(200);
+    expect(response.headers.get('Cache-Control')).toBe('no-store');
+    const body = (await response.json()) as { events: unknown[]; truncated: boolean };
+    expect(body.events).toHaveLength(2);
+    expect(body.truncated).toBe(true);
+    expect(JSON.stringify(body)).not.toMatch(/hidden|127\.0\.0\.1|distinct_id|person_properties/);
+    const summary = await get('summary');
+    expect(summary.status).toBe(200);
+    expect(await summary.json()).toMatchObject({
+      counts: [{ event: 'app_shell_viewed', surface: 'diner', count: 3 }],
+      events: [],
+    });
+    expect((await get('events', viewer)).status).toBe(403);
+    expect((await get('events', actor, '&projectId=2')).status).toBe(400);
+    const client = new Client({ connectionString: runtimeUrl });
+    await client.connect();
+    try {
+      await expect(
+        readTeamAnalytics(client, actor, 2, 'events', {
+          from: '2026-10-20T06:00:00Z',
+          until: '2026-10-20T07:00:00Z',
+          limit: 50,
+        }),
+      ).rejects.toMatchObject({ code: 'forbidden' });
+      expect(
+        (await client.query("SELECT current_setting('app.actor_id',true) AS actor")).rows[0]
+          .actor ?? '',
+      ).toBe('');
+    } finally {
+      await client.end();
+    }
+    await admin.query('DELETE FROM team_api_private.reader_grant WHERE actor_id=$1', [actor]);
+    expect((await get('summary')).status).toBe(403);
+  });
 });
 
 describe('real PostgreSQL staff command', () => {

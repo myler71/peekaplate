@@ -12,6 +12,8 @@ Staging links: [diner](https://peekaplate-diner-staging.pages.dev/) · [owner/st
 
 ## Implementation status
 
+Team analytics inspection uses individual Supabase sessions and explicit staging reader grants through the Worker. See [team data access](docs/team-data-access.md) for the two read APIs, sign-in steps, safe fields and GitHub deployment-secret setup. These delayed diagnostic counts are separate from owner business reports. Hosted availability requires the migration and reviewed release; this source change does not enroll teammates.
+
 The repository contains diner and staff-console shells and a staff-command slice: signed staff-token verification, restaurant membership checks, and atomic dish-revision writes with tenant isolation. Staging hosts both shells and the API. Hosted acceptance with a genuine Supabase session verified authorized writes through Hyperdrive, retries, concurrent updates, cross-restaurant denial and membership revocation. A separate remote probe verified rollback and transaction-context reset. These are bounded synthetic checks, not pilot or production certification. Console login UI, menu publication, intent ingestion, POS integration and visual rendering are not implemented. Feature and pilot acceptance criteria are tracked in the [verification map](docs/verification.md).
 
 ## Technology and architecture
