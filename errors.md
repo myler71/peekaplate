@@ -316,3 +316,17 @@ These records describe local validation limits, not application failures.
 ```json
 {"id":"OBS-20261021-TEAM-API-002","status":"resolved","area":"worker-provider-fetch","observation":"Node-mocked GitHub authorization tests passed, but real workerd returned a sanitized 503 before reaching the local provider fixture. Workerd rejected redirect:error; its error explicitly required manual or follow.","cause":"Browser-style RequestRedirect error is unsupported by the configured Workers runtime.","regression":"Changed provider fetch to redirect:manual; user responses must be OK and membership exactly204, so redirects remain denied without forwarding credentials. Real Worker/PostgreSQL integration and all15 new SQL assertions passed after the correction. Added safe-property malformed/value fixtures.","prevention":"Exercise network-bound code in the actual Worker runtime; mocked fetch cannot establish support for native request options.","sources":["backend/src/team-auth.ts","backend/src/team-auth.test.ts","backend/src/dish.integration.ts","tests/db/team-analytics.sql"]}
 ```
+
+
+## OBS-20261022-VIS02-DRAFT-PREPARATION
+
+- Observation: the imported processing source has whitespace-only blank lines that
+  fail the default `git diff --check`; the user source style is retained for this
+  draft. This is a known review-preparation limitation, not a runtime test result.
+- Observation: the first offline package build could not create a temporary lock
+  in the read-only user uv cache. Repeating with a task-local writable cache
+  built both wheel and source distribution successfully.
+- Evidence: `uv --cache-dir /tmp/peeka-uv-cache build --offline --project
+  /tmp/peeka-vis02-review/processing --out-dir /tmp/peeka-vis02-dist` passed.
+  The isolated current processing suite passed all 82 tests with mocked providers.
+- Scope: no provider calls, application behavior change or performance refinement.
