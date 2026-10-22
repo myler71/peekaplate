@@ -8,7 +8,7 @@ Relates to [0002](0002-selective-event-sourcing.md), [0003](0003-intent-evidence
 
 Sprint 3 work needs shared, versioned data shapes before it can integrate: diner screens (S3-DIN-01/02), publication APIs (S3-RES-02), menu ingestion (S3-VIS-01), event capture (S3-DATA-01) and owner reporting (S3-DATA-02). The S3-DATA-01 event-field matrix v0.1a proposes event meanings and fields and lists the decisions this record must settle.
 
-`packages/contracts` defines the staff dish-revision command/result, a v1 diner event limited to `dish_open` and `portion_compare`, and the team analytics query/response. `packages/analytics` sends consented, privacy-filtered `app_shell_viewed` observations directly to PostHog; its dish-event capture has no caller and makes bounded at-most-once attempts. ADR 0013 copies those observations hourly into `analytics_private.posthog_events`, and ADR 0014 lets collaborators inspect that copy. Neither provides restaurant-authorized evidence. No canonical observation endpoint, outbox, observation tables or owner-report API exist.
+`packages/contracts` defines the staff dish-revision command/result, a v1 diner event limited to `dish_open` and `portion_compare`, and the team analytics query/response. `packages/analytics` sends consented, privacy-filtered `app_shell_viewed` observations directly to PostHog; its dish-event capture has no caller and makes bounded at-most-once attempts. ADR 0013 copies those observations hourly into `analytics_private.posthog_events`, and ADR 0014 lets collaborators inspect that copy. Neither provides restaurant-authorized evidence. No canonical observation endpoint, outbox, observation tables or owner-report API exist. The staging Worker has no Queue or R2 binding, and no menu token can be issued until publication exists (S3-RES-02).
 
 Draft work disagrees with accepted decisions: a report query uses five sessions instead of ADR 0006's ten, and a direct backend → Supabase ingestion route is proposed instead of ADR 0003's Queue and R2 boundary.
 
@@ -26,6 +26,8 @@ Draft work disagrees with accepted decisions: a report query uses five sessions 
 
 **Versioning.** New controls use a new observation version. Historical v1 records stay distinct and are not relabelled; no event is sent twice under two versions.
 
+**Ingest endpoint ownership.** Proposed implementation owner: Zhiliang (S3-DATA-01). Scope is the HTTP ingestion boundary only: request and schema validation, server-authorized venue context, `(venue_id, event_id)` handling, duplicate and conflicting-reuse behavior, consent and privacy checks, and accepted/rejected receipts. It feeds the Queue on the ADR 0003 path and never writes to the ADR 0013 export tables. Jeffin and Sai review its architecture and security. The Queue consumer, canonical migrations and tables, and the owner-report API have separate owners, still to be confirmed.
+
 **Merge order.** This ADR and the contracts merge first. Then diner controls (S3-DIN-02) and capture (S3-DATA-01), followed by live reporting (S3-DATA-02). Fixture, metric and layout work may continue in parallel against labelled synthetic data.
 
 ## Open decisions before acceptance
@@ -39,7 +41,9 @@ Numbers refer to the S3-DATA-01 event-field matrix v0.1a.
 5. **Table and view names** for the observation index and fact tables.
 6. **Retention.** ADR 0005's 30-day raw retention is still a proposal; the PostHog project and its Supabase copy must follow the agreed period and deletion procedure.
 7. **Consent for real diners.** Staging uses per-page opt-in. The pilot policy needs PM approval.
-8. **Owners and reviewers** for the ingest endpoint, consumer, migrations and report API, with reviewer hours recorded per PR.
+8. **Route and receipt contract.** The implementation plan proposes a token-authorized observation POST that returns per-event receipts: accepted IDs only after the Queue accepts them, with permanent rejections separate from retryable failures. The exact path and schemas freeze with the contracts. The browser test that expects `POST /events` to return 404 changes with that route.
+9. **Infrastructure and menu token.** Creating and binding the staging Queue and R2 bucket, and issuing the signed menu token, need named owners and protected setup.
+10. **Owners and reviewers** for the Queue consumer, canonical migrations and tables, and the owner-report API, with reviewer hours recorded per PR.
 
 ## Consequences
 

@@ -23,7 +23,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "docs/adr/0015-integration-contracts-and-owner-evidence.md"
       ],
       "dependsOn": [],
-      "sourceFingerprint": "a9cd9099be2cbd5c409ecb922b5b5e1cc01256e07cab1ccaa5765c2396de8fd3"
+      "sourceFingerprint": "27041e8e430c435311a09b8e6640b1373eb6049efa4c72a381303bf55646e0c0"
     },
     {
       "id": "diner",
@@ -140,7 +140,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "backend"
       ],
-      "sourceFingerprint": "41940073fa28beb115be3bfdb7d0182635fec61a84e7fee0715b744f971e6b71"
+      "sourceFingerprint": "1e254ca196fcfe95a18deb8f4bc78a4464902b6e49419e3f48d00952e2d244d0"
     },
     {
       "id": "delivery",
@@ -244,18 +244,18 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "contracts"
       ],
-      "sourceFingerprint": "0fcc112d7d25024b336df5d570f70e3643cf8ab336553ab0be0c376c7bdb36ca"
+      "sourceFingerprint": "2ab7bc5f67480eb6806ace9fad8659a16ff9af25b165bfc58590c0af9769566d"
     }
   ],
   "handoffs": [
     {
-      "summary": "Proposed ADR 0015 for S3-ARC-01: six versioned integration contracts; owner metrics only from ADR 0003 canonical facts, with the ADR 0013 PostHog copy kept for reconciliation; server-derived (venue_id, event_id) identity shared with consented PostHog copies; the ten-session floor; versioning and merge order. No contract, migration or collector code changed.",
+      "summary": "Proposed ADR 0015 for S3-ARC-01: six versioned integration contracts; owner metrics only from ADR 0003 canonical facts, with the ADR 0013 PostHog copy kept for reconciliation; server-derived (venue_id, event_id) identity shared with consented PostHog copies; the ten-session floor; versioning and merge order. Zhiliang is the proposed ingest-endpoint owner; other owners stay open. No contract, migration or collector code changed.",
       "modules": [
         "contracts",
         "measurement",
         "analytics"
       ],
-      "next": "Resolve the open matrix decisions (D3 events, D4 Save, D7 metrics, D8 timing), table names, retention, pilot consent and owners with Sai, Adam and the PMs; obtain Sai's approval, then implement the contracts with negative tests."
+      "next": "Resolve the open matrix decisions (D3 events, D4 Save, D7 metrics, D8 timing), table names, retention, pilot consent, route/receipt contract, Queue/R2/menu-token setup and remaining owners with Sai, Adam and the PMs; obtain Sai's approval, then implement the contracts with negative tests."
     },
     {
       "summary": "Updated deployment selection to main for both environments per the maintainer's explicit instruction. Configured verified non-secret staging account, issuer and Hyperdrive bindings. Provider audit found existing Supabase migrations, forced RLS, restricted staging login, an ES256 public key and uncached Hyperdrive; no duplicate database branch was created. Hosted request behavior remains unverified.",
