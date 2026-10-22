@@ -103,6 +103,8 @@ The staff-command cloud checks above are complete within their recorded scope: e
 
 ## Later Actions-based staging activation
 
+Team analytics API release and collaborator access are documented in [team data access](team-data-access.md). The forward migration grants only checked function execution to the existing runtime. On October 21 the GitHub API listed no environments or repository Actions secrets, and the operator account had write but no admin permission; provider/GitHub activation must not be inferred from this code change.
+
 This checklist is conditional on verified environment restrictions and independent approval. The repository is now public, but these controls have not been activated or verified. Use the owner-controlled checkpoint above until an administrator configures and tests them; keep this workflow disabled.
 
 The repository owner supplies real account values and enables controls before automated deployment:

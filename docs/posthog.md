@@ -84,6 +84,8 @@ Team members need PostHog membership only if they will inspect its data or manag
 
 ## Internal analysis versus owner analytics
 
+For teammate access to the Supabase copy, use the [staging inspection API](team-data-access.md) with individual login and explicit reader grants. It returns bounded, allowlisted diagnostics; it does not proxy PostHog administration, expose raw visitor identities or implement owner reports.
+
 The internal [Integration health - staging dashboard](https://us.posthog.com/project/675372/dashboard/2233365) counts `app_shell_viewed`, broken down by `surface` and filtered to `environment=staging`. It labels these **opted-in placeholder page views**, not unique diners/owners. The generated distinct ID measures a page lifetime, not a visit or person. Repeat capture after toggling consent can add another technical view. Do not use the provider's generic starter dashboard as proof of menu usage; its automatic events are not collected here.
 
 Once real dish callers exist, exploratory counts of `dish_open` and `portion_compare` can be broken down by `dish_revision_hash` and displayed tier. These are client observations, not verified restaurant facts, consideration rates or orders. Do not expose PostHog shared dashboards to restaurant owners or use client fields as tenant authority. The public ingestion API can be spoofed.

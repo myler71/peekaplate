@@ -215,3 +215,55 @@ export type SourceInputSegment = z.infer<typeof SourceInputSegmentSchema>;
 export type SourceInput = z.infer<typeof SourceInputSchema>;
 export type RetrievalRequestInput = z.input<typeof RetrievalRequestSchema>;
 export type RetrievalRequest = z.infer<typeof RetrievalRequestSchema>;
+
+export const TeamAnalyticsQuerySchema = z
+  .strictObject({
+    from: z.iso.datetime(),
+    until: z.iso.datetime(),
+    limit: z.coerce.number().int().min(1).max(100).default(50),
+  })
+  .refine(({ from, until }) => {
+    const duration = Date.parse(until) - Date.parse(from);
+    return duration > 0 && duration <= 7 * 24 * 60 * 60 * 1000;
+  }, 'Use a positive window of at most seven days');
+
+const analyticsEventName = z.enum(['app_shell_viewed', 'dish_open', 'portion_compare']);
+const analyticsSurface = z.enum(['diner', 'console']);
+const analyticsEvent = z.strictObject({
+  id: z.string().min(1).max(200),
+  event: analyticsEventName,
+  timestamp: z.iso.datetime({ offset: true }),
+  surface: analyticsSurface,
+  properties: z.strictObject({
+    schema_version: z.literal(1).optional(),
+    event_id: z.uuid().optional(),
+    publication_hash: hash.optional(),
+    dish_revision_hash: hash.optional(),
+    displayed_tier: z.enum(['T0', 'T1', 'T2']).optional(),
+    manifest_hash: hash.optional(),
+    availability_version: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER).optional(),
+  }),
+});
+export const TeamAnalyticsResponseSchema = z.strictObject({
+  source: z.literal('posthog_supabase_export'),
+  environment: z.literal('staging'),
+  projectId: z.number().int().positive(),
+  from: z.iso.datetime({ offset: true }),
+  until: z.iso.datetime({ offset: true }),
+  computedAt: z.iso.datetime({ offset: true }),
+  freshness: z.literal('hourly_export_delay'),
+  kind: z.enum(['events', 'summary']),
+  events: z.array(analyticsEvent).max(100),
+  counts: z
+    .array(
+      z.strictObject({
+        event: analyticsEventName,
+        surface: analyticsSurface,
+        count: z.number().int().nonnegative(),
+      }),
+    )
+    .max(6),
+  truncated: z.boolean(),
+});
+export type TeamAnalyticsQuery = z.infer<typeof TeamAnalyticsQuerySchema>;
+export type TeamAnalyticsResponse = z.infer<typeof TeamAnalyticsResponseSchema>;

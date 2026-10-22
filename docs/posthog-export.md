@@ -24,6 +24,8 @@ The diner and console staging sites already send optional shell-view observation
 
 ## What this adds
 
+[ADR 0014](adr/0014-team-analytics-access.md) adds a narrow internal inspection API: approved staging readers can request redacted events/counts through a checked database function. The application runtime still has no direct analytics-schema access, and owners receive no access to these records. See [team access and release steps](team-data-access.md); availability requires its forward migration and Worker release.
+
 ```mermaid
 flowchart LR
     UI["Diner or console: consented observation"] --> PH["PostHog staging"]
@@ -38,7 +40,7 @@ Both kinds of data live in the same Supabase database:
 | --- | --- | --- |
 | `app_private` | Authorized restaurant changes, staff membership, receipts and projections | Existing restricted backend role and RLS |
 | `analytics_private.posthog_events` | Raw optional observations copied from PostHog | Dedicated exporter can read/append; database operator can inspect |
-| `analytics_private.posthog_events_deduplicated` | Exact repeats counted once; conflicting/missing identities excluded | Database operator only; no public API or application grants |
+| `analytics_private.posthog_events_deduplicated` | Exact repeats counted once; conflicting/missing identities excluded | Database operator and restricted internal function owner; runtime receives only checked function execution under ADR 0014 |
 
 Exporting a row does not make it a verified restaurant fact. There is no owner dashboard endpoint for these tables yet. Developers can use synthetic local fixtures; they do not need the export password.
 
