@@ -132,7 +132,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "delivery",
       "status": "foundation",
-      "summary": "Main supplies both environments under ADR 0012. Hosted staging foundation checks cover login, writes, retries, concurrency, tenant denial, membership revocation, rollback and context reset. Issued JWTs remain valid until expiry. Login UI, pilot/load/recovery checks and production remain pending. R2 assets are private and unbound; Actions is gated and GitHub Free controls remain manual. README/team guide explain setup and the accepted Python extension; no Python job exists. Optional PostHog shell capture is verified from local staging builds against the real project; hosted release awaits human review. ADR 0003 still governs durable evidence; PostHog is internal best-effort analytics. Detailed planning is preserved with the deployed foundation.",
+      "summary": "Main supplies both environments under ADR 0012. Hosted staging foundation checks cover login, writes, retries, concurrency, tenant denial, membership revocation, rollback and context reset. Issued JWTs remain valid until expiry. Login UI, pilot/load/recovery checks and production remain pending. R2 assets are private and unbound; Actions remains gated. October 22 staging settings show main-only branches, required reviewers and prevent self-review, with administrator bypass allowed; credential validity and workflow enforcement remain unverified. Repository branch-protection status is separate. README/team guide explain setup and the accepted Python extension; no Python job exists. Optional PostHog shell capture is verified from local staging builds against the real project; hosted release awaits human review. ADR 0003 still governs durable evidence; PostHog is internal best-effort analytics. Detailed planning is preserved with the deployed foundation.",
       "paths": [
         "README.md",
         "SECURITY.md",
@@ -176,7 +176,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "e06f71365798054a3bd6cf150b6a70c1ff914040658b62dfcb35341ab73d5b8e"
+      "sourceFingerprint": "3302a16208b4b57dc173a8de818776b0c98a15f4c4eb58eb3f8bd78a4fa63416"
     },
     {
       "id": "agents",
@@ -230,6 +230,13 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     }
   ],
   "handoffs": [
+    {
+      "summary": "Recorded the October 22 staging environment settings: exact main branch restriction saved, required reviewers and prevent self-review enabled, administrator bypass allowed, and expected variable/secret names present. Updated stale environment-availability guidance. No secret values, activation flag, workflow code or deployment changed.",
+      "modules": [
+        "delivery"
+      ],
+      "next": "Review this documentation PR. Before Actions activation, verify credential permissions, intended staging bindings and the independent approval process; the settings observation is not a successful workflow or deployment test."
+    },
     {
       "summary": "Reconciled PostHog PR 14 with deployed main configuration and PR 13 Python guidance. Verified real synthetic shell ingestion from both local builds and prepared the internal staging chart. Member access supports ingestion inspection and charts; restricted project/billing settings remain with an administrator. Existing database and backend behavior are unchanged.",
       "modules": [
@@ -300,14 +307,6 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "delivery"
       ],
       "next": "Confirm each selected task and current availability with its contributor, record the agreement in ClickUp, then follow the existing publication/exposure/linkage prerequisites and protected cloud-access checkpoint."
-    },
-    {
-      "summary": "Rewrote team_guide around a plain-language dish example, two event types and a function/line-linked code walkthrough. File, task and test inventories are expandable references; the final artifact-aligned plan separates parallel preparation from integration prerequisites. Includes 24 ClickUp tasks, seven scope subtasks and current design progress, distinct from implemented code. PR 9 merged at 413be96 with successful main CI. No runtime or external board/chat changes.",
-      "modules": [
-        "delivery",
-        "diner"
-      ],
-      "next": "Confirm the provider decision and sprint scope with linked deliverables, reconcile the completed approval ticket with missing approval/publication code, recover local Docker and stop at the protected cloud-credential checkpoint before hosted integration."
     }
   ]
 }

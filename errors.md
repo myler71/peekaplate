@@ -194,3 +194,9 @@ These records describe local validation limits, not application failures.
 ```json
 {"id":"ERR-20261019-RELEASE-001","status":"resolved","area":"release-context","cause":"The release merge included a newer main README edit, so the delivery fingerprint calculated on the feature head no longer matched the proposed merged tree.","prevention":"Check the release merge tree against the reviewed head, preserve target-branch edits, and refresh affected context before promotion.","regression":"Merged the current main README change into the release candidate and refreshed the delivery fingerprint; context validation must pass on the resulting release tree.","evidence":"https://github.com/vivienk/peekaplate/actions/runs/39381320009","sources":["README.md","docs/CONTEXT.md"]}
 ```
+
+## October 22 staging settings documentation validation
+
+- Environment observation: `rtk` is unavailable in this local session; plain Git/Node commands were used. The initial sandboxed clone could not resolve GitHub; the authorized network retry succeeded.
+- `pnpm context:refresh` attempted dependency preparation in the fresh checkout and could not reach the package registry under the sandbox. It was interrupted before the requested checks ran. No application failure is established.
+- Fallback validation passed with `node scripts/context.mjs refresh`, `node scripts/context.mjs check`, `node scripts/check-docs.mjs` and `git diff --check`. These dependency-free checks cover this documentation change; the full build/test suite was not run. Use the repository-supported runtime and available dependencies for full CI validation.
