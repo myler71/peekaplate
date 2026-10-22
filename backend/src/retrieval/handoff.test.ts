@@ -183,6 +183,141 @@ describe('S3-VIS-04 × VIS-02 Compatibility Adapter & Handoff Integration', () =
         validateSpanSourceSlice('Short', { segment_id: 'seg', start: 4, end: 2 }, 'anything').valid,
       ).toBe(false);
     });
+
+    describe('transformRetrievalToVis02Evidence Unicode offset regression tests (Raghav review)', () => {
+      const soupEmojiText = 'Soup 🍜 $8.50';
+      const soupSegmentId = 'sha256:abc#page-1';
+
+      const soupResultAtZero: BoundedRetrievalResult = {
+        schema_version: 1,
+        status: 'success',
+        passages: [
+          {
+            passage_id: 'p_soup_0_13',
+            source: {
+              source_id: 'sha256:abc',
+              segment_id: soupSegmentId,
+            },
+            text: soupEmojiText,
+            start_offset: 0,
+            end_offset: 13, // 13 UTF-16 code units (🍜 is 2 code units)
+            score: 0.95,
+            rank: 1,
+          },
+        ],
+        warnings: [],
+      };
+
+      const embeddedSegText = 'Special 🍲: Soup 🍜 $8.50 - Extra Spicy';
+      // In embeddedSegText:
+      // 'Special 🍲: ' has 1 emoji (2 UTF-16 code units, 1 code point) + 10 ASCII chars = 12 UTF-16 code units, 11 code points
+      // 'Soup 🍜 $8.50' has 1 emoji (2 UTF-16 units, 1 code point) + 11 chars = 13 UTF-16 code units, 12 code points
+      const embeddedResult: BoundedRetrievalResult = {
+        schema_version: 1,
+        status: 'success',
+        passages: [
+          {
+            passage_id: 'p_soup_12_25',
+            source: {
+              source_id: 'sha256:abc',
+              segment_id: soupSegmentId,
+            },
+            text: soupEmojiText,
+            start_offset: 12, // in UTF-16
+            end_offset: 25, // 12 + 13 = 25 in UTF-16
+            score: 0.92,
+            rank: 1,
+          },
+        ],
+        warnings: [],
+      };
+
+      describe('Case A: sourceSegments provided', () => {
+        it('emits exact Python code-point offsets for passage at offset 0 and reconstructs slice', () => {
+          const { evidence } = transformRetrievalToVis02Evidence(soupResultAtZero, {
+            sourceSegments: { [soupSegmentId]: soupEmojiText },
+          });
+
+          expect(evidence).toHaveLength(1);
+          const span = evidence[0]!.spans[0]!;
+          expect(span.segment_id).toBe(soupSegmentId);
+
+          // Assert exact expected code-point offsets (12 code points vs 13 UTF-16 units)
+          expect(span.start).toBe(0);
+          expect(span.end).toBe(12);
+          expect(span.end).not.toBe(soupResultAtZero.passages[0]!.end_offset);
+
+          // Slicing original source using output offsets reconstructs exact evidence text
+          const reconstructed = Array.from(soupEmojiText).slice(span.start, span.end).join('');
+          expect(reconstructed).toBe(soupEmojiText);
+        });
+
+        it('emits exact Python code-point offsets when embedded in longer segment with emoji prefix', () => {
+          const { evidence } = transformRetrievalToVis02Evidence(embeddedResult, {
+            sourceSegments: { [soupSegmentId]: embeddedSegText },
+          });
+
+          const span = evidence[0]!.spans[0]!;
+          expect(span.segment_id).toBe(soupSegmentId);
+
+          // In UTF-16, offsets were [12, 25]
+          // In Unicode code points, offsets are [11, 23] (due to '🍲' in prefix and '🍜' in passage)
+          expect(span.start).toBe(11);
+          expect(span.end).toBe(23);
+          expect(span.start).not.toBe(embeddedResult.passages[0]!.start_offset);
+          expect(span.end).not.toBe(embeddedResult.passages[0]!.end_offset);
+
+          // Slicing original source using output offsets reconstructs exact evidence text
+          const reconstructed = Array.from(embeddedSegText).slice(span.start, span.end).join('');
+          expect(reconstructed).toBe(soupEmojiText);
+        });
+
+        it('fails explicitly when required segment is missing from sourceSegments without silent fallback', () => {
+          expect(() =>
+            transformRetrievalToVis02Evidence(soupResultAtZero, {
+              sourceSegments: { 'other_segment#page-2': 'Unrelated text' },
+            }),
+          ).toThrow(/Missing source segment text for segment/);
+        });
+      });
+
+      describe('Case B: sourceSegments absent', () => {
+        it('safely converts passage at offset 0 using trusted passage text and reconstructs exact slice', () => {
+          const { evidence } = transformRetrievalToVis02Evidence(soupResultAtZero);
+
+          expect(evidence).toHaveLength(1);
+          const span = evidence[0]!.spans[0]!;
+          expect(span.segment_id).toBe(soupSegmentId);
+
+          // In UTF-16, end_offset was 13. In code points, it must be 12.
+          expect(span.start).toBe(0);
+          expect(span.end).toBe(12);
+          expect(span.end).not.toBe(soupResultAtZero.passages[0]!.end_offset);
+
+          // Slicing trusted passage text using code-point offsets reconstructs exact evidence text
+          const reconstructed = Array.from(soupEmojiText).slice(span.start, span.end).join('');
+          expect(reconstructed).toBe(soupEmojiText);
+        });
+
+        it('fails explicitly when passage start_offset > 0 without sourceSegments', () => {
+          // When start_offset > 0, characters before start_offset are unknown.
+          // The adapter must fail explicitly rather than emitting inaccurate offsets.
+          expect(() => transformRetrievalToVis02Evidence(embeddedResult)).toThrow(
+            /Cannot convert segment offsets to Unicode code points without source segment text when passage start_offset \(12\) > 0/,
+          );
+        });
+
+        it('emits unchanged UTF-16 offsets when offsetUnit is explicitly "utf16"', () => {
+          const { evidence } = transformRetrievalToVis02Evidence(soupResultAtZero, {
+            offsetUnit: 'utf16',
+          });
+
+          const span = evidence[0]!.spans[0]!;
+          expect(span.start).toBe(0);
+          expect(span.end).toBe(13); // UTF-16 code units
+        });
+      });
+    });
   });
 
   describe('Requirement 3: Price grounding and currency handling', () => {
