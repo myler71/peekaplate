@@ -180,7 +180,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "63e19dec8dff20c96b9535771869e11dc61ea9558560394fa958d0917215b4e9"
+      "sourceFingerprint": "88ff10ba57e8c0f92077c31a8994d95b0afbc262292b00b2d8edf6baa063bc59"
     },
     {
       "id": "agents",
@@ -237,31 +237,36 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "processing",
       "status": "foundation",
-      "summary": "Bounded Python ingestion ported from preserved source 28b91d0 with OCR.space Engine 3, source snapshots and needs_review drafts. OCR overlays preserve approximate uploaded-pixel regions with explicit unavailable/invalid states. Offline frozen-report evaluation uses reviewed one-to-one alignment, exact source/report hashes, per-field errors and source-condition groups; it never certifies acceptance. Eighteen standard-library tests pass locally; full locked dependency and application checks await CI. No provider credential, representative accuracy benchmark, backend integration or public asset delivery is supplied.",
+      "summary": "Bounded Python ingestion with OCR.space Engine 3, source snapshots and needs_review drafts, plus offline frozen-report evaluation that never certifies acceptance. T0 asset preparation emits create-only, hash-addressed bundles with four variants, immutable source/revision references and processing state; spatial validation checks a human-prepared layered sample against the T0 detail variant and keeps the approved photo as fallback. Manifests never self-approve: review stays needs_review and publication stays ineligible. 118 standard-library tests collect; three assert POSIX file modes that cannot hold on Windows and pass in the Linux CI job. No provider credential, accuracy benchmark, approved real photo or backend integration is supplied.",
       "paths": [
-        "processing/.env.example",
         "processing/.gitignore",
         "processing/.python-version",
         "processing/README.md",
         "processing/evaluate_menu.py",
         "processing/pyproject.toml",
         "processing/src/peekaplate_processing/__init__.py",
+        "processing/src/peekaplate_processing/assets.py",
         "processing/src/peekaplate_processing/captures.py",
         "processing/src/peekaplate_processing/errors.py",
         "processing/src/peekaplate_processing/extract_menus.py",
+        "processing/src/peekaplate_processing/harness.py",
         "processing/src/peekaplate_processing/images.py",
         "processing/src/peekaplate_processing/menu_text.py",
         "processing/src/peekaplate_processing/ocr_regions.py",
         "processing/src/peekaplate_processing/ocr_space.py",
         "processing/src/peekaplate_processing/pdf.py",
+        "processing/src/peekaplate_processing/prepare_assets.py",
+        "processing/src/peekaplate_processing/prepare_spatial.py",
         "processing/src/peekaplate_processing/schemas.py",
         "processing/src/peekaplate_processing/sources.py",
+        "processing/src/peekaplate_processing/spatial.py",
         "processing/src/peekaplate_processing/storage.py",
         "processing/src/peekaplate_processing/website.py",
         "processing/tests/fixture_factory.py",
         "processing/tests/fixtures/menu-photo-expected.txt",
         "processing/tests/fixtures/menu.txt",
         "processing/tests/fixtures/website-menu.html",
+        "processing/tests/test_assets.py",
         "processing/tests/test_captures.py",
         "processing/tests/test_configuration.py",
         "processing/tests/test_evaluation.py",
@@ -271,24 +276,26 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "processing/tests/test_ocr_space.py",
         "processing/tests/test_schemas.py",
         "processing/tests/test_sources.py",
-        "processing/uv.lock"
+        "processing/tests/test_spatial.py",
+        "processing/uv.lock",
+        "docs/asset-delivery.md"
       ],
       "adrs": [
         "docs/adr/0001-scope-and-repository.md",
         "docs/adr/0004-visual-tiers.md"
       ],
       "dependsOn": [],
-      "sourceFingerprint": "d7881a55db2b11fb95316617779337a653f199a31b8e8e4f500b999f283f2bc9"
+      "sourceFingerprint": "bb00e059f8ae34b4c9eb895458f7dd9b347d7f4818dca11322f05a6ed91b0e9b"
     }
   ],
   "handoffs": [
     {
-      "summary": "Ported preserved Python ingestion without importing the old application branch, added OCR overlay evidence and a frozen-report field evaluator. Standard-library tests pass locally; source accuracy and full dependency/application verification remain pending.",
+      "summary": "Ported preserved Python ingestion without importing the old application branch and added OCR overlay evidence and a frozen-report field evaluator. Added local T0 asset preparation and 2.5D feasibility validation for S3-VIS-03: create-only hash-addressed bundles with four variants, immutable source/revision references and processing state, plus layered-sample validation that keeps the approved photo as fallback through a dependency-free harness. Manifests never self-approve. Standard-library tests pass locally; source accuracy, approved real photos and full dependency/application verification remain pending.",
       "modules": [
         "processing",
         "delivery"
       ],
-      "next": "Run full CI, obtain human review, agree ingestion/review schema and rubric, then evaluate permitted representative sources using a privately configured OCR.space key. Hand source/error evidence to Uneeza and Sai; coordinate original-photo preparation with Marwan."
+      "next": "Run full CI, obtain human review, agree ingestion/review schema and rubric, then evaluate permitted representative sources using a privately configured OCR.space key. Prepare the permitted restaurant photos with real dish/revision identifiers and capture evidence, then record manifest hashes and byte totals for the PR. Keep the manifest JSON provisional until S3-ARC-01 freezes the TypeScript contract, align the fallback/publication fields with S3-RES-02, and obtain Vivien and Shirley rights and publication review. Hand source/error evidence to Uneeza and Sai."
     },
     {
       "summary": "PR #10 merged at bb56cef and API/Pages shells were deployed from that main revision. Hosted tests passed genuine Supabase login, atomic writes, retries/concurrency, cross-restaurant denial and membership revocation. Remote Hyperdrive probes passed context reset and rollback after an injected outbox failure. Logout rejected refresh but accepted the existing JWT until membership removal. Test membership was removed and ephemeral harnesses stopped. R2 staging is private; no paid upgrade or production deployment.",

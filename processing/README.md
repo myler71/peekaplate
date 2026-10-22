@@ -95,3 +95,92 @@ requires the agreed evidence/review contract, never image-based inference.
 EasyOCR's Python library and the hosted `easyocr.org` API are distinct services.
 Neither is added here. Comparing providers requires the exact service, credentials
 and the same reviewed corpus; no pricing/performance equivalence is assumed.
+
+## T0 asset preparation and delivery
+
+`peekaplate_processing.assets` prepares one captured dish photo into approved
+delivery variants. `python -m peekaplate_processing.prepare_assets` writes a
+bundle directory that contains the byte-identical source, four variants and
+`manifest.json`:
+
+```sh
+uv run --project processing --frozen python -m peekaplate_processing.prepare_assets \
+  --input work/photos/dish.jpg \
+  --dish-id 11111111-1111-4111-8111-111111111111 \
+  --revision-id 22222222-2222-4222-8222-222222222222 \
+  --capture-evidence "Permitted capture; see the private capture log." \
+  --captured-at 2026-10-01T12:00:00+00:00 \
+  --output-root work/vis03/<revision-id>/t0 \
+  --budget-bytes 400000
+```
+
+`--dish-id` and `--revision-id` are caller-supplied backend identifiers and are
+never verified against the backend. `--capture-evidence` is required and must
+identify the capture; `--captured-at` is optional but must carry a timezone and
+must not be in the future. `--budget-bytes` is optional: when omitted the
+manifest records `not_configured` and no threshold is invented. Exit codes: 0
+ready, 2 failed. Unexpected errors propagate so CI fails loudly.
+
+The bundle is content-addressed: `asset_id` is `t0_` plus the first 32 hex of
+the SHA-256 over source bytes, dish ID, revision ID and the recipe version.
+There is no timestamp in the identity, so the same source and revision always
+produce the same `asset_id`. Preparation is create-only: an existing bundle
+directory is refused and its `manifest.json` is left untouched. Use one output
+root per revision.
+
+Variants are `card-480` and `detail-1280`, each as WebP (quality 82) and JPEG
+(quality 85). Images are never upscaled; a source smaller than the detail edge
+produces smaller variants and a warning. Orientation is normalized, alpha is
+flattened to RGB on white, and the original bytes are preserved as `source.*`.
+The manifest records source and variant SHA-256 values, byte sizes, pixel
+dimensions, processing steps, warnings and measurements.
+
+Preparation never approves anything. `review.status` is always `needs_review`
+and `publication.eligible` is always `false`. Rights, dish facts, revision
+currency and publication eligibility stay human decisions. The manifest is a
+proposed handoff for the S3-ARC-01 TypeScript contract; do not consume it in
+the application until that contract is frozen.
+
+## 2.5D feasibility sample
+
+`peekaplate_processing.spatial` validates a human-prepared layered sample
+against an approved T0 bundle. It never generates layers or food imagery.
+
+```sh
+uv run --project processing --frozen python -m peekaplate_processing.prepare_spatial \
+  --t0-manifest work/vis03/<revision-id>/t0/<asset_id>/manifest.json \
+  --layers work/vis03/layers.json \
+  --output-root work/vis03/<revision-id>/spatial \
+  --budget-bytes 400000
+```
+
+`--budget-bytes` is mandatory for spatial assets; the verification run uses the
+ADR 0004 T1 ceiling of 400,000 bytes, which is provisional until the render
+budget is measured in this repository. The layers manifest is caller-supplied
+JSON with `schema_version: 1`, `tier: "T1"`, the `dish` reference, `motion`
+limits of at most ±3°, a `layers[]` list of bare filenames with `depth` values,
+`capture_evidence` and `rights_confirmed: true`. Layer files must sit beside the
+layers manifest.
+
+Validation is strict on purpose. Layer dimensions must equal the T0
+`detail-1280` variant exactly, one layer must be the opaque background
+(`depth: 0`), every other layer must carry an alpha channel, names must be
+unique and the dish revision must match the T0 manifest. A mismatch, an
+oversized sample or an unusable manifest fails with exit code 2 and writes
+nothing.
+
+The bundle contains the copied layers, `fallback.jpg` (the approved T0 detail
+variant, verified against its manifest hash), `spatial-manifest.json` and
+`harness.html`. The harness is a dependency-free static page labelled
+"Feasibility harness — not the diner viewer". It keeps the T0 photo visible at
+all times, fades layers in after decode, and drives both rotation and layer
+parallax from the combined pointer and arrow-key input, clamped to the manifest
+limits with `Home` to reset. Paint order comes from layer depth, so a slow
+background cannot cover the foreground. It honours `prefers-reduced-motion`,
+and degrades to the T0 photo when 3D CSS or a layer is unavailable. It records
+`window.__peekaplateSpatialMetrics` with fetch, decode, frame-timing, viewport
+and fallback state, and offers a copy button for the same JSON.
+
+The harness is a feasibility measurement, not a diner renderer and not a phone
+benchmark. Real captured-dish review, rights review and publication approval
+remain human gates.
