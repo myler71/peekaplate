@@ -13,7 +13,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "contracts",
       "status": "foundation",
-      "summary": "Strict health, staff dish-revision command/result and initial dish-intent schemas. HTTP command authority fields are rejected; ingest and broader diner events remain planned.",
+      "summary": "Strict health, staff dish-revision command/result, dish-intent, and S3-VIS-04 bounded menu evidence retrieval schemas (SourceReference, EvidencePassage, BoundedRetrievalResult, RetrievalRequest). Offsets, rank sequences, and aggregate context limits strictly enforced.",
       "paths": [
         "packages/contracts/src/index.ts",
         "packages/contracts/src/index.test.ts"
@@ -22,7 +22,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "docs/adr/0003-intent-evidence.md"
       ],
       "dependsOn": [],
-      "sourceFingerprint": "802e422cbe5d2c067e0933be29976bde9777e35bc2fc8799c6e7feefa2952725"
+      "sourceFingerprint": "b1d212e4c4af992885daad34f3ef1507546a88caa201b3d458bce3ce1fc81774"
     },
     {
       "id": "diner",
@@ -68,7 +68,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "backend",
       "status": "foundation",
-      "summary": "Hono Worker verifies configured staff JWTs and current restaurant membership, then executes atomic dish revisions under a restricted database role. Staging API uses the Supabase issuer and uncached Hyperdrive. Bounded hosted tests passed genuine login, authorized writes, retries/concurrency, cross-restaurant denial and membership revocation; remote probes verified transaction-context reset and rollback. JWT logout revocation is bounded by expiry, not immediate. No ingestion or publication endpoint.",
+      "summary": "Hono Worker verifies configured staff JWTs and current restaurant membership, executes atomic dish revisions, and provides S3-VIS-04 bounded menu evidence retrieval (SSRF defense, deterministic ranking, aggregate context limits, and S3-VIS-01 structured candidate handoff). Staging API uses the Supabase issuer and uncached Hyperdrive. Staff approval and review boundary preserved; no direct live publication.",
       "paths": [
         "backend/src/index.ts",
         "backend/src/index.test.ts",
@@ -80,7 +80,18 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "backend/src/dish.integration.ts",
         "backend/local.mjs",
         "backend/local.test.mjs",
-        "backend/package.json"
+        "backend/package.json",
+        "backend/src/retrieval/api.test.ts",
+        "backend/src/retrieval/fetcher.ts",
+        "backend/src/retrieval/handoff.test.ts",
+        "backend/src/retrieval/handoff.ts",
+        "backend/src/retrieval/index.ts",
+        "backend/src/retrieval/parser.ts",
+        "backend/src/retrieval/ranker.ts",
+        "backend/src/retrieval/retrieval.test.ts",
+        "backend/src/retrieval/retriever.ts",
+        "backend/src/retrieval/security.test.ts",
+        "backend/src/retrieval/security.ts"
       ],
       "adrs": [
         "docs/adr/0002-selective-event-sourcing.md",
@@ -91,7 +102,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "contracts",
         "database"
       ],
-      "sourceFingerprint": "3919fa1e39fd43702f4ea6ccecef4804c79d0347b74ad89d113b8e29cdb7c13d"
+      "sourceFingerprint": "e9b54bcb2262c117ae163c4501378b15ab85f7867c3433ce202988d06ebef32e"
     },
     {
       "id": "database",
@@ -236,14 +247,6 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
   ],
   "handoffs": [
     {
-      "summary": "PR #10 merged at bb56cef and API/Pages shells were deployed from that main revision. Hosted tests passed genuine Supabase login, atomic writes, retries/concurrency, cross-restaurant denial and membership revocation. Remote Hyperdrive probes passed context reset and rollback after an injected outbox failure. Logout rejected refresh but accepted the existing JWT until membership removal. Test membership was removed and ephemeral harnesses stopped. R2 staging is private; no paid upgrade or production deployment.",
-      "modules": [
-        "delivery",
-        "backend"
-      ],
-      "next": "Implement staff login UI and review/approval/immutable publication before diner exposure and ingestion. Design, manual assets and event-contract review can proceed in parallel. Before a real pilot, resolve session-lifetime policy, representative latency/load, recovery and cost/incident ownership. Production needs separate resources and release approval."
-    },
-    {
       "summary": "Updated deployment selection to main for both environments per the maintainer's explicit instruction. Configured verified non-secret staging account, issuer and Hyperdrive bindings. Provider audit found existing Supabase migrations, forced RLS, restricted staging login, an ES256 public key and uncached Hyperdrive; no duplicate database branch was created. Hosted request behavior remains unverified.",
       "modules": [
         "delivery",
@@ -312,6 +315,14 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "delivery"
       ],
       "next": "Review PR 18 and merge under the human-comment policy. Jeffin owns contract/collection decisions; Zhiliang wires approved real UI events with tests. Each adds a ticket comment with PR and evidence when done. Observe the next automatic export; confirm monitoring, retention/deletion and billing limits before real diner data. Owner evidence pipeline/projections/API remain product work. Handoff drafts are local and unsent."
+    },
+    {
+      "summary": "Implemented S3-VIS-04: Bounded Menu Evidence Retrieval and S3-VIS-01 handoff adapter. Added shared schemas (BoundedRetrievalResultSchema, EvidencePassageSchema, RetrievalRequestSchema) with strict offset and aggregate-context limits (max 16k chars). Implemented safe SSRF fetcher (DNS pinning, private/loopback/link-local/multicast IP blocking, redirect limits, scheme downgrade defense), HTML/text parser, deterministic ranking engine, and S3-VIS-01 candidate transformer preserving provenance (SourceSpan). All 96 tests across 10 suites pass with clean biome formatting.",
+      "modules": [
+        "contracts",
+        "backend"
+      ],
+      "next": "Teeyansh to wire S3-VIS-01 structured candidate ingestion to consume BoundedRetrievalResult and generate review-ready dish drafts. Raghav and PM to review retrieval relevance benchmarks against live menu sources."
     }
   ]
 }

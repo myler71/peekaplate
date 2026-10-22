@@ -1,13 +1,16 @@
 import {
+  type BoundedRetrievalResult,
   CreateDishRevisionSchema,
   DishRevisionScopeSchema,
   type HealthResponse,
+  VenueScopeSchema,
 } from '@peekaplate/contracts';
 import { Hono } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
 import { Client } from 'pg';
 import { AuthenticationError, AuthUnavailableError, createStaffVerifier } from './auth';
 import { CommandError, createDishRevision } from './dish-command';
+import { retrieveMenuEvidence } from './retrieval';
 
 export type Bindings = {
   APP_ENV?: string;
@@ -24,6 +27,7 @@ type Dependencies = {
     input: Parameters<typeof createDishRevision>[3],
     env: Bindings,
   ) => ReturnType<typeof createDishRevision>;
+  retrieve?: (request: unknown) => Promise<BoundedRetrievalResult>;
 };
 
 let verifier: { issuer: string; local: boolean; verify: ReturnType<typeof createStaffVerifier> };
@@ -51,6 +55,9 @@ const dependencies: Dependencies = {
     } finally {
       await client.end();
     }
+  },
+  async retrieve(request) {
+    return retrieveMenuEvidence(request);
   },
 };
 
@@ -100,6 +107,29 @@ export function createApp(services: Dependencies = dependencies) {
       },
       c.env ?? {},
     );
+    return c.json(result);
+  });
+  app.post('/venues/:venueId/menu-evidence', async (c) => {
+    const authorization = c.req.header('Authorization');
+    if (!authorization || !/^Bearer \S+$/i.test(authorization)) {
+      return c.json({ error: 'unauthorized' }, 401);
+    }
+    await services.verify(authorization, c.env ?? {});
+    const scope = VenueScopeSchema.safeParse(c.req.param());
+    if (!scope.success) return c.json({ error: 'invalid_request' }, 400);
+
+    if (!/^application\/json(?:\s*;|$)/i.test(c.req.header('Content-Type') ?? '')) {
+      return c.json({ error: 'unsupported_media_type' }, 415);
+    }
+    let body: unknown;
+    try {
+      body = await c.req.json();
+    } catch {
+      return c.json({ error: 'invalid_json' }, 400);
+    }
+
+    const retrieverFn = services.retrieve ?? retrieveMenuEvidence;
+    const result = await retrieverFn(body);
     return c.json(result);
   });
   app.onError((error, c) => {
