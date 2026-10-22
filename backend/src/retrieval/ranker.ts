@@ -14,6 +14,14 @@ export type CandidatePassage = {
   start_offset: number;
   end_offset: number;
   score: number;
+  provenance?:
+    | {
+        source_sha256?: string | undefined;
+        original_url?: string | undefined;
+        final_url?: string | undefined;
+        retrieved_at?: string | undefined;
+      }
+    | undefined;
 };
 
 export type RankingOptions = {
@@ -199,6 +207,7 @@ export function extractPassageFromSegment(
     start_offset: startOffset,
     end_offset: endOffset,
     score,
+    ...(segment.provenance ? { provenance: segment.provenance } : {}),
   };
 }
 
@@ -312,6 +321,10 @@ export function rankAndBoundPassages(
       source: {
         source_id: cand.source_id,
         segment_id: cand.segment_id,
+        ...(cand.provenance?.source_sha256 ? { source_sha256: cand.provenance.source_sha256 } : {}),
+        ...(cand.provenance?.original_url ? { original_url: cand.provenance.original_url } : {}),
+        ...(cand.provenance?.final_url ? { final_url: cand.provenance.final_url } : {}),
+        ...(cand.provenance?.retrieved_at ? { retrieved_at: cand.provenance.retrieved_at } : {}),
       },
       text: cand.text,
       start_offset: cand.start_offset,

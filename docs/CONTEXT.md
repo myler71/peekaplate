@@ -22,7 +22,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "docs/adr/0003-intent-evidence.md"
       ],
       "dependsOn": [],
-      "sourceFingerprint": "510f11777bd941e06ed078fbe13b19d273cd9b5a1f3cb883effc4a2125a33706"
+      "sourceFingerprint": "03f0fbefba53546c96069e3ea86a7ed481bee4b89808908c2992bd65eae07ea7"
     },
     {
       "id": "diner",
@@ -107,7 +107,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "contracts",
         "database"
       ],
-      "sourceFingerprint": "43b4855ec6ad26a18661aaeaa06af872ada37fc7d9be712691b863c4700078b1"
+      "sourceFingerprint": "1c9cc980bdeb4cfe124ba1cf76a11949c027fb035d46c297ac7ceccd1be59d60"
     },
     {
       "id": "database",
@@ -330,12 +330,12 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "next": "DB tests cover duplicate collapse, safe property serialization, scope isolation and collaborator removal; all15 team SQL assertions and14 Worker integration cases passed after correcting unsupported Worker redirect:error to manual. Finish final build/browser verification and delta review, then open a single PR against develop. Vivien creates staging environment; supply scoped Cloudflare token plus repository Metadata-read TEAM_GITHUB_TOKEN to GitHub environment secrets. Deploy reviewed main release with checker secret, apply forward migration and verify collaborator/non-collaborator/removal behavior. No manual teammate allowlist or Supabase account enrollment required. Follow-up live inspection found Worker health200, analytics route404 and no Worker secrets; activation remains incomplete. User delegated the provider setup and merge to Vivien; point to the owner activation checklist and do not announce hosted availability before acceptance tests."
     },
     {
-      "summary": "Implemented S3-VIS-04: Bounded Menu Evidence Retrieval and S3-VIS-01 handoff adapter. Added shared schemas (BoundedRetrievalResultSchema, EvidencePassageSchema, RetrievalRequestSchema) with strict offset and aggregate-context limits (max 16k chars). Implemented safe SSRF fetcher (DNS pinning, private/loopback/link-local/multicast IP blocking, redirect limits, scheme downgrade defense), HTML/text parser, deterministic ranking engine, and S3-VIS-01 candidate transformer preserving provenance (SourceSpan). Verified test suite with clean biome formatting.",
+      "summary": "Implemented S3-VIS-04: Bounded Menu Evidence Retrieval and VIS-02/S3-VIS-01 compatibility handoff adapter. Added shared schemas (BoundedRetrievalResultSchema, EvidencePassageSchema, RetrievalRequestSchema, SourceInputSchema with image/website support, SourceReferenceSchema with URL provenance). Implemented safe SSRF fetcher (DNS pinning, private/loopback/link-local/multicast IP blocking, redirect limits, scheme downgrade defense), HTML/text parser, deterministic ranking engine, and VIS-02 compatibility adapter with decoupled drafts/evidence, Python Unicode code-point <-> UTF-16 code-unit offset translation, exact slice equality validation, removed heuristic regex price fabrication, and preservation of partial/failed page statuses and warnings.",
       "modules": [
         "contracts",
         "backend"
       ],
-      "next": "Teeyansh to wire S3-VIS-01 structured candidate ingestion to consume BoundedRetrievalResult and generate review-ready dish drafts. Raghav and PM to review retrieval relevance benchmarks against live menu sources."
+      "next": "Teeyansh to wire S3-VIS-01 structured candidate ingestion to consume BoundedRetrievalResult and generate review-ready dish drafts. Mohammad to confirm Python LangGraph integration consuming decoupled drafts/evidence. Raghav to review PR #23."
     }
   ]
 }

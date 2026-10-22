@@ -57,8 +57,33 @@ export async function retrieveMenuEvidence(
   // 2. Process directly provided sources
   if (request.sources && request.sources.length > 0) {
     for (const src of request.sources) {
+      const sourceProvenance = {
+        source_sha256: src.sha256,
+        original_url:
+          src.location && (src.kind === 'url' || src.kind === 'website') ? src.location : undefined,
+        retrieved_at: src.retrieved_at,
+      };
+
       if (src.segments && src.segments.length > 0) {
         for (const seg of src.segments) {
+          // Preserve upstream segment-level warnings
+          if (seg.warnings && seg.warnings.length > 0) {
+            for (const w of seg.warnings) {
+              warnings.push(`[${seg.segment_id}] ${w}`);
+            }
+          }
+
+          // Handle incomplete / failed / skipped pages explicitly
+          if (seg.status === 'failed' || seg.status === 'skipped' || seg.error) {
+            warnings.push(
+              `Source '${src.source_id}' segment '${seg.segment_id}' marked as ${seg.status ?? 'failed'}${seg.error ? `: ${seg.error}` : ''}`,
+            );
+            // If the segment has no readable text, skip indexing it as an evidence passage
+            if (!seg.text || seg.text.trim().length === 0) {
+              continue;
+            }
+          }
+
           allSegments.push({
             sourceId: src.source_id,
             segment: {
@@ -66,15 +91,20 @@ export async function retrieveMenuEvidence(
               text: seg.text,
               ...(seg.page_number !== undefined ? { page_number: seg.page_number } : {}),
               method: seg.method || 'text',
+              ...(seg.metadata ? { metadata: seg.metadata } : {}),
+              provenance: sourceProvenance,
             },
           });
         }
         successfulSourceCount++;
       } else if (src.content) {
-        if (src.kind === 'html') {
+        if (src.kind === 'html' || src.kind === 'website') {
           const parsed = parseHtmlSource(src.content, src.source_id, src.location);
           for (const seg of parsed.segments) {
-            allSegments.push({ sourceId: src.source_id, segment: seg });
+            allSegments.push({
+              sourceId: src.source_id,
+              segment: { ...seg, provenance: sourceProvenance },
+            });
           }
           warnings.push(...parsed.warnings);
         } else {
@@ -84,7 +114,10 @@ export async function retrieveMenuEvidence(
             src.kind === 'pdf' ? 'pdf_native' : 'text',
           );
           for (const seg of parsed.segments) {
-            allSegments.push({ sourceId: src.source_id, segment: seg });
+            allSegments.push({
+              sourceId: src.source_id,
+              segment: { ...seg, provenance: sourceProvenance },
+            });
           }
           warnings.push(...parsed.warnings);
         }
@@ -107,6 +140,13 @@ export async function retrieveMenuEvidence(
           warnings.push(`Source '${url}' redirected ${fetchResult.redirectCount} time(s)`);
         }
 
+        const urlProvenance = {
+          source_sha256: fetchResult.sha256,
+          original_url: url,
+          final_url: fetchResult.finalUrl,
+          retrieved_at: fetchResult.retrievedAt,
+        };
+
         const isHtml =
           fetchResult.contentType.includes('text/html') ||
           fetchResult.content.trim().startsWith('<');
@@ -114,13 +154,19 @@ export async function retrieveMenuEvidence(
         if (isHtml) {
           const parsed = parseHtmlSource(fetchResult.content, sourceId, fetchResult.finalUrl);
           for (const seg of parsed.segments) {
-            allSegments.push({ sourceId, segment: seg });
+            allSegments.push({
+              sourceId,
+              segment: { ...seg, provenance: urlProvenance },
+            });
           }
           warnings.push(...parsed.warnings);
         } else {
           const parsed = parsePlainTextSource(fetchResult.content, sourceId, 'text');
           for (const seg of parsed.segments) {
-            allSegments.push({ sourceId, segment: seg });
+            allSegments.push({
+              sourceId,
+              segment: { ...seg, provenance: urlProvenance },
+            });
           }
           warnings.push(...parsed.warnings);
         }

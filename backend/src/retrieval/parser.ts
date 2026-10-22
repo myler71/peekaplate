@@ -2,8 +2,17 @@ export type ExtractedSegment = {
   segment_id: string;
   text: string;
   page_number?: number | undefined;
-  method: 'html' | 'text' | 'pdf_native' | 'ocr';
+  method: 'html' | 'text' | 'pdf_native' | 'ocr' | 'ocr_space_engine3';
   is_menu_scope?: boolean | undefined;
+  metadata?: Record<string, unknown> | undefined;
+  provenance?:
+    | {
+        source_sha256?: string | undefined;
+        original_url?: string | undefined;
+        final_url?: string | undefined;
+        retrieved_at?: string | undefined;
+      }
+    | undefined;
 };
 
 export type ParseSourceResult = {

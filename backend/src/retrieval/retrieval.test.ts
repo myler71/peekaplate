@@ -322,5 +322,114 @@ Garlic Bread: $4.00
       const totalLen = passages.reduce((sum, p) => sum + p.text.length, 0);
       expect(totalLen).toBeLessThanOrEqual(1000);
     });
+
+    it('ingests VIS-02 image sources with ocr_space_engine3 and preserves metadata', async () => {
+      const request: RetrievalRequestInput = {
+        query: 'Lobster Roll',
+        sources: [
+          {
+            source_id: 'sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+            kind: 'image',
+            sha256: '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+            segments: [
+              {
+                segment_id:
+                  'sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef#image-1',
+                text: 'Fresh Maine Lobster Roll with lemon butter: $24.00',
+                method: 'ocr_space_engine3',
+                metadata: { engine: 3, word_count: 8 },
+                warnings: ['Low lighting condition on image'],
+              },
+            ],
+          },
+        ],
+      };
+
+      const result = await retrieveMenuEvidence(request);
+
+      expect(result.status).toBe('success');
+      expect(result.passages).toHaveLength(1);
+      expect(result.passages[0]?.source.source_id).toBe(
+        'sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+      );
+      expect(result.passages[0]?.source.source_sha256).toBe(
+        '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+      );
+      expect(result.warnings.some((w) => w.includes('Low lighting condition'))).toBe(true);
+    });
+
+    it('surfaces partial/failed page processing in warnings without marking source fully complete', async () => {
+      const request: RetrievalRequestInput = {
+        query: 'Duck Confit',
+        sources: [
+          {
+            source_id: 'src_scanned_menu_pdf',
+            kind: 'pdf',
+            segments: [
+              {
+                segment_id: 'src_scanned_menu_pdf#page-1',
+                text: 'Duck Confit with roasted potatoes: $28.00',
+                page_number: 1,
+                method: 'ocr_space_engine3',
+                status: 'ready',
+              },
+              {
+                segment_id: 'src_scanned_menu_pdf#page-2',
+                text: '',
+                page_number: 2,
+                method: 'ocr_space_engine3',
+                status: 'failed',
+                error: 'OCR API timeout after 15000ms',
+              },
+            ],
+          },
+        ],
+      };
+
+      const result = await retrieveMenuEvidence(request);
+
+      // Page 1 evidence is retrieved successfully
+      expect(result.status).toBe('success');
+      expect(result.passages).toHaveLength(1);
+      expect(result.passages[0]?.text).toContain('Duck Confit');
+
+      // But page 2 failure is transparently surfaced in warnings
+      expect(
+        result.warnings.some((w) =>
+          w.includes("segment 'src_scanned_menu_pdf#page-2' marked as failed: OCR API timeout"),
+        ),
+      ).toBe(true);
+    });
+
+    it('retains complete URL provenance in passages when fetching candidate URLs', async () => {
+      const mockFetch: typeof fetch = async () => {
+        return new Response(
+          '<html><body><h1>Bistro Menu</h1><p>Mushroom Risotto with truffle oil: $18.00</p></body></html>',
+          {
+            status: 200,
+            headers: { 'Content-Type': 'text/html' },
+          },
+        );
+      };
+
+      const request: RetrievalRequestInput = {
+        query: 'Mushroom Risotto',
+        candidate_urls: ['https://bistro.example.com/menu'],
+      };
+
+      const result = await retrieveMenuEvidence(request, {
+        customFetch: mockFetch,
+        allowLocalTestDestinations: true,
+      });
+
+      expect(result.status).toBe('success');
+      expect(result.passages).toHaveLength(1);
+
+      const passageSource = result.passages[0]?.source;
+      expect(passageSource?.original_url).toBe('https://bistro.example.com/menu');
+      expect(passageSource?.final_url).toBe('https://bistro.example.com/menu');
+      expect(passageSource?.source_sha256).toMatch(/^[0-9a-f]{64}$/);
+      expect(passageSource?.retrieved_at).toBeDefined();
+    });
   });
 });
