@@ -19,10 +19,11 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "packages/contracts/src/index.test.ts"
       ],
       "adrs": [
-        "docs/adr/0003-intent-evidence.md"
+        "docs/adr/0003-intent-evidence.md",
+        "docs/adr/0015-integration-contracts-and-owner-evidence.md"
       ],
       "dependsOn": [],
-      "sourceFingerprint": "fdf4978899a3bc17468a902d80cb8d0448f5d62681c482e02e8e76f018a3e922"
+      "sourceFingerprint": "a9cd9099be2cbd5c409ecb922b5b5e1cc01256e07cab1ccaa5765c2396de8fd3"
     },
     {
       "id": "diner",
@@ -133,12 +134,13 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "docs/implementation_plan.md"
       ],
       "adrs": [
-        "docs/adr/0006-orders-and-measurement.md"
+        "docs/adr/0006-orders-and-measurement.md",
+        "docs/adr/0015-integration-contracts-and-owner-evidence.md"
       ],
       "dependsOn": [
         "backend"
       ],
-      "sourceFingerprint": "0408b5208254ea544057b4dd17e070e1577666b1d2a5ebf064d5cca10c8f08b0"
+      "sourceFingerprint": "41940073fa28beb115be3bfdb7d0182635fec61a84e7fee0715b744f971e6b71"
     },
     {
       "id": "delivery",
@@ -187,7 +189,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "9a5bd75d4724890e7c236f01a85bbaf9fd71963c5e0b3416c31e05aeecbfb984"
+      "sourceFingerprint": "dd7b0be68f6abca5d880554b8c7d9e8a19f8e47c8049b9a22f30aacbdee291ea"
     },
     {
       "id": "agents",
@@ -236,15 +238,25 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "docs/adr/0005-tenancy-and-privacy.md",
         "docs/adr/0006-orders-and-measurement.md",
         "docs/adr/0013-posthog-export-boundary.md",
-        "docs/adr/0014-team-analytics-access.md"
+        "docs/adr/0014-team-analytics-access.md",
+        "docs/adr/0015-integration-contracts-and-owner-evidence.md"
       ],
       "dependsOn": [
         "contracts"
       ],
-      "sourceFingerprint": "47351eb70296f29fd4328beeb09f5bae752148a2973a902ed7a7624dce27f918"
+      "sourceFingerprint": "0fcc112d7d25024b336df5d570f70e3643cf8ab336553ab0be0c376c7bdb36ca"
     }
   ],
   "handoffs": [
+    {
+      "summary": "Proposed ADR 0015 for S3-ARC-01: six versioned integration contracts; owner metrics only from ADR 0003 canonical facts, with the ADR 0013 PostHog copy kept for reconciliation; server-derived (venue_id, event_id) identity shared with consented PostHog copies; the ten-session floor; versioning and merge order. No contract, migration or collector code changed.",
+      "modules": [
+        "contracts",
+        "measurement",
+        "analytics"
+      ],
+      "next": "Resolve the open matrix decisions (D3 events, D4 Save, D7 metrics, D8 timing), table names, retention, pilot consent and owners with Sai, Adam and the PMs; obtain Sai's approval, then implement the contracts with negative tests."
+    },
     {
       "summary": "Updated deployment selection to main for both environments per the maintainer's explicit instruction. Configured verified non-secret staging account, issuer and Hyperdrive bindings. Provider audit found existing Supabase migrations, forced RLS, restricted staging login, an ES256 public key and uncached Hyperdrive; no duplicate database branch was created. Hosted request behavior remains unverified.",
       "modules": [
@@ -314,17 +326,6 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "delivery"
       ],
       "next": "Review PR 18 and merge under the human-comment policy. Jeffin owns contract/collection decisions; Zhiliang wires approved real UI events with tests. Each adds a ticket comment with PR and evidence when done. Observe the next automatic export; confirm monitoring, retention/deletion and billing limits before real diner data. Owner evidence pipeline/projections/API remain product work. Handoff drafts are local and unsent."
-    },
-    {
-      "summary": "Added staging-only team analytics GET APIs over the hourly PostHog Supabase copy. All current vivienk/peekaplate collaborators are eligible through individual GitHub user tokens and uncached identity/collaboration checks. Staff Supabase authentication is unchanged. A private fixed SQL function bounds staging scope and safe fields; runtime still cannot SELECT raw analytics. GitHub has no configured environments/secrets and current operator lacks admin. Hosted migration, checker secret, reviewed release and live authorization tests remain unactivated.",
-      "modules": [
-        "backend",
-        "contracts",
-        "database",
-        "analytics",
-        "delivery"
-      ],
-      "next": "DB tests cover duplicate collapse, safe property serialization, scope isolation and collaborator removal; all15 team SQL assertions and14 Worker integration cases passed after correcting unsupported Worker redirect:error to manual. Finish final build/browser verification and delta review, then open a single PR against develop. Vivien creates staging environment; supply scoped Cloudflare token plus repository Metadata-read TEAM_GITHUB_TOKEN to GitHub environment secrets. Deploy reviewed main release with checker secret, apply forward migration and verify collaborator/non-collaborator/removal behavior. No manual teammate allowlist or Supabase account enrollment required. Follow-up live inspection found Worker health200, analytics route404 and no Worker secrets; activation remains incomplete. User delegated the provider setup and merge to Vivien; point to the owner activation checklist and do not announce hosted availability before acceptance tests."
     }
   ]
 }
