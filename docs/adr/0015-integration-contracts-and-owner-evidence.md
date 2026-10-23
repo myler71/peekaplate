@@ -6,7 +6,7 @@ Relates to [0002](0002-selective-event-sourcing.md), [0003](0003-intent-evidence
 
 ## Context
 
-Sprint 3 work needs shared, versioned data shapes before it can integrate: diner screens (S3-DIN-01/02), publication APIs (S3-RES-02), menu ingestion (S3-VIS-01), event capture (S3-DATA-01) and owner reporting (S3-DATA-02). The S3-DATA-01 event-field matrix (v0.1c) proposes event meanings and fields and lists the decisions this record must settle.
+Sprint 3 work needs shared, versioned data shapes before it can integrate: diner screens (S3-DIN-01/02), publication APIs (S3-RES-02), menu ingestion (S3-VIS-01), event capture (S3-DATA-01) and owner reporting (S3-DATA-02). The S3-DATA-01 event-field matrix (v0.1d) proposes event meanings and fields and lists the decisions this record must settle.
 
 `packages/contracts` defines the staff dish-revision command/result, a v1 diner event limited to `dish_open` and `portion_compare`, and the team analytics query/response. `packages/analytics` sends consented, privacy-filtered `app_shell_viewed` observations directly to PostHog; its dish-event capture has no caller and makes bounded at-most-once attempts. ADR 0013 copies those observations hourly into `analytics_private.posthog_events`, and ADR 0014 lets collaborators inspect that copy. Neither provides restaurant-authorized evidence. No canonical observation endpoint, outbox, observation tables or owner-report API exist. The staging Worker has no Queue or R2 binding, and no menu token can be issued until publication exists (S3-RES-02).
 
@@ -72,6 +72,33 @@ The body is a strict, bounded batch of `observation.v2` items. Each item has `sc
   - An identical repeat receives the same disposition as its first copy, with `reason_code=duplicate_in_batch`.
   - Copies of one `event_id` with different payloads in the same batch are all `rejected` with `event_id_conflict` and quarantined.
 
+**Ingest limits (agreed by Jeffin and Zhiliang, review item 3).** These start from the implementation plan's collection table and are frozen before ingestion is connected:
+
+- **Request:** at most 25 items and 32 KiB per request.
+- **Browser outbox:**
+  - at most 500 pending events or 1 MiB, retained for at most 24 hours, evicting the oldest predictably;
+  - flushes on a 5-second timer, on a full batch and on visibility loss;
+  - retries with exponential backoff and jitter, capped at 60 seconds.
+
+  These are client safeguards; the server enforces its own limits independently.
+- **Time:** an item is rejected with `too_old` when `occurred_at` is more than 24 hours old at first receipt, and with `future_time` when it is more than 5 minutes in the future. Queue work that was already accepted may finish later and is never reclassified as expired.
+- **Rate limit:**
+  - a token bucket keyed by the menu token's `jti`, at 60 requests per minute with a burst of 10; normal 5-second flushing is about 12 requests per minute;
+  - IP address is not the key, because shared venue networks would cause false throttling and IP is an unnecessary privacy identifier;
+  - a throttled request returns `429` with `Retry-After`. The browser keeps the whole batch with the same IDs and payloads and retries within the capped backoff. No receipt on a `429` implies Queue acceptance.
+- **HTTP status codes:**
+  - `200` with per-item receipts, including mixed results;
+  - `400` for an invalid envelope;
+  - `401` for a missing, invalid or expired token;
+  - `403` for a token outside its venue, publication or scope;
+  - `413` (`body_too_large`) for an oversized body;
+  - `429` for rate limiting;
+  - `503` when the Queue is wholly unavailable.
+
+  A non-`200` response carries no per-item receipts and never implies Queue acceptance.
+- **Rejected reason codes:** `schema_invalid`, `unknown_type`, `too_old`, `future_time`, `publication_not_allowed` and `event_id_conflict`. `duplicate_same_payload` and `duplicate_in_batch` accompany `accepted` or the first copy's disposition; they are not rejections.
+- **Menu-token claims:** venue, publication, scope `observations`, `iat`, `exp` (30 minutes) and a unique `jti`. Renewal verifies the original allowed exposure and never relabels the publication of unsent events.
+
 The endpoint can return `duplicate_same_payload` or `event_id_conflict` only when it already knows the earlier copy. A retry that arrives before the Queue consumer has indexed the first copy may be accepted and queued again, so these reason codes are best effort. The consumer is the final guarantee: it drops identical repeats and quarantines conflicting reuse in `app_private.observation_conflict`. The tests that expect `POST /events` to return 404 are replaced by tests of this route when it is implemented.
 
 **Infrastructure.** Reuse the existing private staging R2 bucket for the archive. Create and bind a staging Queue with a dead-letter queue. The pipeline order is Worker → Queue → create-only R2 archive → idempotent Supabase facts → individual Queue acknowledgement. Vivien and Sai own the protected staging bindings, which are not complete yet. A local synthetic token and Queue harness can proceed meanwhile, without representing a published menu. Bindings, secrets and the menu-token signing key are configured by authorized operators through the protected setup, never committed to Git. The menu token cannot be issued until publication exists (S3-RES-02).
@@ -102,17 +129,12 @@ Fixtures and report scaffolding continue in parallel throughout.
 
 ## Open decisions before acceptance
 
-Resolved in Sai's review: D1 (ten sessions), D5 (Queue and R2 path), D6, D7 and D8, the route and the canonical index/conflict names. Still open:
+Resolved: D1 (ten sessions), D5 (Queue and R2 path), D6, D7 and D8, the route and the canonical index/conflict names (Sai's review), and the ingest limits (review item 3, agreed with Zhiliang). Still open:
 
-1. **D3 — P0 events and triggers.** Transfer Adam's latest approvals into the exact matrix rows, with `dish_compared` replacing `portion_compare`.
-2. **D4 — Save.** Harshita confirms the implemented success transitions and Save availability and persistence. Restaurant Save/Discover stays out. Reconcile the older "open OR Save" wording with Adam and Vivien, and record any remaining Save/selection disagreement rather than inferring approval.
+1. **D3 — P0 events and triggers.** Adam's latest decisions are recorded in matrix v0.1d. Implement exactly those rows, with `dish_compared` replacing `portion_compare`.
+2. **D4 — Save.** Adam's decisions are recorded in matrix v0.1d. The remaining evidence is Harshita's confirmation of the implemented success transitions and of Save availability and persistence. Harshita confirms the implemented success transitions and Save availability and persistence. Restaurant Save/Discover stays out. Reconcile the older "open OR Save" wording with Adam and Vivien, and record any remaining Save/selection disagreement rather than inferring approval.
 3. **Fact and view names** and the field mapping, pinned by Jeffin and Louis in the contract and migration PR.
-4. **Ingest limits**, frozen before ingestion is connected:
-   - numeric batch, body and rate limits;
-   - event age and clock-skew limits;
-   - HTTP success and error codes;
-   - the bounded rejected-item reason codes;
-   - the menu-token claims.
+4. **Browser handling of `400` and `413`.** These are deterministic client defects, so they must not loop. Fix their handling (for example, splitting an oversized batch) in the contract tests.
 5. **Median active time:** its visit/dish aggregation and incomplete-timing rules.
 6. **Retention and pilot consent.** Both stay gated on accountable policy approval. ADR 0005's 30-day raw retention is still a proposal, and the PostHog project and its Supabase copy must follow the agreed period and deletion procedure. Disabling PostHog is not permission to bypass canonical collection policy.
 7. **Protected setup.** Vivien and Sai complete the staging secrets, Queue and R2 bindings.
@@ -124,4 +146,4 @@ Owner metrics stay restaurant-scoped and reproducible, while the team keeps Post
 
 ## Verification
 
-Contracts: valid and invalid examples for all six, including unknown fields and injected authority. Observations: a Queue send failure returns `retry`, never `accepted`; an unconfirmed Queue send returns `retry`; duplicate and conflict receipt tests separate an already-indexed first copy (`duplicate_same_payload` or `event_id_conflict`) from the pre-index race, where another Queue-accepted receipt is valid and the consumer still deduplicates or quarantines; identical and conflicting duplicates within one batch; a rejected item leaves the outbox retry queue; a body or header venue is ignored in favour of the token; repeated send, partial receipt, offline reload, same ID with a different payload (quarantined), forged venue (rejected), and consent off or analytics disabled (no PostHog request; menu still usable). Consumer: a crash after the R2 write but before the acknowledgement creates no duplicate rows, and failed batches reach the dead-letter queue. False successes: pointer-down, render-only, failed detail, picker cancel and failed comparison produce no success event. Reconciliation: for a synthetic run, the matching consented cohort is compared after consumer and export processing, and every gap is explained. Reports: nine-session cells are suppressed while ten- and eleven-session cells are shown; a zero denominator returns not-measurable; checkpoint time uses the greatest valid cumulative value; suppressed cells cannot be reconstructed, another restaurant's data is denied and withdrawn content is not shown as current. Publication: unauthorized approval fails and two concurrent publishes cannot both succeed.
+Contracts: valid and invalid examples for all six, including unknown fields and injected authority. Observations: a Queue send failure returns `retry`, never `accepted`; an unconfirmed Queue send returns `retry`; duplicate and conflict receipt tests separate an already-indexed first copy (`duplicate_same_payload` or `event_id_conflict`) from the pre-index race, where another Queue-accepted receipt is valid and the consumer still deduplicates or quarantines; identical and conflicting duplicates within one batch; a rejected item leaves the outbox retry queue; a request over 25 items or 32 KiB is refused; items exactly at and just beyond the 24-hour and 5-minute edges; a `429` returns `Retry-After`, keeps the whole batch and carries no acceptance; the rate limit applies per token `jti`, not per IP; a body or header venue is ignored in favour of the token; repeated send, partial receipt, offline reload, same ID with a different payload (quarantined), forged venue (rejected), and consent off or analytics disabled (no PostHog request; menu still usable). Consumer: a crash after the R2 write but before the acknowledgement creates no duplicate rows, and failed batches reach the dead-letter queue. False successes: pointer-down, render-only, failed detail, picker cancel and failed comparison produce no success event. Reconciliation: for a synthetic run, the matching consented cohort is compared after consumer and export processing, and every gap is explained. Reports: nine-session cells are suppressed while ten- and eleven-session cells are shown; a zero denominator returns not-measurable; checkpoint time uses the greatest valid cumulative value; suppressed cells cannot be reconstructed, another restaurant's data is denied and withdrawn content is not shown as current. Publication: unauthorized approval fails and two concurrent publishes cannot both succeed.

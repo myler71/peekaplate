@@ -23,7 +23,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "docs/adr/0015-integration-contracts-and-owner-evidence.md"
       ],
       "dependsOn": [],
-      "sourceFingerprint": "7758fac7b94b8ddf45b0bbcae75617464bf2ec6fe6938067064b4eea03ec84c5"
+      "sourceFingerprint": "e54065f60a8d9ae13b6f977a71ab4d6f352d5b5d835aa248be47edecbc37c6cb"
     },
     {
       "id": "diner",
@@ -140,7 +140,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "backend"
       ],
-      "sourceFingerprint": "366a56e26d7a28b3f0d75cf080d9c74e1df914e50c72dc84ad728b5d7b25eee4"
+      "sourceFingerprint": "be9a51229d087115f9a1535709e3a9a40a05267fa4d056a0b6462454ac934878"
     },
     {
       "id": "delivery",
@@ -244,18 +244,18 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "contracts"
       ],
-      "sourceFingerprint": "3b8a5e8736f962bc0840a4eb1e5c74770291eee9223d3f7f6cd7de001b47e8bb"
+      "sourceFingerprint": "b158ae6807ef1be513e407a20b96b6855e5ce86751ce13b1e2515eae47b6e01e"
     }
   ],
   "handoffs": [
     {
-      "summary": "Proposed ADR 0015 for S3-ARC-01, revised after Sai's review: owner metrics only from ADR 0003 canonical facts; POST /observations with a Bearer menu token and accepted/retry/rejected receipts (accepted = durable Queue acceptance), terminal rejected items, uncertain sends retried and in-batch duplicates defined; canonical app_private.observation_index/conflict; D1 ten sessions, D6 observation.v2, D7 session-based rates and D8 timing recorded; owners Zhiliang (ingest), Teeyansh (consumer), Jeffin (migrations/views), Louis (reports). No contract, migration or collector code changed.",
+      "summary": "Proposed ADR 0015 for S3-ARC-01, revised after Sai's review: owner metrics only from ADR 0003 canonical facts; POST /observations with a Bearer menu token and accepted/retry/rejected receipts (accepted = durable Queue acceptance), terminal rejected items, uncertain sends retried and in-batch duplicates defined; canonical app_private.observation_index/conflict; D1 ten sessions, D6 observation.v2, D7 session-based rates and D8 timing recorded; ingest limits agreed with Zhiliang (25 items/32 KiB, 24 h age, 5 min skew, per-jti 60/min burst 10, HTTP and reason codes, token claims); D3/D4 decisions in matrix v0.1d; owners Zhiliang (ingest), Teeyansh (consumer), Jeffin (migrations/views), Louis (reports). No contract, migration or collector code changed.",
       "modules": [
         "contracts",
         "measurement",
         "analytics"
       ],
-      "next": "Agree numeric ingest limits, HTTP codes, reason codes and token claims with Zhiliang; transfer Adam's D3/D4 approvals and confirm Save transitions with Harshita; pin fact/view names with Louis; then request Sai's re-review. Retention, pilot consent and protected bindings stay with the accountable owners."
+      "next": "Get Harshita's confirmation of the implemented Save transitions and persistence, then request Sai's re-review. Fix 400/413 browser handling in contract tests; pin fact/view names with Louis. Retention, pilot consent and protected bindings stay with the accountable owners."
     },
     {
       "summary": "Updated deployment selection to main for both environments per the maintainer's explicit instruction. Configured verified non-secret staging account, issuer and Hyperdrive bindings. Provider audit found existing Supabase migrations, forced RLS, restricted staging login, an ES256 public key and uncached Hyperdrive; no duplicate database branch was created. Hosted request behavior remains unverified.",
