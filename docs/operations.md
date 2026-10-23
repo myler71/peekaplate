@@ -1,5 +1,9 @@
 # Local and staging operations
 
+## PostHog export handoff — October 21, 2026
+
+The private analytics export is verified in staging. Two successful runs of the same synthetic interval produced eight raw copies and four deduplicated events; the known diner and console records each matched once. All 14 read-only row/permission checks passed. The hourly schedule is enabled, with the official Supabase CA and hostname verification retained. See [the export runbook](posthog-export.md) for run IDs, recovery history and evidence limits. No grants were broadened. The next automatic scheduled run and sustained monitoring remain to be observed. Menu and event-contract tickets can proceed; the hourly internal copy is separate from the planned promptly updated owner-report pipeline.
+
 Repository transition: [migration and release checklist](repository-migration.md) records repository and deployment gates. Under [ADR 0012](adr/0012-main-environment-promotion.md), `main` supplies both environments: test an exact commit in staging, then promote that same commit to production after human approval. The staging workflow requires `STAGING_DEPLOYMENT_APPROVED=true`; keep it disabled until its controls are verified. Production deployment remains unconfigured.
 
 ## What is configured
@@ -26,9 +30,17 @@ The live [staging environment settings](https://github.com/vivienk/peekaplate/se
 | Environment variable | `CLOUDFLARE_ACCOUNT_ID` exists and is populated |
 | Environment secrets | `CLOUDFLARE_API_TOKEN` and `TEAM_GITHUB_TOKEN` exist; only names were inspected |
 
-These settings are saved in GitHub, outside the Git tree. This dated record documents their observed state; merging it does not apply settings or detect future drift. The existing [staging workflow](../.github/workflows/deploy-staging.yml) already requires `refs/heads/main`, targets the `staging` environment and runs only by manual dispatch with `STAGING_DEPLOYMENT_APPROVED=true`. It uses the Cloudflare variable and secret; it does not reference `TEAM_GITHUB_TOKEN`.
+These settings are saved in GitHub, outside the Git tree. This dated record documents their observed state; merging it does not apply settings or detect future drift. The [staging workflow](../.github/workflows/deploy-staging.yml) requires `refs/heads/main`, targets the `staging` environment and runs only by manual dispatch with repository variable `STAGING_DEPLOYMENT_APPROVED=true`. At the settings audit, main's workflow used only the Cloudflare variable and secret. This release also passes `TEAM_GITHUB_TOKEN` to Wrangler through a private temporary secrets file; merely storing that secret in GitHub does not configure the deployed Worker.
 
 No secret values were read or committed. Token validity, scopes and expiration were not verified. This settings audit did not enable or change `STAGING_DEPLOYMENT_APPROVED`, run a deployment, or test approval enforcement through a workflow run. Administrator bypass remains allowed, so the configured reviewer gate is not an absolute barrier to administrators. Before activation, verify credential permissions, intended staging bindings and the independent approval process. This environment observation does not establish repository branch protection, a billing-plan change or production readiness.
+
+### October 22 release prerequisite audit
+
+A read-only SQL transaction against staging project `icwhkrlsecpzcomfjsso` found migration-history versions `202610130001`, `20261014210000` and `20261020070000`. The export table and deduplicated view exist, but migration `20261021130000` is **not applied**: its history entry, `team_api_private.project_scope` table and `team_api_private.read_analytics` function are absent. No migration or grant was applied during this audit.
+
+Project-local Wrangler authenticated successfully with the operator's existing OAuth credential and could list the intended account's Worker secrets; the staging Worker returned an empty secret list. This verifies the operator connection, **not** the separate `CLOUDFLARE_API_TOKEN` or `TEAM_GITHUB_TOKEN` stored in GitHub. Both GitHub environment secret names exist, but their values, expiry and effective permissions remain unverified. GitHub secrets cannot be read back for local testing. Test them only through an approved protected runner without printing them; do not substitute the operator's OAuth result as evidence for those tokens.
+
+The repository activation variable remains unset. Keep deployment disabled until the reviewed release is on main, the forward migration is applied and recorded, and the protected credential/deployment checks are ready. Hosted collaborator/non-collaborator/removal acceptance follows deployment. This audit changed no credentials, provider resources or deployment settings.
 
 ## Staging deployment record
 
@@ -117,6 +129,8 @@ The staff-command cloud checks above are complete within their recorded scope: e
 
 ## Later Actions-based staging activation
 
+Team analytics API release and collaborator access are documented in [team data access](team-data-access.md). The forward migration grants only checked function execution to the existing runtime. Merging the release does not establish hosted activation.
+
 The required reviewer and main-only environment settings were observed on October 22 as recorded above. This supersedes the earlier environment-availability assumption, but does not establish token validity or end-to-end approval enforcement. Keep this workflow disabled until the remaining activation checks pass; no billing-plan change was verified.
 
 The repository owner supplies real account values and enables controls before automated deployment:
@@ -131,17 +145,17 @@ Production is a separate decision with separate credentials/resources. There is 
 
 ## Optional PostHog staging release
 
-The existing US PostHog project `675372` is used only for synthetic staging data. Local staging builds sent verified diner and console shell views; this does not mean the hosted Pages deployments contain the integration yet. The [setup record](posthog.md) identifies current access, privacy settings, the internal dashboard and remaining approval gates.
+The existing US PostHog project `675372` is used only for synthetic staging data. Both hosted staging pages now send verified consented synthetic shell views. The [setup record](posthog.md) identifies current access, privacy settings, the internal dashboard and remaining approval gates.
 
-After the final PR receives independent human approval and the release reaches `main`, build that exact commit with `--mode staging`. Supply the five `VITE_POSTHOG_*` values from each frontend's `.env.example`; use its exact Pages origin and the staging project's public ingestion token. Build-time configuration is required: runtime variables cannot change uploaded static JavaScript. Never add personal API keys or database secrets to these values.
+For future releases, obtain the required review and build the exact approved `main` commit with `--mode staging`. Supply the five `VITE_POSTHOG_*` values from each frontend's `.env.example`; use its exact Pages origin and the staging project's public ingestion token. Build-time configuration is required: runtime variables cannot change uploaded static JavaScript. Never add personal API keys or database secrets to these values.
 
-Upload only `frontend/diner/dist` and `frontend/console/dist` to their existing, explicitly named Pages projects, using `--branch main` and the reviewed commit hash. No Worker, database or migration deployment is required for PostHog. Verify zero capture before consent, one correct event after opt-in, withdrawal/reload, browser privacy blocking and real PostHog readback on both hosted URLs. Record deployment IDs and the exact SHA. To roll back analytics, rebuild with `VITE_POSTHOG_ENABLED=false` and redeploy, or restore the previous reviewed Pages release.
+Upload only `frontend/diner/dist` and `frontend/console/dist` to their existing, explicitly named Pages projects, using `--branch main` and the reviewed commit hash. Browser capture requires no Worker or database deployment. The separate [Supabase export](posthog-export.md) requires its reviewed migration and restricted connection. Verify zero capture before consent, one correct event after opt-in, withdrawal/reload, browser privacy blocking and real PostHog readback on both hosted URLs. Record deployment IDs and the exact SHA. To roll back analytics, rebuild with `VITE_POSTHOG_ENABLED=false` and redeploy, or restore the previous reviewed Pages release.
 
 Member access is sufficient for these synthetic checks and internal charts. An administrator still needs to confirm project naming, staging-only use, the actual billing limits and deletion responsibility. No paid upgrade was purchased. Production requires its own project and release approval; real diner collection also needs an approved privacy/retention policy.
 
 ## GitHub merge controls
 
-The current owner chooses GitHub Free and private repositories. GitHub does not enable branch protection/rulesets for these private repos on this plan, so `main` and `develop` remain unenforced. The ruleset files below are retained for a future plan change, not presented as active policy. For now, keep write access limited; require reviewed PRs, passing `ci`, and an independent human approval comment before merges; preserve migration/release history with merge commits. These are team process controls, not GitHub enforcement, and admins can bypass them. Protect production credentials in provider settings and keep production promotion behind explicit human release sign-off. Configuration files and CODEOWNERS do not establish enforcement.
+On October 19, the canonical repository was public and GitHub reported both `main` and `develop` as unprotected. Earlier private-plan limitations are historical. The stored ruleset proposals are not active policy; an administrator should now evaluate enabling them for the public repository. For now, keep write access limited; require reviewed PRs, passing `ci`, and an independent human approval comment before merges; preserve migration/release history with merge commits. These are team process controls, not GitHub enforcement, and admins can bypass them. Protect production credentials in provider settings and keep production promotion behind explicit human release sign-off. Configuration files and CODEOWNERS do not establish enforcement.
 
 CI runs with read-only tokens and pinned action SHAs. PR bodies are read as data, never interpolated into shell commands. The final gate requires path selection and quality to succeed and every applicable integration lane to pass. Fork PRs receive no deployment credentials. Require a human approval with a review comment on the current commit for every PR, including AI-written and dependency changes. Reviewers and mergers currently enforce both approval and comment content manually. Native approval rules could enforce approval only after they become available and are activated. No additional comment-check workflow or automatic approval is configured.
 
@@ -154,3 +168,13 @@ Dependabot checks routine versions on the first day of each month, with one open
 Document and demonstrate: Queue retry and poison-message DLQ handling; create-only archive conflict quarantine; replay with network side effects disabled; independent backup of Postgres, approved assets/manifests and R2 evidence; restore reconciliation by ID and checksum; deletion requests reapplied after restoration. Measure the plan's content RPO ≤24 hours and restore RTO ≤4 hours. Until the drill exists, those are targets only.
 
 For a failing release, stop promotion and preserve logs without secrets or raw diner data. Prefer restoring the prior application deployment and forward-fixing schema. Do not delete an event stream or silently acknowledge unarchived observations to clear an alert.
+
+## PostHog hosted release — October 19, 2026
+
+Released exact main commit `2a135faa4386fc3e1002aef3d1a150930e5ff9bf` after [PR 14](https://github.com/vivienk/peekaplate/pull/14) and [PR 15](https://github.com/vivienk/peekaplate/pull/15). The user explicitly delegated setup approval; the review disclosed agent assistance. Ordinary PR review requirements remain unchanged.
+
+- Diner Pages deployment: `013f89a7`, [staging diner](https://peekaplate-diner-staging.pages.dev/).
+- Console Pages deployment: `9ebf0f78`, [staging console](https://peekaplate-console-staging.pages.dev/).
+- Worker and database were unchanged by this frontend release.
+- Live isolated-browser checks passed on both stable URLs: no capture before consent, HTTP 200 after consent, expected minimal properties, and no new capture after withdrawal/reload. Both matching generated IDs were visible in PostHog. Synthetic data only.
+- Private Supabase export is a separate change; see [its current status](posthog-export.md). These results do not prove diner-event ingestion, menu functionality or owner reports.

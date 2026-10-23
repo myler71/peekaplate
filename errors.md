@@ -195,8 +195,143 @@ These records describe local validation limits, not application failures.
 {"id":"ERR-20261019-RELEASE-001","status":"resolved","area":"release-context","cause":"The release merge included a newer main README edit, so the delivery fingerprint calculated on the feature head no longer matched the proposed merged tree.","prevention":"Check the release merge tree against the reviewed head, preserve target-branch edits, and refresh affected context before promotion.","regression":"Merged the current main README change into the release candidate and refreshed the delivery fingerprint; context validation must pass on the resulting release tree.","evidence":"https://github.com/vivienk/peekaplate/actions/runs/39381320009","sources":["README.md","docs/CONTEXT.md"]}
 ```
 
+```json
+{"id":"OBS-20261019-EXPORT-RED-001","status":"resolved","area":"posthog-export-tests","cause":"The intentional red test found the requested private analytics table absent before implementation.","regression":"Added a forward migration. pnpm verify test:db passed 15 new export assertions, existing 43 pgTAP assertions, 13 database integration cases and the local demo lifecycle.","sources":["migrations/20261020070000_posthog_exports.sql","tests/db/posthog.sql"]}
+```
+
+```json
+{"id":"OBS-20261019-SETUP-TOOLS-001","status":"resolved","area":"operator-tooling","observation":"A quoted shell comment command failed to parse, and claiming an existing Supabase browser tab timed out twice. Neither action completed a write.","prevention":"Use a UTF-8 body file for GitHub prose. Recover a stale browser tab through a new tab in the already-selected browser, without accessing profile files.","regression":"Body-file submission succeeded. A fresh Supabase tab displayed the existing app_private schema."}
+```
+
+<!-- automatic observation; not root cause -->
+```json
+{"kind":"automatic-check-observation","check":"test:db","timestamp":"2026-10-20T06:48:43.863Z","exitCode":1}
+```
+
+```json
+{"id":"OBS-20261020-EXPORT-TLS-001","status":"open","area":"hosted-posthog-export","observation":"The first bounded Events export failed certificate verification with system certificate authorities. Supabase readback returned zero rows. The backfill wrapper said Completed even though its individual run failed.","followup":"Schedule paused. Use the official Supabase root certificate while retaining certificate and hostname verification; repeat the bounded export and deduplication check before claiming transfer success.","prevention":"Check individual run status plus database rows. Connection creation and backfill completion alone do not establish successful delivery.","sources":["docs/posthog-export.md"]}
+```
+
+```json
+{"id":"OBS-20261020-EXPORT-ADMIN-001","status":"open","area":"hosted-posthog-export","observation":"Operator reported that correcting the existing integration requires project Admin access. Browser file upload also required manual operator completion.","followup":"Vivien updates the connection or grants project Admin access. Retain TLS verification, then verify actual rows and retry deduplication before resuming the paused schedule.","sources":["docs/posthog-export.md","docs/operations.md"]}
+```
+
+```json
+{"id":"OBS-20261020-EXPORT-ADMIN-002","status":"resolved","area":"hosted-posthog-export","references":["OBS-20261020-EXPORT-ADMIN-001"],"observation":"Provider membership readback confirmed Admin access. Existing integration update succeeded without a permission workaround.","limit":"Access correction does not establish successful export or billing-limit verification.","sources":["docs/posthog-export.md"]}
+```
+
+```json
+{"id":"OBS-20261020-EXPORT-TLS-002","status":"resolved","area":"hosted-posthog-export","references":["OBS-20261020-EXPORT-TLS-001"],"observation":"Attached the official Supabase CA and retained certificate/hostname verification. Bounded retry reached PostgreSQL authentication instead of failing TLS.","regression":"Run 01a15d01-7dc1-0000-2e18-a56c0872e0f5 no longer reported certificate verification failure; it failed separately with EAUTHQUERY.","limit":"Transfer and duplicate-safe replay remain unverified.","sources":["docs/posthog-export.md"]}
+```
+
+```json
+{"id":"OBS-20261020-EXPORT-AUTH-001","status":"open","area":"hosted-posthog-export","observation":"Bounded export retry failed with EAUTHQUERY: unsupported or invalid secret format. A read-only role check returned LOGIN enabled, no expiry and a missing password; no verifier was displayed.","cause":"The dedicated database role had no password set. Entering a password in the destination form does not set the PostgreSQL role password.","prevention":"Verify password presence and expiry without printing the stored verifier, then require actual connection and matching-row evidence. Never broaden grants or weaken TLS for credential errors.","followup":"Operator sets the same password privately on the restricted role and clears the editor. Repeat bounded export and deduplication verification before resuming schedule.","sources":["docs/posthog-export.md","docs/operations.md"]}
+```
+
+```json
+{"id":"OBS-20261021-EXPORT-AUTH-002","status":"resolved","area":"hosted-posthog-export","references":["OBS-20261020-EXPORT-AUTH-001"],"observation":"After the operator's password correction, a read-only role check returned SCRAM password format, LOGIN enabled and no expiry. The editor was replaced with non-secret verification SQL.","limit":"Resolves missing password only. Subsequent export authentication still fails; successful transfer is not established.","sources":["docs/posthog-export.md"]}
+```
+
+```json
+{"id":"OBS-20261021-EXPORT-AUTH-003","status":"open","area":"hosted-posthog-export","observation":"Runs 01a15d25-6f43-0000-b5f1-ce8d7e959bca and 01a15d2e-9c4d-0000-1eeb-641c9338cae1 failed password authentication after the database password correction. The second bounded retry followed a delay. No credential mismatch or pooler-cache cause has been proven.","followup":"Re-enter the exact database password privately in the existing integration with verified TLS. If failure persists, privately test direct authentication to distinguish credentials from pooler failure; avoid repeated resets and retry loops. Prove matching rows and duplicate-safe repetition before enabling the paused schedule.","sources":["docs/posthog-export.md"]}
+```
+
+```json
+{"id":"OBS-20261021-EXPORT-UI-001","status":"observation","area":"operator-tooling","observation":"Browser extension routing was unavailable. Native Windows control allowed tab and form work, but accessibility indexes and geometry sometimes lagged visible scrolling; the file picker did not accept automation reliably.","prevention":"Refresh after layout changes, confirm actual field contents, and hand an unresolved native file picker to the operator. Do not infer success from an input call or bypass browser safety checks.","followup":"Use the prepared connection form and official certificate file; operator completes private credential input. No broader browser access or security setting change is required."}
+```
+
+```json
+{"id":"OBS-20261021-CERT-TOOLS-001","status":"resolved","area":"operator-tooling","references":["ERR-20261018-DOCS-001"],"observation":"A nested PowerShell certificate-inspection command expanded variables in the outer shell and failed parsing before reading the certificate.","prevention":"Use a script file for multi-statement probes rather than nested shell interpolation.","regression":"A local Node crypto inspection read the CA expiry successfully. A separate credential-free TLS probe passed CA and hostname validation against the configured pooler; no database login or SQL was attempted.","sources":["docs/posthog-export.md"]}
+```
+
+```json
+{"id":"OBS-20261021-EXPORT-PROBE-001","status":"open","area":"hosted-posthog-export","references":["OBS-20261021-EXPORT-AUTH-003"],"observation":"An independent PostgreSQL client using the operator-supplied credential and verified TLS returned 28P01 for the restricted pooler login. The direct-host diagnostic failed DNS resolution with ENOENT before authentication. No database SQL executed; no credential was saved in project files.","followup":"Verify a working restricted credential before updating the destination and repeating export checks. Direct authentication remains untested, so do not claim a pooler-cache root cause or exclude it solely from this probe.","sources":["docs/posthog-export.md"]}
+```
+
+```json
+{"id":"OBS-20261021-PROBE-TOOLS-001","status":"observation","area":"operator-tooling","observation":"Direct ESM import of the installed CommonJS PostgreSQL client failed with require is not defined. Loading it with createRequire succeeded and allowed the bounded authentication probe. A fresh browser-control inventory still timed out; native file-picker interaction remained unreliable.","prevention":"Use createRequire for the installed CommonJS client in this runtime. Report provider results separately from automation failures; never infer a successful file attachment from an input call."}
+```
+
+```json
+{"id":"OBS-20261021-PRIVATE-SETUP-001","status":"resolved","area":"operator-tooling","observation":"PowerShell could not load its Security module for Set-Acl. Execution stopped before generating or writing a credential.","prevention":"Establish and verify private filesystem permissions before writing sensitive setup material. Preserve existing nonempty setup directories rather than regenerating credentials.","regression":"The .NET filesystem ACL API succeeded. Verification confirmed inheritance disabled and one explicit access rule for the current user before the private setup file was used. No credential was written to the repository."}
+```
+
+```json
+{"id":"OBS-20261021-EXPORT-AUTH-004","status":"resolved","area":"hosted-posthog-export","references":["OBS-20261021-EXPORT-AUTH-003","OBS-20261021-EXPORT-PROBE-001"],"observation":"A private credential correction restored verified-TLS restricted pooler authentication. Two hosted exports completed the same bounded synthetic interval. Supabase readback found eight raw copies, four deduplicated events and each known diner/console test record once. All 14 row/permission checks passed; hourly schedule enabled.","regression":"Runs 01a15d4f-261f-0000-b88a-3f67d622bc39 and 01a15d53-eb5b-0000-0e3e-3ccb4c589db6. No missing/conflicting identities or out-of-scope rows. No broader grants.","limit":"Original cache or credential-mismatch cause is unproven. Direct-host IPv6 was unreachable. Next automatic hourly run not observed.","sources":["docs/posthog-export.md","docs/operations.md"]}
+```
+
+<!-- automatic observation; not root cause -->
+```json
+{"kind":"automatic-check-observation","check":"test:db","timestamp":"2026-10-21T19:35:09.347Z","exitCode":1}
+```
+
+<!-- automatic observation; not root cause -->
+```json
+{"kind":"automatic-check-observation","check":"test:db","timestamp":"2026-10-21T19:36:48.316Z","exitCode":1}
+```
+
+<!-- automatic observation; not root cause -->
+```json
+{"kind":"automatic-check-observation","check":"test:db","timestamp":"2026-10-21T19:37:36.494Z","exitCode":1}
+```
+
+```json
+{"id":"OBS-20261021-TEAM-API-001","status":"resolved","area":"team-analytics-tests","observation":"The initial new HTTP tests returned 404 instead of required authentication/query errors because the team endpoint did not exist. The first database runs stopped because Docker was not running; native startup did not start the engine. The Docker desktop start command recovered it. A later SQL test assumed a Supabase anon role existed in plain local PostgreSQL.","prevention":"Use the installed Docker CLI startup command and explicit untrusted fixture roles in provider-independent database tests. Keep authentication and database authorization as separate tested boundaries.","regression":"Focused HTTP tests now pass; all 12 new SQL assertions and 14 real Worker/Postgres integration cases passed. Complete database harness cleanup/local smoke confirmation is recorded separately in PR evidence.","sources":["backend/src/team-analytics.test.ts","backend/src/dish.integration.ts","tests/db/team-analytics.sql"]}
+```
+
+```json
+{"id":"OBS-20261021-GITHUB-ENV-001","status":"open","area":"team-access-activation","observation":"Staging environment secret/variable reads returned 404. Repository metadata confirms write but no admin access; environment listing was empty and repository Actions secret listing was empty.","followup":"Repository administrator creates the staging environment and configures a scoped deployment token without sharing it with contributors. No permission bypass or shared privileged API key is introduced.","sources":["docs/team-data-access.md"]}
+```
+
+<!-- automatic observation; not root cause -->
+```json
+{"kind":"automatic-check-observation","check":"test:db","timestamp":"2026-10-21T19:43:03.732Z","exitCode":1}
+```
+
+<!-- automatic observation; not root cause -->
+```json
+{"kind":"automatic-check-observation","check":"test:db","timestamp":"2026-10-21T19:44:04.172Z","exitCode":1}
+```
+
+<!-- automatic observation; not root cause -->
+```json
+{"kind":"automatic-check-observation","check":"test:db","timestamp":"2026-10-21T19:44:46.070Z","exitCode":1}
+```
+
+<!-- automatic observation; not root cause -->
+```json
+{"kind":"automatic-check-observation","check":"test:db","timestamp":"2026-10-21T19:45:30.517Z","exitCode":1}
+```
+
+<!-- automatic observation; not root cause -->
+```json
+{"kind":"automatic-check-observation","check":"test:db","timestamp":"2026-10-21T19:46:06.911Z","exitCode":1}
+```
+
+<!-- automatic observation; not root cause -->
+```json
+{"kind":"automatic-check-observation","check":"test:db","timestamp":"2026-10-21T19:47:30.134Z","exitCode":1}
+```
+
+```json
+{"id":"OBS-20261021-TEAM-API-002","status":"resolved","area":"worker-provider-fetch","observation":"Node-mocked GitHub authorization tests passed, but real workerd returned a sanitized 503 before reaching the local provider fixture. Workerd rejected redirect:error; its error explicitly required manual or follow.","cause":"Browser-style RequestRedirect error is unsupported by the configured Workers runtime.","regression":"Changed provider fetch to redirect:manual; user responses must be OK and membership exactly204, so redirects remain denied without forwarding credentials. Real Worker/PostgreSQL integration and all15 new SQL assertions passed after the correction. Added safe-property malformed/value fixtures.","prevention":"Exercise network-bound code in the actual Worker runtime; mocked fetch cannot establish support for native request options.","sources":["backend/src/team-auth.ts","backend/src/team-auth.test.ts","backend/src/dish.integration.ts","tests/db/team-analytics.sql"]}
+```
+
 ## October 22 staging settings documentation validation
 
 - Environment observation: `rtk` is unavailable in this local session; plain Git/Node commands were used. The initial sandboxed clone could not resolve GitHub; the authorized network retry succeeded.
 - `pnpm context:refresh` attempted dependency preparation in the fresh checkout and could not reach the package registry under the sandbox. It was interrupted before the requested checks ran. No application failure is established.
 - Fallback validation passed with `node scripts/context.mjs refresh`, `node scripts/context.mjs check`, `node scripts/check-docs.mjs` and `git diff --check`. These dependency-free checks cover this documentation change; the full build/test suite was not run. Use the repository-supported runtime and available dependencies for full CI validation.
+
+<!-- automatic observation; not root cause -->
+```json
+{"kind":"automatic-check-observation","check":"context:check","timestamp":"2026-10-22T02:25:25.896Z","exitCode":1}
+```
+
+```json
+{"kind":"resolution","references":{"check":"context:check","timestamp":"2026-10-22T02:25:25.896Z"},"status":"resolved","cause":"Editing ADR 0015, which the contracts, measurement and analytics nodes reference, changed their fingerprinted inputs before refresh.","prevention":"Run pnpm context:refresh after editing a referenced ADR, then rerun pnpm check.","regression":"pnpm context:refresh followed by pnpm check passed."}
+```
+
+```json
+{"id":"OBS-20261022-ADR15-PUSH-001","status":"resolved","area":"review-coordination","observation":"A normal PR-branch push was rejected because the author concurrently merged the same develop update.","cause":"The remote review head advanced after the local review was pinned.","regression":"Fetched and compared the new head, then merged it without force-pushing; the only retained local difference was the final technical-review context handoff. Context freshness, documentation links and diff checks passed after reconciliation.","prevention":"Re-pin and re-review a changed remote head; preserve concurrent commits and use an expected head when merging the PR."}
+```

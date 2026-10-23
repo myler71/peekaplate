@@ -13,16 +13,17 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "contracts",
       "status": "foundation",
-      "summary": "Strict health, staff dish-revision command/result and initial dish-intent schemas. HTTP command authority fields are rejected; ingest and broader diner events remain planned.",
+      "summary": "Strict health, staff dish-revision command/result and initial dish-intent schemas. HTTP command authority fields are rejected; ingest and broader diner events remain planned. Team analytics query/response schemas enforce bounded dates/results and allowlisted diagnostic fields.",
       "paths": [
         "packages/contracts/src/index.ts",
         "packages/contracts/src/index.test.ts"
       ],
       "adrs": [
-        "docs/adr/0003-intent-evidence.md"
+        "docs/adr/0003-intent-evidence.md",
+        "docs/adr/0015-integration-contracts-and-owner-evidence.md"
       ],
       "dependsOn": [],
-      "sourceFingerprint": "802e422cbe5d2c067e0933be29976bde9777e35bc2fc8799c6e7feefa2952725"
+      "sourceFingerprint": "17b4bf0b98b5808aa805cf10b4ad7763069bdde6194a2a5614cdeb422f0868e9"
     },
     {
       "id": "diner",
@@ -68,7 +69,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "backend",
       "status": "foundation",
-      "summary": "Hono Worker verifies configured staff JWTs and current restaurant membership, then executes atomic dish revisions under a restricted database role. Staging API uses the Supabase issuer and uncached Hyperdrive. Bounded hosted tests passed genuine login, authorized writes, retries/concurrency, cross-restaurant denial and membership revocation; remote probes verified transaction-context reset and rollback. JWT logout revocation is bounded by expiry, not immediate. No ingestion or publication endpoint.",
+      "summary": "Hono Worker verifies configured staff JWTs and current restaurant membership, then executes atomic dish revisions under a restricted database role. Staging API uses the Supabase issuer and uncached Hyperdrive. Bounded hosted tests passed genuine login, authorized writes, retries/concurrency, cross-restaurant denial and membership revocation; remote probes verified transaction-context reset and rollback. JWT logout revocation is bounded by expiry, not immediate. No ingestion or publication endpoint. Added staging/local-only team analytics GET endpoints with individual GitHub tokens, live fixed-repository collaborator checks, fixed server project and strict seven-day/100-row bounds. No direct runtime analytics SELECT; safe response schemas remove visitor/person/IP fields. Hosted activation pending.",
       "paths": [
         "backend/src/index.ts",
         "backend/src/index.test.ts",
@@ -80,23 +81,28 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "backend/src/dish.integration.ts",
         "backend/local.mjs",
         "backend/local.test.mjs",
-        "backend/package.json"
+        "backend/package.json",
+        "backend/src/team-analytics.ts",
+        "backend/src/team-analytics.test.ts",
+        "backend/src/team-auth.ts",
+        "backend/src/team-auth.test.ts"
       ],
       "adrs": [
         "docs/adr/0002-selective-event-sourcing.md",
         "docs/adr/0003-intent-evidence.md",
-        "docs/adr/0005-tenancy-and-privacy.md"
+        "docs/adr/0005-tenancy-and-privacy.md",
+        "docs/adr/0014-team-analytics-access.md"
       ],
       "dependsOn": [
         "contracts",
         "database"
       ],
-      "sourceFingerprint": "3919fa1e39fd43702f4ea6ccecef4804c79d0347b74ad89d113b8e29cdb7c13d"
+      "sourceFingerprint": "92f22213bceebd5fb3a213a5a135dc4ebc35532f191e73ffc157d646f0b8b551"
     },
     {
       "id": "database",
       "status": "foundation",
-      "summary": "Private Postgres venue/event/command/outbox, actor-scoped memberships and tenant-scoped dish projections. Runtime grants cannot modify membership; share locks serialize revocation. Forward migration validates safe existing runtime-role attributes. Tests cover prior-schema upgrade, RLS, atomic commands and direct connection reuse; October 18 staging checks verified effective managed-provider grants and transaction-context reset; physical hosted pool reuse and restore evidence remain pending.",
+      "summary": "Private Postgres venue/event/command/outbox, actor-scoped memberships and tenant-scoped dish projections. Runtime grants cannot modify membership; share locks serialize revocation. Tests cover prior-schema upgrade, RLS, atomic commands and direct connection reuse; hosted grants/context reset verified, physical pool reuse and restore pending. Private PostHog landing table and conflict-aware view are migration-tested and applied. Exporter is separate from app runtime. Restricted PostHog pooler authentication, two successful hosted exports, actual deduplicated view and effective grants verified. Eight raw copies yield four unique events; hourly schedule enabled. See docs/posthog-export.md for evidence limits. New forward migration defines operator-controlled staging project scope and fixed read function owned by a non-login reader; runtime only receives function execution. Hosted migration not applied.",
       "paths": [
         "migrations/202610130001_foundation.sql",
         "tests/db/foundation.sql",
@@ -104,14 +110,20 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "scripts/test-db.mjs",
         "scripts/test-db.test.mjs",
         "migrations/20261014210000_staff_commands.sql",
-        "tests/db/staff.sql"
+        "tests/db/staff.sql",
+        "migrations/20261020070000_posthog_exports.sql",
+        "tests/db/posthog.sql",
+        "migrations/20261021130000_team_analytics.sql",
+        "tests/db/team-analytics.sql"
       ],
       "adrs": [
         "docs/adr/0002-selective-event-sourcing.md",
-        "docs/adr/0005-tenancy-and-privacy.md"
+        "docs/adr/0005-tenancy-and-privacy.md",
+        "docs/adr/0013-posthog-export-boundary.md",
+        "docs/adr/0014-team-analytics-access.md"
       ],
       "dependsOn": [],
-      "sourceFingerprint": "59f97389cbaa95e02e355b4aaad030f9decd1701006f69fc09d83efcecbe487e"
+      "sourceFingerprint": "fccd1d02035493216fcb1fae4fb672e25ec554da17005a27354ae2a4f975f7f8"
     },
     {
       "id": "measurement",
@@ -122,17 +134,18 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "docs/implementation_plan.md"
       ],
       "adrs": [
-        "docs/adr/0006-orders-and-measurement.md"
+        "docs/adr/0006-orders-and-measurement.md",
+        "docs/adr/0015-integration-contracts-and-owner-evidence.md"
       ],
       "dependsOn": [
         "backend"
       ],
-      "sourceFingerprint": "a292bc0c5001819c38c6dddbb4540eeb3cc4bde2626bc34aa91398f52304fc8d"
+      "sourceFingerprint": "5fc2bb2fddca8d87f6d03aab9cf8e1922e1d921d9c66d2eee027e5cba8fdf853"
     },
     {
       "id": "delivery",
       "status": "foundation",
-      "summary": "Main supplies both environments under ADR 0012. Hosted staging foundation checks cover login, writes, retries, concurrency, tenant denial, membership revocation, rollback and context reset. Issued JWTs remain valid until expiry. Login UI, pilot/load/recovery checks and production remain pending. R2 assets are private and unbound; Actions remains gated. October 22 staging settings show main-only branches, required reviewers and prevent self-review, with administrator bypass allowed; credential validity and workflow enforcement remain unverified. Repository branch-protection status is separate. README/team guide explain setup and the accepted Python extension; no Python job exists. Optional PostHog shell capture is verified from local staging builds against the real project; hosted release awaits human review. ADR 0003 still governs durable evidence; PostHog is internal best-effort analytics. Detailed planning is preserved with the deployed foundation.",
+      "summary": "Main supplies staging and production under ADR 0012. Hosted staging Pages, Worker, restricted Supabase/Hyperdrive and staff-command evidence are recorded in operations. Hosted PostHog shell views and private export transfer, duplicate-safe repeat and permission checks passed; hourly staging export is enabled. Team analytics inspection is locally tested but not active: October 22 read-only SQL confirmed migration 20261021130000, its scope table and read function absent. Operator Wrangler OAuth works; the Worker has no secrets. GitHub environment secret names exist but their credentials remain unverified. Staging restricts deployments to main with no tags, required reviewers and prevent self-review; administrator bypass is allowed. The deployment flag remains unset. R2 is private and unbound; ingestion, login UI, pilot/load/recovery and production remain pending. Repository branch protection is separate.",
       "paths": [
         "README.md",
         "SECURITY.md",
@@ -176,7 +189,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "3302a16208b4b57dc173a8de818776b0c98a15f4c4eb58eb3f8bd78a4fa63416"
+      "sourceFingerprint": "a6b3a6189ff4cf61e465f813772d35c08db353c5d040c8afba8e8cbf62efed60"
     },
     {
       "id": "agents",
@@ -209,60 +222,55 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "analytics",
       "status": "foundation",
-      "summary": "Disabled-by-default optional PostHog capture with page consent, DNT/GPC, exact origin/mode guards, allowlisted v1 dish projection and bounded best-effort delivery. Local staging builds sent diner and console shell views to real US project 675372; matching records and propertyless processing were verified in PostHog. Hosted activation awaits human review and release. Real dish controls, canonical receipts and owner reports remain unimplemented. See docs/posthog.md for privacy, retention and admin limits.",
+      "summary": "Consent-gated explicit PostHog capture: hosted diner/console shell views verified in staging. Dish adapter awaits real controls. Private export schema and duplicate/permission tests exist. Two hosted exports of one synthetic interval passed: eight raw copies, four deduplicated events, known diner/console records each matched once, no missing/conflicting/out-of-scope rows. Restricted grants verified; hourly schedule enabled. Next automatic run not observed. Hourly internal copy does not power live owner reports; validated evidence/projections and owner authorization remain planned. Internal inspection API returns safe deduplicated records/counts after live repo-collaborator authorization; no PostHog management token or owner-report endpoint.",
       "paths": [
         "packages/analytics/package.json",
         "packages/analytics/tsconfig.json",
         "packages/analytics/src/index.ts",
         "packages/analytics/src/consent.ts",
         "packages/analytics/src/index.test.ts",
-        "docs/posthog.md"
+        "docs/posthog.md",
+        "docs/posthog-export.md",
+        "docs/team-data-access.md"
       ],
       "adrs": [
         "docs/adr/0003-intent-evidence.md",
         "docs/adr/0005-tenancy-and-privacy.md",
-        "docs/adr/0006-orders-and-measurement.md"
+        "docs/adr/0006-orders-and-measurement.md",
+        "docs/adr/0013-posthog-export-boundary.md",
+        "docs/adr/0014-team-analytics-access.md",
+        "docs/adr/0015-integration-contracts-and-owner-evidence.md"
       ],
       "dependsOn": [
         "contracts"
       ],
-      "sourceFingerprint": "e1535c6f24c72095c59fcb8c2e4f1327064740e2e1d3d0887396c504ce357d12"
+      "sourceFingerprint": "874d1071b705723d9f765e64d273ecc621c6454ae9d4c4437da4461f2c887f05"
     }
   ],
   "handoffs": [
+    {
+      "summary": "Proposed ADR 0015 for S3-ARC-01, revised after Sai's review: owner metrics only from ADR 0003 canonical facts; POST /observations with a Bearer menu token and accepted/retry/rejected receipts (accepted = durable Queue acceptance), terminal rejected items, uncertain sends retried and in-batch duplicates defined; canonical app_private.observation_index/conflict; D1 ten sessions, D6 observation.v2, D7 session-based rates and D8 timing recorded; ingest limits agreed with Zhiliang (25 items/32 KiB, 24 h age, 5 min skew, per-jti 60/min burst 10, HTTP and reason codes, token claims); D3/D4 scope from matrix v0.1d; bounded 400/413 handling; remaining work split into the Save/UI acceptance decision and owned implementation/release prerequisites; owners Zhiliang (ingest), Teeyansh (consumer), Jeffin (migrations/views), Louis (reports). No contract, migration or collector code changed. Final technical review reconciled develop activation prerequisites; the ADR remains Proposed pending Save/UI confirmation.",
+      "modules": [
+        "contracts",
+        "measurement",
+        "analytics"
+      ],
+      "next": "Harshita confirms the Save/UI transitions, persistence, unsave/Undo, unavailable-storage behaviour and any Saved limit; Adam accepts, then record ADR acceptance. Owners deliver the listed contracts, ingest, consumer, migrations/views, report API, protected bindings, menu token, retention/consent and hosted validation through later PRs."
+    },
+    {
+      "summary": "Reconciled main into the PR 27 release branch, preserving October 22 staging controls, verified PostHog export history, team analytics access documentation and both error-ledger histories. Runtime, contracts, migrations and deployment workflow are unchanged from the reviewed develop release. Corrected the team-access activation checklist so migration/history, token permissions and final review/CI are explicit prerequisites to enabling the flag. Final guide cleanup distinguishes the enabled hourly export from the pending team inspection API and links its activation checklist; PR verification metadata is refreshed for the final candidate.",
+      "modules": [
+        "delivery",
+        "analytics"
+      ],
+      "next": "Review the reconciled PR 27 release after local checks. Read-only hosted audit confirmed migration 20261021130000 is absent; apply and record its forward migration through the database procedure before deployment. Operator OAuth is valid but does not verify GitHub-held tokens. Keep the activation flag off until protected credential/release checks, then deploy reviewed main and run hosted access acceptance."
+    },
     {
       "summary": "Recorded the October 22 staging environment settings: exact main branch restriction saved, required reviewers and prevent self-review enabled, administrator bypass allowed, and expected variable/secret names present. Updated stale environment-availability guidance. No secret values, activation flag, workflow code or deployment changed.",
       "modules": [
         "delivery"
       ],
       "next": "Review this documentation PR. Before Actions activation, verify credential permissions, intended staging bindings and the independent approval process; the settings observation is not a successful workflow or deployment test."
-    },
-    {
-      "summary": "Reconciled PostHog PR 14 with deployed main configuration and PR 13 Python guidance. Verified real synthetic shell ingestion from both local builds and prepared the internal staging chart. Member access supports ingestion inspection and charts; restricted project/billing settings remain with an administrator. Existing database and backend behavior are unchanged.",
-      "modules": [
-        "analytics",
-        "diner",
-        "console",
-        "delivery"
-      ],
-      "next": "Obtain independent human approval on the final commit, merge into develop and release the reviewed candidate to main. Build with exact hosted staging origins, upload the two existing Pages projects and verify hosted readback. Confirm billing/deletion ownership before real diners. Design and actual dish/event implementation follow their tickets."
-    },
-    {
-      "summary": "Clarified the existing staging setup for technical and nontechnical readers. Retained diner/console/API URLs, explained owner naming and each provider, corrected completed-check wording and linked newer planning/design references on develop. Added unassigned ticket boundaries and prerequisites; no runtime, cloud resource, credential or deployment change.",
-      "modules": [
-        "delivery",
-        "diner",
-        "database"
-      ],
-      "next": "Agree weekly tickets from the deployed foundation. Start staff login/editing alongside three-dish preparation, diner fixture UI and event/metric contract review. Publication precedes real exposure; ingestion precedes live reports. Preserve pilot and production gates."
-    },
-    {
-      "summary": "PR #10 merged at bb56cef and API/Pages shells were deployed from that main revision. Hosted tests passed genuine Supabase login, atomic writes, retries/concurrency, cross-restaurant denial and membership revocation. Remote Hyperdrive probes passed context reset and rollback after an injected outbox failure. Logout rejected refresh but accepted the existing JWT until membership removal. Test membership was removed and ephemeral harnesses stopped. R2 staging is private; no paid upgrade or production deployment.",
-      "modules": [
-        "delivery",
-        "backend"
-      ],
-      "next": "Implement staff login UI and review/approval/immutable publication before diner exposure and ingestion. Design, manual assets and event-contract review can proceed in parallel. Before a real pilot, resolve session-lifetime policy, representative latency/load, recovery and cost/incident ownership. Production needs separate resources and release approval."
     },
     {
       "summary": "Updated deployment selection to main for both environments per the maintainer's explicit instruction. Configured verified non-secret staging account, issuer and Hyperdrive bindings. Provider audit found existing Supabase migrations, forced RLS, restricted staging login, an ES256 public key and uncached Hyperdrive; no duplicate database branch was created. Hosted request behavior remains unverified.",
@@ -302,11 +310,22 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "next": "Use the linked Figma Make diner-menu V1 as the referenced design handoff."
     },
     {
-      "summary": "Updated the final team_guide plan from the dated Team Interests & Responsibilities document. Proposed bounded contributions and explicit handoffs, distinguished preferences from confirmed assignments, and kept reported capacity and unfilled engineering work visible. Existing delivery dependencies and runtime behavior are unchanged.",
+      "summary": "PRs 14/15 released hosted PostHog consented shell capture at main 2a135fa, verified by live synthetic capture and provider readback. Added private export landing migration, conflict-aware deduplication view and least-privilege tests. pnpm check and test:db pass; technical/security review found no supported defect and guide review corrections are applied. Hosted migration applied with explicit access approval; tables and effective role boundaries verified. Export connection created; first run failed TLS verification and schedule is paused. User reported correction requires project Admin access. No rows transferred; no bypass attempted.",
       "modules": [
+        "analytics",
+        "database",
         "delivery"
       ],
-      "next": "Confirm each selected task and current availability with its contributor, record the agreement in ClickUp, then follow the existing publication/exposure/linkage prerequisites and protected cloud-access checkpoint."
+      "next": "Vivien must correct the connection or grant project Admin access. Complete the connection with the official Supabase CA, verify a bounded export and duplicate-safe retry, then resume schedule. Do not claim transfer success from backfill wrapper completion alone."
+    },
+    {
+      "summary": "October 21, 2026: restricted pooler login and PostHog export recovered using a privately generated credential, official Supabase CA and hostname verification. Runs 01a15d4f-261f-0000-b88a-3f67d622bc39 and 01a15d53-eb5b-0000-0e3e-3ccb4c589db6 completed the October 20 06:00–07:00 UTC interval. Actual Supabase view: eight raw copies, four unique events, one matching diner/console record each. All 14 row/permission checks passed; hourly schedule enabled. No runtime, migration, grants or production change. Earlier failures remain in errors.md; original cache/mismatch cause unproven.",
+      "modules": [
+        "analytics",
+        "database",
+        "delivery"
+      ],
+      "next": "Review PR 18 and merge under the human-comment policy. Jeffin owns contract/collection decisions; Zhiliang wires approved real UI events with tests. Each adds a ticket comment with PR and evidence when done. Observe the next automatic export; confirm monitoring, retention/deletion and billing limits before real diner data. Owner evidence pipeline/projections/API remain product work. Handoff drafts are local and unsent."
     }
   ]
 }

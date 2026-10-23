@@ -1,6 +1,6 @@
 # PeekaPlate: team guide
 
-Infrastructure updated October 18, 2026; Python and PostHog setup guidance updated October 19 (verification recorded October 20 UTC). The team research and board inventory below remains the dated October 14 snapshot.
+Infrastructure updated October 18, 2026; PostHog export and dashboard-freshness guidance updated October 20. The team research and board inventory below remains the dated October 14 snapshot.
 
 PeekaPlate is meant to help a restaurant explain its food and learn how people use its menu. The team has been researching that idea and designing the experience. Sai started the code setup. We now have the project structure, checks for new code, and one tested way to save a staff member's draft dish change.
 
@@ -41,7 +41,7 @@ The visual experience is one part of this loop. Accurate food information, a usa
 | Saving a dish | Backend draft-save flow tested locally and online with Supabase identity | Connecting it to the staff screen |
 | Food visuals | Design direction and written rules | Reviewed assets and the optional interactive viewer |
 | Diner tracking | Initial rules for event data | Collecting, storing and reporting actual browsing actions |
-| PostHog analytics | Opt-in tracking code; real test events verified in the staging PostHog project from local builds | Reviewed hosted release, then connect actual menu controls as they are built |
+| PostHog analytics | Opt-in shell views and the private hourly Supabase export verified in staging | Monitor export runs; activate the separate team inspection API after its migration and release checks |
 | Python processing | Accepted extension in the architecture | Implement, test and choose a runtime for the first specific job |
 | Owner report | Research/design requirements | A report built from real, permitted evidence |
 
@@ -229,9 +229,11 @@ Before connecting a job to staging, test a successful result, bad input, a timeo
 
 ### What PostHog adds, and what it does not
 
-**The PostHog connection is implemented and has received real test events from local builds. It is awaiting a reviewed release to the hosted staging pages.** For now, the two screens are starter pages. Clicking **Allow optional analytics** sends one `app_shell_viewed` event: a small record saying which screen was viewed and that this is staging. PostHog turns those records into an internal chart. It does not mean a diner opened a published menu or ordered food.
+For team inspection, the new read API lets any current repository collaborator use their own GitHub token to ask the Worker for safe staging events or technical counts. Nobody needs our export password or database administrator key. The Worker verifies their GitHub identity and current collaborator status before asking Supabase; data still arrives through PostHog's hourly export. This is a development tool, not the restaurant-owner dashboard. Hosted activation is still pending; the repository owner’s [activation checklist](team-data-access.md#repository-owner-activate-and-hand-over) describes credentials, release order and access tests before team use. See [team data access](team-data-access.md) for authentication, API examples, permissions and the migration/deployment checkpoint.
 
-The flow is **page → consent check → PostHog → internal chart**. It does not pass through Supabase, and it does not change the trusted database records. Tracking starts off, stops when withdrawn, and resets when the page reloads. Browser privacy signals can block it. The menu must work even if PostHog is unavailable.
+**Both hosted staging pages now send consented test events to PostHog, and those records were checked in PostHog.** For now, the two screens are starter pages. Clicking **Allow optional analytics** sends one `app_shell_viewed` event: a small record saying which screen was viewed and that this is staging. PostHog turns those records into an internal chart. It does not mean a diner opened a published menu or ordered food.
+
+The flow is **page → consent check → PostHog → internal chart**. An hourly connection now copies those observations into a separate private area of the same Supabase database. We verified four test events arrived. Sending the same batch again produced eight stored copies, but the clean view still counted four events. The diner and console test records each appeared once, and access checks passed. The hourly schedule is enabled. A raw table keeps received copies; a view counts identical repeats once and excludes conflicting copies. It does not change trusted restaurant records. See [export setup and status](posthog-export.md). Tracking starts off, stops when withdrawn, and resets when the page reloads. Browser privacy signals can block it. The menu must work even if PostHog is unavailable.
 
 When the real menu is built, its actions must follow [Adam's taxonomy and measurement plan](https://app.clickup.com/90141746115/docs/2kydvry3-1494?view=open) and the [implementation plan](implementation_plan.md), including ingredient interactions and comparisons. Agree the names, exact triggers and content versions before wiring each control. The current v1 adapter is tested for `dish_open` and `portion_compare`; it has no real dish-control caller yet. A general dish comparison must not be labelled as physical portion measurement.
 
@@ -244,7 +246,11 @@ These responsibilities remain separate:
 | PostHog | Optional internal charts; current test events describe starter-page views |
 | Owner dashboard | A future product screen with agreed calculations and access restricted to the owner's restaurant |
 
-PostHog can supply analytics through an API, but using it for owner reports is still a decision to review. A filter saying "Restaurant A" is not a security boundary. Our backend must establish which restaurant the signed-in owner can access. The current durable-event plan remains in place until a new architecture decision explicitly changes it. Decide the collection route before implementation so one action is not accidentally recorded twice.
+**The owner dashboard should not wait for the hourly PostHog export.** The planned route is: **diner action → backend validation → queue → archive and Supabase → updated totals → owner's dashboard**. A projection is simply a prepared total or summary, such as how many eligible views a dish received. The backend checks which restaurant the owner can access before returning those totals. A chart filter alone cannot protect another restaurant's data.
+
+For example, when someone opens a dish, the event pipeline will record that action once and update its eligible view count. The dashboard can then refresh from Supabase. Retries must not count the same action twice. The target is prompt updates, but the pipeline and dashboard are not built yet, so we have no measured freshness guarantee. Their tickets must agree and test the target, show when data was last updated, and show a delay if processing falls behind. The [export runbook](posthog-export.md#why-the-owner-dashboard-must-not-wait-for-this-export) diagrams this planned path beside the separate hourly analytics copy.
+
+PostHog remains useful for the team's optional usage charts and later checks against those records. Using PostHog as the owner-report source would change the accepted design and needs a reviewed architecture decision. Agree one PostHog sending route per action so it is not accidentally mirrored twice.
 
 **Capacity example:** 300 menu visits per day, with 40 events per visit over 30 days, would produce 360,000 events. PostHog lists a one-million-event monthly free allowance as checked on October 19, 2026. That should leave room for a small pilot under these assumptions; it is not a forecast or an unlimited service. Include test and automatically collected events in usage, and monitor the allowance because extra events can be dropped when a free or configured billing limit is reached. See [current pricing](https://posthog.com/pricing).
 
@@ -252,7 +258,7 @@ PostHog can supply analytics through an API, but using it for owner reports is s
 
 **Files behind this:** [analytics/index.ts](../packages/analytics/src/index.ts) checks configuration and consent, builds the allowed event fields and limits network requests. [analytics/consent.ts](../packages/analytics/src/consent.ts) provides the opt-in button. [diner/main.ts](../frontend/diner/src/main.ts) and [console/main.tsx](../frontend/console/src/main.tsx) connect it to each screen. [Unit tests](../packages/analytics/src/index.test.ts) and [browser tests](../tests/e2e/posthog.spec.ts) check allowed, blocked and failed capture. [posthog.md](posthog.md) is the operator's setup and verification record.
 
-**What comes next:** finish review and release the staging builds; then finalize the diner design states, build approved menu controls and connect their agreed events. The durable evidence pipeline and owner calculations remain separate implementation work. Vivien can rename the project **PeekaPlate Staging** later and confirm billing and retention ownership; Member access was enough to test the connection and prepare the internal chart. Before real diner use, approve the privacy notice and deletion policy. Python work can proceed separately once its first job is defined.
+**What comes next:** finalize the diner design states, build approved menu controls and connect their agreed events. The private Supabase export is already enabled. The separate team inspection API still needs its migration and reviewed deployment; follow the [activation checklist](team-data-access.md#repository-owner-activate-and-hand-over). These steps do not block local work with synthetic fixtures. The durable evidence pipeline and owner calculations remain separate implementation work. Vivien can rename the project **PeekaPlate Staging** later and confirm billing and retention ownership; Member access was enough to test the connection and prepare the internal chart. Before real diner use, approve the privacy notice and deletion policy. Python work can proceed separately once its first job is defined.
 
 ### What T0, T1 and T2 mean
 
