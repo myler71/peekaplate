@@ -23,7 +23,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "docs/adr/0015-integration-contracts-and-owner-evidence.md"
       ],
       "dependsOn": [],
-      "sourceFingerprint": "27041e8e430c435311a09b8e6640b1373eb6049efa4c72a381303bf55646e0c0"
+      "sourceFingerprint": "2f8fa414a235ebafa6b2b2a92769fed886f6736348712b94e40fac42759f42ba"
     },
     {
       "id": "diner",
@@ -140,7 +140,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "backend"
       ],
-      "sourceFingerprint": "1e254ca196fcfe95a18deb8f4bc78a4464902b6e49419e3f48d00952e2d244d0"
+      "sourceFingerprint": "0009c157193ca4cee4e14f87a440cc8fa3bea82304e0403d583c7479f903fe8c"
     },
     {
       "id": "delivery",
@@ -244,18 +244,18 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "contracts"
       ],
-      "sourceFingerprint": "2ab7bc5f67480eb6806ace9fad8659a16ff9af25b165bfc58590c0af9769566d"
+      "sourceFingerprint": "c587bc8230bdcd91f0225205a392d64304ea53430c46e1d1f0b0fbd3b745fff5"
     }
   ],
   "handoffs": [
     {
-      "summary": "Proposed ADR 0015 for S3-ARC-01: six versioned integration contracts; owner metrics only from ADR 0003 canonical facts, with the ADR 0013 PostHog copy kept for reconciliation; server-derived (venue_id, event_id) identity shared with consented PostHog copies; the ten-session floor; versioning and merge order. Zhiliang is the proposed ingest-endpoint owner; other owners stay open. No contract, migration or collector code changed.",
+      "summary": "Proposed ADR 0015 for S3-ARC-01: six versioned integration contracts; owner metrics only from ADR 0003 canonical facts, with the ADR 0013 PostHog copy kept for reconciliation; server-derived (venue_id, event_id) identity; the ten-session floor; observation.v2 versioning (D6); proposed POST /observations with accepted/retry/rejected receipts (accepted only after Queue acceptance); proposed app_private.observation_* tables; reuse of the staging R2 bucket with a new Queue; Zhiliang owns the ingest endpoint and Teeyansh the Queue consumer. No contract, migration or collector code changed.",
       "modules": [
         "contracts",
         "measurement",
         "analytics"
       ],
-      "next": "Resolve the open matrix decisions (D3 events, D4 Save, D7 metrics, D8 timing), table names, retention, pilot consent, route/receipt contract, Queue/R2/menu-token setup and remaining owners with Sai, Adam and the PMs; obtain Sai's approval, then implement the contracts with negative tests."
+      "next": "Get Sai's approval; confirm route/receipt limits, table names, D3/D4/D7/D8, retention, pilot consent and the migration and report-API owners; Sai and Vivien complete the protected Queue/R2 setup. Then implement the contracts with negative tests."
     },
     {
       "summary": "Updated deployment selection to main for both environments per the maintainer's explicit instruction. Configured verified non-secret staging account, issuer and Hyperdrive bindings. Provider audit found existing Supabase migrations, forced RLS, restricted staging login, an ES256 public key and uncached Hyperdrive; no duplicate database branch was created. Hosted request behavior remains unverified.",

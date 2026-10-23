@@ -20,30 +20,52 @@ Draft work disagrees with accepted decisions: a report query uses five sessions 
 
 **Event identity.** As in ADR 0003, the transport key is `(venue_id, event_id)`. The browser creates `event_id` once per observation and keeps it and the payload on every retry. `venue_id` is derived on the server from the signed menu token, never accepted from the browser. The same key with the same canonical checksum is a retry; the same key with a different payload is quarantined, never overwritten. Semantic keys prevent double counting of one opening, activation, comparison version or opportunity. Genuine repeated actions receive new action identities. When a consented PostHog copy is sent, it carries the same `event_id`, so reconciliation compares ID sets. PostHog's `(team_id, uuid)` collapse only removes repeated export copies; it does not prove browser-action idempotency.
 
-**Storage.** Canonical observations go to new private tables created by forward migrations, protected by RLS and written only by the restricted runtime role. Start with the planned validated observation index and typed fact tables. Nothing is created or changed by hand in a hosted database.
+**Storage (names proposed).** Canonical observations go to new tables in the existing private `app_private` schema, created by forward migrations, protected by RLS and written only by the restricted runtime role. Proposed names: `app_private.observation_index`, keyed by `(venue_id, event_id)` with checksum, schema version, type, authorized references, client `occurred_at`, server `received_at`, R2 archive key and disposition; `app_private.observation_conflict` for quarantined conflicting reuse; and typed fact tables named `app_private.observation_<family>_fact` once D3 fixes the event families. Owner reports read bounded views over those facts, never the raw index. Nothing is created or changed by hand in a hosted database.
 
 **Privacy and reporting.** Keep ADR 0006's floor: suppress behavioral cells below ten eligible sessions, including totals, filters, differences and drill-downs that could reconstruct them. Lowering the floor requires a superseding ADR with a privacy rationale and accountable approval. Payloads exclude names, emails, full URLs, raw table labels, search text, fingerprints and credentials. PostHog receives only properties approved in the event-field matrix, behind the existing consent and Do Not Track/Global Privacy Control checks. Owner reports are served by the backend after verifying current restaurant membership. Analytics and collection failure never block the menu. Viewing, saving, comparing or opening ingredients is recorded as interest, never as an order or causal proof.
 
-**Versioning.** New controls use a new observation version. Historical v1 records stay distinct and are not relabelled; no event is sent twice under two versions.
+**Versioning (D6).** New controls use `observation.v2`, whose event semantics Adam approved; this record provides the architecture approval. Historical v1 records (`dish_open`, `portion_compare`) stay distinct and are not relabelled, and no observation is sent twice under two versions.
 
-**Ingest endpoint ownership.** Proposed implementation owner: Zhiliang (S3-DATA-01). Scope is the HTTP ingestion boundary only: request and schema validation, server-authorized venue context, `(venue_id, event_id)` handling, duplicate and conflicting-reuse behavior, consent and privacy checks, and accepted/rejected receipts. It feeds the Queue on the ADR 0003 path and never writes to the ADR 0013 export tables. Jeffin and Sai review its architecture and security. The Queue consumer, canonical migrations and tables, and the owner-report API have separate owners, still to be confirmed.
+**Route and receipt (proposed).** The ingest route is `POST /observations`. It is named for observations rather than events because AGENTS.md keeps staff domain events (`app_private.es_event`) separate from diner intent observations. The request carries the signed menu token and a bounded batch of strict `observation.v2` items. Each item has `schema_version`, `event_id`, `session_id`, `local_sequence`, `occurred_at`, `type` and only its type's fields. Batch size, body size and token transport are fixed with the contract schemas. The response holds one receipt entry per item:
+
+- `accepted` only after the Queue has accepted the item, so the browser may remove it;
+- `retry` for temporary failures, so the browser keeps it and resends the same `event_id` and payload;
+- `rejected` with a bounded reason code for permanent failures, which are never retried.
+
+A partial failure returns mixed entries, never a blanket success. A timeout leaves the browser uncertain but safe to retry. The tests that expect `POST /events` to return 404 are replaced by tests of this route when it is implemented.
+
+**Infrastructure.** Reuse the existing private staging R2 bucket for the archive. Create and bind a staging Queue with a dead-letter queue. Bindings, secrets and the menu-token signing key are configured by authorized operators through the protected setup, never committed to Git. The menu token cannot be issued until publication exists (S3-RES-02).
+
+**Ownership.**
+
+- **Ingest endpoint: Zhiliang (S3-DATA-01), approved by Sai.** Scope is the HTTP ingestion boundary only:
+  - request and schema validation;
+  - server-authorized venue context;
+  - `(venue_id, event_id)` handling, plus duplicate and conflicting-reuse behavior;
+  - consent and privacy checks;
+  - receipts.
+
+  It feeds the Queue and never writes to the ADR 0013 export tables.
+- **Queue consumer: Teeyansh.** Archive to R2 first with a create-only key, then write the index and facts idempotently, then acknowledge the Queue. Failed batches go to the dead-letter queue.
+- **Review:** Jeffin and Sai review the architecture and security of both.
+- **Still open:** owners for the canonical migrations/tables and the owner-report API.
 
 **Merge order.** This ADR and the contracts merge first. Then diner controls (S3-DIN-02) and capture (S3-DATA-01), followed by live reporting (S3-DATA-02). Fixture, metric and layout work may continue in parallel against labelled synthetic data.
 
 ## Open decisions before acceptance
 
-Numbers refer to the S3-DATA-01 event-field matrix v0.1a.
+Numbers refer to the S3-DATA-01 event-field matrix v0.1c.
 
 1. **D3 — P0 events and triggers.** Recommended: the matrix's candidate list, with `dish_compared` replacing `portion_compare`. Adam confirms triggers; Vivien confirms scope.
 2. **D4 — Save scope.** Whether dish Save is P0 and whether selection is a separate event.
 3. **D7 — Opened versus engaged.** Whether these are separate metrics, and their definitions.
 4. **D8 — Timing rules.** Whether to freeze the 30-minute visit, 30-second idle pause and five-second checkpoints.
-5. **Table and view names** for the observation index and fact tables.
+5. **Table names.** Confirm or change the proposed `app_private.observation_*` names, and the fact families after D3.
 6. **Retention.** ADR 0005's 30-day raw retention is still a proposal; the PostHog project and its Supabase copy must follow the agreed period and deletion procedure.
 7. **Consent for real diners.** Staging uses per-page opt-in. The pilot policy needs PM approval.
-8. **Route and receipt contract.** The implementation plan proposes a token-authorized observation POST that returns per-event receipts: accepted IDs only after the Queue accepts them, with permanent rejections separate from retryable failures. The exact path and schemas freeze with the contracts. The browser test that expects `POST /events` to return 404 changes with that route.
-9. **Infrastructure and menu token.** Creating and binding the staging Queue and R2 bucket, and issuing the signed menu token, need named owners and protected setup.
-10. **Owners and reviewers** for the Queue consumer, canonical migrations and tables, and the owner-report API, with reviewer hours recorded per PR.
+8. **Route and receipt.** Confirm `POST /observations` and the receipt states above; fix the batch limits, token transport and reason codes in the contract schemas.
+9. **Protected setup.** Sai and Vivien complete the GitHub secrets and workflow access, then create the Queue and bind it with R2.
+10. **Remaining owners** for the canonical migrations/tables and the owner-report API, with reviewer hours recorded per PR.
 
 ## Consequences
 
@@ -51,4 +73,4 @@ Owner metrics stay restaurant-scoped and reproducible, while the team keeps Post
 
 ## Verification
 
-Contracts: valid and invalid examples for all six, including unknown fields and injected authority. Observations: repeated send, partial receipt, offline reload, same ID with a different payload (quarantined), forged venue (rejected), and consent off or analytics disabled (no PostHog request; menu still usable). False successes: pointer-down, render-only, failed detail, picker cancel and failed comparison produce no success event. Reconciliation: for a synthetic run, accepted canonical event IDs match the consented PostHog copy. Reports: a nine-session cell is suppressed and a ten-session cell shown, suppressed cells cannot be reconstructed, another restaurant's data is denied and withdrawn content is not shown as current. Publication: unauthorized approval fails and two concurrent publishes cannot both succeed.
+Contracts: valid and invalid examples for all six, including unknown fields and injected authority. Observations: a Queue send failure returns `retry`, never `accepted`; repeated send, partial receipt, offline reload, same ID with a different payload (quarantined), forged venue (rejected), and consent off or analytics disabled (no PostHog request; menu still usable). Consumer: a crash after the R2 write but before the acknowledgement creates no duplicate rows, and failed batches reach the dead-letter queue. False successes: pointer-down, render-only, failed detail, picker cancel and failed comparison produce no success event. Reconciliation: for a synthetic run, accepted canonical event IDs match the consented PostHog copy. Reports: a nine-session cell is suppressed and a ten-session cell shown, suppressed cells cannot be reconstructed, another restaurant's data is denied and withdrawn content is not shown as current. Publication: unauthorized approval fails and two concurrent publishes cannot both succeed.
