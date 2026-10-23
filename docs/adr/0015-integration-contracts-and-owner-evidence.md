@@ -67,6 +67,12 @@ The body is a strict, bounded batch of `observation.v2` items. Each item has `sc
 - **Uncertain or transient:** unknown delivery, timeouts and transient failures keep the same `event_id` and payload for a later retry.
 - **Partial batches:** a partial failure returns mixed entries, never a blanket success.
 - **Uncertain Queue sends:** an item whose Queue send was not confirmed is returned as `retry`, never `accepted`, even if the message may have been enqueued; the consumer deduplicates any second copy.
+- **Oversized requests (`413`):** a request over 25 items or 32 KiB returns `413`.
+  - The browser splits the batch in half and resends each half. Splitting stops at a single item, so it takes at most five levels.
+  - A single item that still returns `413` leaves the active retry queue with the terminal local disposition `payload_too_large` and is never retried.
+- **Invalid envelopes (`400`):** `400` is reserved for an envelope that cannot be read as a batch, such as malformed JSON or a missing item list. Per-item schema problems return `200` with `rejected` and `schema_invalid` instead.
+  - On `400`, the browser does not resend that batch. Its items leave the active retry queue with the terminal local disposition `client_invalid`.
+  - Only aggregate counts of `payload_too_large` and `client_invalid` are kept, never the raw payloads.
 - **Duplicate IDs within one batch:**
   - The Worker enqueues each `event_id` at most once per request.
   - An identical repeat receives the same disposition as its first copy, with `reason_code=duplicate_in_batch`.
@@ -91,7 +97,7 @@ The body is a strict, bounded batch of `observation.v2` items. Each item has `sc
   - `400` for an invalid envelope;
   - `401` for a missing, invalid or expired token;
   - `403` for a token outside its venue, publication or scope;
-  - `413` (`body_too_large`) for an oversized body;
+  - `413` (`body_too_large`) for more than 25 items or more than 32 KiB;
   - `429` for rate limiting;
   - `503` when the Queue is wholly unavailable.
 
@@ -127,18 +133,42 @@ The endpoint can return `duplicate_same_payload` or `event_id_conflict` only whe
 
 Fixtures and report scaffolding continue in parallel throughout.
 
-## Open decisions before acceptance
+## Status of remaining work
 
-Resolved: D1 (ten sessions), D5 (Queue and R2 path), D6, D7 and D8, the route and the canonical index/conflict names (Sai's review), and the ingest limits (review item 3, agreed with Zhiliang). Still open:
+**Resolved in review:**
+- D1 (ten sessions), D5 (Queue and R2 path), D6, D7 and D8, the route, and the canonical index/conflict names;
+- the ingest limits (review item 3, agreed with Zhiliang);
+- `400`/`413` handling (above).
 
-1. **D3 — P0 events and triggers.** Adam's latest decisions are recorded in matrix v0.1d. Implement exactly those rows, with `dish_compared` replacing `portion_compare`.
-2. **D4 — Save.** Adam's decisions are recorded in matrix v0.1d. The remaining evidence is Harshita's confirmation of the implemented success transitions and of Save availability and persistence. Harshita confirms the implemented success transitions and Save availability and persistence. Restaurant Save/Discover stays out. Reconcile the older "open OR Save" wording with Adam and Vivien, and record any remaining Save/selection disagreement rather than inferring approval.
-3. **Fact and view names** and the field mapping, pinned by Jeffin and Louis in the contract and migration PR.
-4. **Browser handling of `400` and `413`.** These are deterministic client defects, so they must not loop. Fix their handling (for example, splitting an oversized batch) in the contract tests.
-5. **Median active time:** its visit/dish aggregation and incomplete-timing rules.
-6. **Retention and pilot consent.** Both stay gated on accountable policy approval. ADR 0005's 30-day raw retention is still a proposal, and the PostHog project and its Supabase copy must follow the agreed period and deletion procedure. Disabling PostHog is not permission to bypass canonical collection policy.
-7. **Protected setup.** Vivien and Sai complete the staging secrets, Queue and R2 bindings.
-8. **Reviewer hours** recorded per PR for each owned component.
+**D3/D4 scope:** the approved event rows are Adam's decisions in matrix v0.1d. Implement exactly those rows, with `dish_compared` replacing `portion_compare`. Restaurant Save/Discover stays out. Save never creates an opening or engagement on its own.
+
+### Decision still needed for ADR acceptance
+
+1. **Save/UI confirmation from Harshita (S3-DIN-02 DRI); Adam accepts the semantics.** For the Save controls as implemented, confirm:
+   - the success transition: `dish_saved` or `dish_unsaved` fires only after the local storage write commits and the visible state changes, and never on render, a no-op or a failed or rolled-back write;
+   - persistence: the storage mechanism, and whether Save survives a reload in the same browser;
+   - unsave and Undo behaviour;
+   - what the diner sees, and what is recorded, when browser storage is unavailable;
+   - any Saved limit.
+
+   Any remaining Save/selection disagreement, including the older "open OR Save" wording, is recorded rather than inferred as approval.
+
+### Implementation and release prerequisites (later PRs, with owners)
+
+These do not block accepting this record; each lands in its own PR or release gate.
+
+| Prerequisite | Owner |
+| --- | --- |
+| `observation.v2` and the other contract schemas, with negative tests | Zhiliang, reviewed by Jeffin and Sai |
+| Ingest endpoint on `POST /observations` | Zhiliang |
+| Queue consumer: create-only R2 archive, idempotent facts, dead-letter queue | Teeyansh |
+| Migrations, fact and view names, and the field mapping | Jeffin, with Louis |
+| Owner-report API; median active-time aggregation and incomplete-timing rules | Louis, with Vivien |
+| Protected staging secrets, Queue, dead-letter queue and R2 bindings | Vivien and Sai |
+| Menu-token issuance | S3-RES-02 publication owners |
+| Retention and pilot consent policy (ADR 0005's 30 days is still a proposal) | Vivien, with the venue |
+| Hosted ingestion, recovery and reporting validation before release | Sai (release review) |
+| Reviewer hours recorded per PR | Each owner |
 
 ## Consequences
 
@@ -146,4 +176,4 @@ Owner metrics stay restaurant-scoped and reproducible, while the team keeps Post
 
 ## Verification
 
-Contracts: valid and invalid examples for all six, including unknown fields and injected authority. Observations: a Queue send failure returns `retry`, never `accepted`; an unconfirmed Queue send returns `retry`; duplicate and conflict receipt tests separate an already-indexed first copy (`duplicate_same_payload` or `event_id_conflict`) from the pre-index race, where another Queue-accepted receipt is valid and the consumer still deduplicates or quarantines; identical and conflicting duplicates within one batch; a rejected item leaves the outbox retry queue; a request over 25 items or 32 KiB is refused; items exactly at and just beyond the 24-hour and 5-minute edges; a `429` returns `Retry-After`, keeps the whole batch and carries no acceptance; the rate limit applies per token `jti`, not per IP; a body or header venue is ignored in favour of the token; repeated send, partial receipt, offline reload, same ID with a different payload (quarantined), forged venue (rejected), and consent off or analytics disabled (no PostHog request; menu still usable). Consumer: a crash after the R2 write but before the acknowledgement creates no duplicate rows, and failed batches reach the dead-letter queue. False successes: pointer-down, render-only, failed detail, picker cancel and failed comparison produce no success event. Reconciliation: for a synthetic run, the matching consented cohort is compared after consumer and export processing, and every gap is explained. Reports: nine-session cells are suppressed while ten- and eleven-session cells are shown; a zero denominator returns not-measurable; checkpoint time uses the greatest valid cumulative value; suppressed cells cannot be reconstructed, another restaurant's data is denied and withdrawn content is not shown as current. Publication: unauthorized approval fails and two concurrent publishes cannot both succeed.
+Contracts: valid and invalid examples for all six, including unknown fields and injected authority. Observations: a Queue send failure returns `retry`, never `accepted`; an unconfirmed Queue send returns `retry`; duplicate and conflict receipt tests separate an already-indexed first copy (`duplicate_same_payload` or `event_id_conflict`) from the pre-index race, where another Queue-accepted receipt is valid and the consumer still deduplicates or quarantines; identical and conflicting duplicates within one batch; a rejected item leaves the outbox retry queue; a request over 25 items or 32 KiB returns `413` and is split down to single items, then marked `payload_too_large`; a `400` envelope is not resent and is marked `client_invalid`; Save emits only on a committed storage write with a visible state change; items exactly at and just beyond the 24-hour and 5-minute edges; a `429` returns `Retry-After`, keeps the whole batch and carries no acceptance; the rate limit applies per token `jti`, not per IP; a body or header venue is ignored in favour of the token; repeated send, partial receipt, offline reload, same ID with a different payload (quarantined), forged venue (rejected), and consent off or analytics disabled (no PostHog request; menu still usable). Consumer: a crash after the R2 write but before the acknowledgement creates no duplicate rows, and failed batches reach the dead-letter queue. False successes: pointer-down, render-only, failed detail, picker cancel and failed comparison produce no success event. Reconciliation: for a synthetic run, the matching consented cohort is compared after consumer and export processing, and every gap is explained. Reports: nine-session cells are suppressed while ten- and eleven-session cells are shown; a zero denominator returns not-measurable; checkpoint time uses the greatest valid cumulative value; suppressed cells cannot be reconstructed, another restaurant's data is denied and withdrawn content is not shown as current. Publication: unauthorized approval fails and two concurrent publishes cannot both succeed.

@@ -23,7 +23,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "docs/adr/0015-integration-contracts-and-owner-evidence.md"
       ],
       "dependsOn": [],
-      "sourceFingerprint": "e54065f60a8d9ae13b6f977a71ab4d6f352d5b5d835aa248be47edecbc37c6cb"
+      "sourceFingerprint": "17b4bf0b98b5808aa805cf10b4ad7763069bdde6194a2a5614cdeb422f0868e9"
     },
     {
       "id": "diner",
@@ -140,7 +140,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "backend"
       ],
-      "sourceFingerprint": "be9a51229d087115f9a1535709e3a9a40a05267fa4d056a0b6462454ac934878"
+      "sourceFingerprint": "5fc2bb2fddca8d87f6d03aab9cf8e1922e1d921d9c66d2eee027e5cba8fdf853"
     },
     {
       "id": "delivery",
@@ -244,18 +244,18 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "contracts"
       ],
-      "sourceFingerprint": "b158ae6807ef1be513e407a20b96b6855e5ce86751ce13b1e2515eae47b6e01e"
+      "sourceFingerprint": "cb35575b7c70bbd7d0c63f47621a8d6e6fa89f026278ca7d1d973eee7a0f1c30"
     }
   ],
   "handoffs": [
     {
-      "summary": "Proposed ADR 0015 for S3-ARC-01, revised after Sai's review: owner metrics only from ADR 0003 canonical facts; POST /observations with a Bearer menu token and accepted/retry/rejected receipts (accepted = durable Queue acceptance), terminal rejected items, uncertain sends retried and in-batch duplicates defined; canonical app_private.observation_index/conflict; D1 ten sessions, D6 observation.v2, D7 session-based rates and D8 timing recorded; ingest limits agreed with Zhiliang (25 items/32 KiB, 24 h age, 5 min skew, per-jti 60/min burst 10, HTTP and reason codes, token claims); D3/D4 decisions in matrix v0.1d; owners Zhiliang (ingest), Teeyansh (consumer), Jeffin (migrations/views), Louis (reports). No contract, migration or collector code changed.",
+      "summary": "Proposed ADR 0015 for S3-ARC-01, revised after Sai's review: owner metrics only from ADR 0003 canonical facts; POST /observations with a Bearer menu token and accepted/retry/rejected receipts (accepted = durable Queue acceptance), terminal rejected items, uncertain sends retried and in-batch duplicates defined; canonical app_private.observation_index/conflict; D1 ten sessions, D6 observation.v2, D7 session-based rates and D8 timing recorded; ingest limits agreed with Zhiliang (25 items/32 KiB, 24 h age, 5 min skew, per-jti 60/min burst 10, HTTP and reason codes, token claims); D3/D4 scope from matrix v0.1d; bounded 400/413 handling; remaining work split into the Save/UI acceptance decision and owned implementation/release prerequisites; owners Zhiliang (ingest), Teeyansh (consumer), Jeffin (migrations/views), Louis (reports). No contract, migration or collector code changed.",
       "modules": [
         "contracts",
         "measurement",
         "analytics"
       ],
-      "next": "Get Harshita's confirmation of the implemented Save transitions and persistence, then request Sai's re-review. Fix 400/413 browser handling in contract tests; pin fact/view names with Louis. Retention, pilot consent and protected bindings stay with the accountable owners."
+      "next": "Harshita confirms the Save/UI transitions, persistence, unsave/Undo, unavailable-storage behaviour and any Saved limit; Adam accepts; then Sai's final review. Owners then deliver contracts, ingest, consumer, migrations/views, report API, protected bindings, menu token, retention/consent and hosted validation."
     },
     {
       "summary": "Reconciled main into the PR 27 release branch, preserving October 22 staging controls, verified PostHog export history, team analytics access documentation and both error-ledger histories. Runtime, contracts, migrations and deployment workflow are unchanged from the reviewed develop release.",
