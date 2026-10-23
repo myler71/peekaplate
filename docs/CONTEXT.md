@@ -189,7 +189,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "a2f3f75f8eee25219fd4525dc2d2f91fabc94a1d19caaa0af5de026c08d9440b"
+      "sourceFingerprint": "bb310443f0727996a5299b2e3d9441c506742cb9a5e2deb6aa01eff63218e818"
     },
     {
       "id": "agents",
@@ -289,10 +289,18 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "docs/adr/0005-tenancy-and-privacy.md"
       ],
       "dependsOn": [],
-      "sourceFingerprint": "ad24cdd5f725ace473b0a5ff6eb9f43ad2eb5ec7f1b5a34563088f3ab33a6b0a"
+      "sourceFingerprint": "75fdf67c0d190a7e87d550803da8eaa2d674bb07ed853cdd69a37b56d64cfb45"
     }
   ],
   "handoffs": [
+    {
+      "summary": "Corrected formatter-required wrapping in the Unicode handoff script. Disabled optional pnpm cache restore after the hosted cache egress quota error delayed Node setup; frozen installation and all quality/browser/database checks remain required. No processing behavior changed.",
+      "modules": [
+        "processing",
+        "delivery"
+      ],
+      "next": "Run the native formatting, handoff and context checks, then verify hosted CI on the correction before review."
+    },
     {
       "summary": "Fixed VIS-02 page-load isolation, Windows test portability and scheduling-sensitive SDK cancellation; added minimal OCRProvider inheritance, Unicode span fixtures and package privacy exclusions. Preserved current develop docs. Fresh 35-page OCR passed; smaller-batch LLM follow-up retained 161 needs_review drafts with timeouts and rejected names. Included the exact PDF and test summary at the user request.",
       "modules": [
@@ -364,13 +372,6 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "delivery"
       ],
       "next": "Finish exact-head review and CI for the local recovery PR. Keep the GitHub protection policy in a separate owner-action PR; stop before Cloudflare/Supabase integration until protected credentials are supplied."
-    },
-    {
-      "summary": "Corrected the design hyperlink in docs/team_guide.md to the owner-supplied Figma Make diner-menu V1 URL. No design or runtime behavior changed.",
-      "modules": [
-        "delivery"
-      ],
-      "next": "Use the linked Figma Make diner-menu V1 as the referenced design handoff."
     }
   ]
 }
