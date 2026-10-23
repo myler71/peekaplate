@@ -244,21 +244,21 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "contracts"
       ],
-      "sourceFingerprint": "cb35575b7c70bbd7d0c63f47621a8d6e6fa89f026278ca7d1d973eee7a0f1c30"
+      "sourceFingerprint": "874d1071b705723d9f765e64d273ecc621c6454ae9d4c4437da4461f2c887f05"
     }
   ],
   "handoffs": [
     {
-      "summary": "Proposed ADR 0015 for S3-ARC-01, revised after Sai's review: owner metrics only from ADR 0003 canonical facts; POST /observations with a Bearer menu token and accepted/retry/rejected receipts (accepted = durable Queue acceptance), terminal rejected items, uncertain sends retried and in-batch duplicates defined; canonical app_private.observation_index/conflict; D1 ten sessions, D6 observation.v2, D7 session-based rates and D8 timing recorded; ingest limits agreed with Zhiliang (25 items/32 KiB, 24 h age, 5 min skew, per-jti 60/min burst 10, HTTP and reason codes, token claims); D3/D4 scope from matrix v0.1d; bounded 400/413 handling; remaining work split into the Save/UI acceptance decision and owned implementation/release prerequisites; owners Zhiliang (ingest), Teeyansh (consumer), Jeffin (migrations/views), Louis (reports). No contract, migration or collector code changed.",
+      "summary": "Proposed ADR 0015 for S3-ARC-01, revised after Sai's review: owner metrics only from ADR 0003 canonical facts; POST /observations with a Bearer menu token and accepted/retry/rejected receipts (accepted = durable Queue acceptance), terminal rejected items, uncertain sends retried and in-batch duplicates defined; canonical app_private.observation_index/conflict; D1 ten sessions, D6 observation.v2, D7 session-based rates and D8 timing recorded; ingest limits agreed with Zhiliang (25 items/32 KiB, 24 h age, 5 min skew, per-jti 60/min burst 10, HTTP and reason codes, token claims); D3/D4 scope from matrix v0.1d; bounded 400/413 handling; remaining work split into the Save/UI acceptance decision and owned implementation/release prerequisites; owners Zhiliang (ingest), Teeyansh (consumer), Jeffin (migrations/views), Louis (reports). No contract, migration or collector code changed. Final technical review reconciled develop activation prerequisites; the ADR remains Proposed pending Save/UI confirmation.",
       "modules": [
         "contracts",
         "measurement",
         "analytics"
       ],
-      "next": "Harshita confirms the Save/UI transitions, persistence, unsave/Undo, unavailable-storage behaviour and any Saved limit; Adam accepts; then Sai's final review. Owners then deliver contracts, ingest, consumer, migrations/views, report API, protected bindings, menu token, retention/consent and hosted validation."
+      "next": "Harshita confirms the Save/UI transitions, persistence, unsave/Undo, unavailable-storage behaviour and any Saved limit; Adam accepts, then record ADR acceptance. Owners deliver the listed contracts, ingest, consumer, migrations/views, report API, protected bindings, menu token, retention/consent and hosted validation through later PRs."
     },
     {
-      "summary": "Reconciled main into the PR 27 release branch, preserving October 22 staging controls, verified PostHog export history, team analytics access documentation and both error-ledger histories. Runtime, contracts, migrations and deployment workflow are unchanged from the reviewed develop release.",
+      "summary": "Reconciled main into the PR 27 release branch, preserving October 22 staging controls, verified PostHog export history, team analytics access documentation and both error-ledger histories. Runtime, contracts, migrations and deployment workflow are unchanged from the reviewed develop release. Corrected the team-access activation checklist so migration/history, token permissions and final review/CI are explicit prerequisites to enabling the flag.",
       "modules": [
         "delivery",
         "analytics"
