@@ -26,13 +26,19 @@ Draft work disagrees with accepted decisions: a report query uses five sessions 
 
 **Versioning (D6).** New controls use `observation.v2`, whose event semantics Adam approved; this record provides the architecture approval. Historical v1 records (`dish_open`, `portion_compare`) stay distinct and are not relabelled, and no observation is sent twice under two versions.
 
-**Route and receipt (proposed).** The ingest route is `POST /observations`. It is named for observations rather than events because AGENTS.md keeps staff domain events (`app_private.es_event`) separate from diner intent observations. The request carries the signed menu token and a bounded batch of strict `observation.v2` items. Each item has `schema_version`, `event_id`, `session_id`, `local_sequence`, `occurred_at`, `type` and only its type's fields. Batch size, body size and token transport are fixed with the contract schemas. The response holds one receipt entry per item:
+**Route and receipt (proposed; agreed by Jeffin and Zhiliang, pending Sai).** The ingest route is `POST /observations`. It is named for observations rather than events because AGENTS.md keeps staff domain events (`app_private.es_event`) and PostHog events separate from diner intent observations.
 
-- `accepted` only after the Queue has accepted the item, so the browser may remove it;
-- `retry` for temporary failures, so the browser keeps it and resends the same `event_id` and payload;
-- `rejected` with a bounded reason code for permanent failures, which are never retried.
+The menu token travels only as `Authorization: Bearer <menu_token>`, never in the JSON body or URL. The Worker verifies it and derives `venue_id` and the authorized publication context from it; a browser-supplied venue value never grants authority.
 
-A partial failure returns mixed entries, never a blanket success. A timeout leaves the browser uncertain but safe to retry. The tests that expect `POST /events` to return 404 are replaced by tests of this route when it is implemented.
+The body is a strict, bounded batch of `observation.v2` items. Each item has `schema_version`, `event_id`, `session_id`, `producer_id`, `local_sequence`, `occurred_at`, `type`, publication and content references, and only its type's fields. The response holds one receipt entry per item:
+
+- `accepted` only after the Queue has accepted the item. An identical retry of a previously accepted item is also `accepted`, with `reason_code=duplicate_same_payload`.
+- `retry` for a Queue outage or other transient failure. The browser keeps the item and resends the same `event_id` and payload.
+- `rejected` with a bounded reason code for permanent failures, which are never retried. The same `event_id` with a changed canonical payload is `rejected` with `reason_code=event_id_conflict`, and the item is quarantined.
+
+The browser removes only accepted IDs from its outbox. A partial failure returns mixed entries, never a blanket success. A timeout leaves the browser uncertain but safe to retry.
+
+The endpoint can return `duplicate_same_payload` or `event_id_conflict` only when it already knows the earlier copy. A retry that arrives before the Queue consumer has indexed the first copy may be accepted and queued again, so these reason codes are best effort. The consumer is the final guarantee: it drops identical repeats and quarantines conflicting reuse in `app_private.observation_conflict`. The tests that expect `POST /events` to return 404 are replaced by tests of this route when it is implemented.
 
 **Infrastructure.** Reuse the existing private staging R2 bucket for the archive. Create and bind a staging Queue with a dead-letter queue. Bindings, secrets and the menu-token signing key are configured by authorized operators through the protected setup, never committed to Git. The menu token cannot be issued until publication exists (S3-RES-02).
 
@@ -63,7 +69,13 @@ Numbers refer to the S3-DATA-01 event-field matrix v0.1c.
 5. **Table names.** Confirm or change the proposed `app_private.observation_*` names, and the fact families after D3.
 6. **Retention.** ADR 0005's 30-day raw retention is still a proposal; the PostHog project and its Supabase copy must follow the agreed period and deletion procedure.
 7. **Consent for real diners.** Staging uses per-page opt-in. The pilot policy needs PM approval.
-8. **Route and receipt.** Confirm `POST /observations` and the receipt states above; fix the batch limits, token transport and reason codes in the contract schemas.
+8. **Route and receipt limits** (raised by Zhiliang). Before the contract freezes, decide and test:
+   - the batch-size and body limits;
+   - event age and clock-skew limits;
+   - HTTP success and error status codes;
+   - behaviour when only part of a batch reaches the Queue;
+   - the menu-token claims;
+   - where the consent check sits on this path.
 9. **Protected setup.** Sai and Vivien complete the GitHub secrets and workflow access, then create the Queue and bind it with R2.
 10. **Remaining owners** for the canonical migrations/tables and the owner-report API, with reviewer hours recorded per PR.
 
@@ -73,4 +85,4 @@ Owner metrics stay restaurant-scoped and reproducible, while the team keeps Post
 
 ## Verification
 
-Contracts: valid and invalid examples for all six, including unknown fields and injected authority. Observations: a Queue send failure returns `retry`, never `accepted`; repeated send, partial receipt, offline reload, same ID with a different payload (quarantined), forged venue (rejected), and consent off or analytics disabled (no PostHog request; menu still usable). Consumer: a crash after the R2 write but before the acknowledgement creates no duplicate rows, and failed batches reach the dead-letter queue. False successes: pointer-down, render-only, failed detail, picker cancel and failed comparison produce no success event. Reconciliation: for a synthetic run, accepted canonical event IDs match the consented PostHog copy. Reports: a nine-session cell is suppressed and a ten-session cell shown, suppressed cells cannot be reconstructed, another restaurant's data is denied and withdrawn content is not shown as current. Publication: unauthorized approval fails and two concurrent publishes cannot both succeed.
+Contracts: valid and invalid examples for all six, including unknown fields and injected authority. Observations: a Queue send failure returns `retry`, never `accepted`; an identical retry returns `accepted` with `duplicate_same_payload`; a changed payload returns `rejected` with `event_id_conflict`; a body or header venue is ignored in favour of the token; repeated send, partial receipt, offline reload, same ID with a different payload (quarantined), forged venue (rejected), and consent off or analytics disabled (no PostHog request; menu still usable). Consumer: a crash after the R2 write but before the acknowledgement creates no duplicate rows, and failed batches reach the dead-letter queue. False successes: pointer-down, render-only, failed detail, picker cancel and failed comparison produce no success event. Reconciliation: for a synthetic run, accepted canonical event IDs match the consented PostHog copy. Reports: a nine-session cell is suppressed and a ten-session cell shown, suppressed cells cannot be reconstructed, another restaurant's data is denied and withdrawn content is not shown as current. Publication: unauthorized approval fails and two concurrent publishes cannot both succeed.
