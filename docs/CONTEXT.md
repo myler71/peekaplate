@@ -244,7 +244,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "contracts"
       ],
-      "sourceFingerprint": "cb35575b7c70bbd7d0c63f47621a8d6e6fa89f026278ca7d1d973eee7a0f1c30"
+      "sourceFingerprint": "874d1071b705723d9f765e64d273ecc621c6454ae9d4c4437da4461f2c887f05"
     }
   ],
   "handoffs": [
@@ -258,7 +258,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "next": "Harshita confirms the Save/UI transitions, persistence, unsave/Undo, unavailable-storage behaviour and any Saved limit; Adam accepts; then Sai's final review. Owners then deliver contracts, ingest, consumer, migrations/views, report API, protected bindings, menu token, retention/consent and hosted validation."
     },
     {
-      "summary": "Reconciled main into the PR 27 release branch, preserving October 22 staging controls, verified PostHog export history, team analytics access documentation and both error-ledger histories. Runtime, contracts, migrations and deployment workflow are unchanged from the reviewed develop release.",
+      "summary": "Reconciled main into the PR 27 release branch, preserving October 22 staging controls, verified PostHog export history, team analytics access documentation and both error-ledger histories. Runtime, contracts, migrations and deployment workflow are unchanged from the reviewed develop release. Corrected the team-access activation checklist so migration/history, token permissions and final review/CI are explicit prerequisites to enabling the flag.",
       "modules": [
         "delivery",
         "analytics"
