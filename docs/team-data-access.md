@@ -86,7 +86,7 @@ If activation is delayed, collaborators can continue with the repository's local
 - Apply the forward migration before deploying the Worker; preserve the existing exporter and restaurant permissions.
 - Deploy only the reviewed release under [ADR 0012](adr/0012-main-environment-promotion.md); confirm Hyperdrive query caching is disabled.
 - Use an approved collaborator’s individual GitHub token to verify 200 and bounded redacted results, a non-collaborator’s valid token to verify 403, and no/invalid token to verify 401. Verify removal denies the next check using a controlled test account.
-- Confirm production returns 404, PostHog export continues, and raw tables remain inaccessible to public/application roles.
+- Confirm production-mode requests return 404 locally, PostHog export continues, and raw tables remain inaccessible to public/application roles. Hosted production verification is NOT RUN because production is unconfigured.
 - Record the deployed SHA and evidence. All accepted repo collaborators are eligible after activation; the migration grants no public or database-console access.
 
 Decision: [ADR 0014](adr/0014-team-analytics-access.md). This does not change the owner-metric suppression threshold or implement S3-DATA-02.
