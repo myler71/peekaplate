@@ -2,7 +2,7 @@ import io
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 import pymupdf
 from PIL import Image
@@ -68,6 +68,26 @@ class PDFImageTests(unittest.TestCase):
         self.assertEqual(pages[0].method, "ocr_space_engine3")
         self.assertEqual(pages[1].status, "ready")
         self.assertEqual(pages[1].page_number, 2)
+
+    def test_page_load_failure_keeps_earlier_and_later_native_pages(self):
+        data = make_pdf([{"text": f"Menu prices\nDish {number} 8.50 CAD"} for number in range(1, 4)])
+        load_page = pymupdf.Document.load_page
+        attempts = []
+        def fail_second_page(document, page_number):
+            attempts.append(page_number)
+            if page_number == 1:
+                raise RuntimeError("synthetic page load failure")
+            return load_page(document, page_number)
+        ocr = Mock()
+        with patch.object(pymupdf.Document, "load_page", fail_second_page):
+            pages = extract_pdf(data, "source", ocr)
+        self.assertEqual(attempts, [0, 1, 2])
+        self.assertEqual([page.status for page in pages], ["ready", "failed", "ready"])
+        self.assertEqual([page.segment_id for page in pages], ["source#page-1", "source#page-2", "source#page-3"])
+        self.assertIn("Dish 1", pages[0].text)
+        self.assertEqual(pages[1].error, "PDF page extraction failed.")
+        self.assertIn("Dish 3", pages[2].text)
+        ocr.extract.assert_not_called()
 
     def test_40_pages_accepted_and_41_rejected_before_ocr(self):
         ocr = Mock()

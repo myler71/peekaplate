@@ -1,4 +1,5 @@
 import json
+import os
 import tempfile
 import unittest
 from pathlib import Path
@@ -56,7 +57,8 @@ class OCRSpaceTests(unittest.TestCase):
             self.assertFalse(first["cache_hit"])
             self.assertTrue(second["cache_hit"])
             factory.assert_called_once()
-            self.assertEqual(next(Path(directory).glob("*.json")).stat().st_mode&0o777, 0o600)
+            if os.name == "posix":
+                self.assertEqual(next(Path(directory).glob("*.json")).stat().st_mode&0o777, 0o600)
 
     def test_cache_is_separate_for_different_upload_bytes(self):
         with tempfile.TemporaryDirectory() as directory:

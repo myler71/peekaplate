@@ -4,6 +4,7 @@ import warnings
 from PIL import Image, ImageOps, UnidentifiedImageError
 
 from peekaplate_processing.errors import ExtractionError
+from peekaplate_processing.ocr import OCRProvider
 
 
 MAX_IMAGE_PIXELS=24_000_000
@@ -55,7 +56,7 @@ def prepare_ocr_image(data:bytes)->tuple[bytes,dict]:
         image.close()
 
 
-def extract_image(data:bytes, source_id:str, ocr):
+def extract_image(data:bytes, source_id:str, ocr:OCRProvider):
     from peekaplate_processing.schemas import SourceSegment
 
     prepared,metadata=prepare_ocr_image(data)

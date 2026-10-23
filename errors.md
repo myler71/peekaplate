@@ -317,6 +317,34 @@ These records describe local validation limits, not application failures.
 {"id":"OBS-20261021-TEAM-API-002","status":"resolved","area":"worker-provider-fetch","observation":"Node-mocked GitHub authorization tests passed, but real workerd returned a sanitized 503 before reaching the local provider fixture. Workerd rejected redirect:error; its error explicitly required manual or follow.","cause":"Browser-style RequestRedirect error is unsupported by the configured Workers runtime.","regression":"Changed provider fetch to redirect:manual; user responses must be OK and membership exactly204, so redirects remain denied without forwarding credentials. Real Worker/PostgreSQL integration and all15 new SQL assertions passed after the correction. Added safe-property malformed/value fixtures.","prevention":"Exercise network-bound code in the actual Worker runtime; mocked fetch cannot establish support for native request options.","sources":["backend/src/team-auth.ts","backend/src/team-auth.test.ts","backend/src/dish.integration.ts","tests/db/team-analytics.sql"]}
 ```
 
+## October 22 staging settings documentation validation
+
+- Environment observation: `rtk` is unavailable in this local session; plain Git/Node commands were used. The initial sandboxed clone could not resolve GitHub; the authorized network retry succeeded.
+- `pnpm context:refresh` attempted dependency preparation in the fresh checkout and could not reach the package registry under the sandbox. It was interrupted before the requested checks ran. No application failure is established.
+- Fallback validation passed with `node scripts/context.mjs refresh`, `node scripts/context.mjs check`, `node scripts/check-docs.mjs` and `git diff --check`. These dependency-free checks cover this documentation change; the full build/test suite was not run. Use the repository-supported runtime and available dependencies for full CI validation.
+
+<!-- automatic observation; not root cause -->
+```json
+{"kind":"automatic-check-observation","check":"context:check","timestamp":"2026-10-22T02:25:25.896Z","exitCode":1}
+```
+
+```json
+{"kind":"resolution","references":{"check":"context:check","timestamp":"2026-10-22T02:25:25.896Z"},"status":"resolved","cause":"Editing ADR 0015, which the contracts, measurement and analytics nodes reference, changed their fingerprinted inputs before refresh.","prevention":"Run pnpm context:refresh after editing a referenced ADR, then rerun pnpm check.","regression":"pnpm context:refresh followed by pnpm check passed."}
+```
+
+```json
+{"id":"OBS-20261022-ADR15-PUSH-001","status":"resolved","area":"review-coordination","observation":"A normal PR-branch push was rejected because the author concurrently merged the same develop update.","cause":"The remote review head advanced after the local review was pinned.","regression":"Fetched and compared the new head, then merged it without force-pushing; the only retained local difference was the final technical-review context handoff. Context freshness, documentation links and diff checks passed after reconciliation.","prevention":"Re-pin and re-review a changed remote head; preserve concurrent commits and use an expected head when merging the PR."}
+```
+
+## October 22 staging activation verification
+
+```json
+{"id": "OBS-20261022-STAGING-AUDIT-001", "status": "resolved", "area": "hosted-verification-tooling", "observation": "Attaching an old Supabase SQL tab timed out during browser focus setup. A first local migration read also used a nonexistent singular filename; one documentation patch failed its ledger context check before applying.", "cause": "The existing SQL browser tab could not be attached; its underlying browser cause was not established. Local reads/patch context did not match the actual repository paths/text.", "prevention": "Open a fresh tab in the same authorized browser for a stale tab, inspect actual migration paths, and verify file context before applying a patch. Do not infer a provider outage or alter database permissions from a browser attachment failure.", "regression": "A fresh SQL tab completed a read-only transaction: all eleven catalog/permission assertions passed and eight raw/four deduplicated events remained. Corrected paths/patch context were used; pnpm check passed; a trailing blank line introduced in this ledger was removed before the final diff check."}
+```
+
+```json
+{"kind": "resolution", "references": {"id": "OBS-20261021-GITHUB-ENV-001"}, "status": "resolved", "cause": "Vivien configured the protected staging environment and credentials after the earlier administrator-access block.", "regression": "Run 39907285014 completed after an eligible separate reviewer approved it. Both hosted analytics GET endpoints returned 200 for hemu77; no secret value was published.", "remaining": "Valid non-collaborator and controlled collaborator-removal hosted 403 checks remain deferred; this resolution does not mark full hosted acceptance complete."}
+```
 
 ## OBS-20261022-VIS02-DRAFT-PREPARATION
 
@@ -330,3 +358,23 @@ These records describe local validation limits, not application failures.
   /tmp/peeka-vis02-review/processing --out-dir /tmp/peeka-vis02-dist` passed.
   The isolated current processing suite passed all 82 tests with mocked providers.
 - Scope: no provider calls, application behavior change or performance refinement.
+
+## OBS-20261023-VIS02-REVIEW-CORRECTIONS
+
+- Cause: document iteration loaded each page before the per-page try block.
+  A failing synthetic middle-page load aborted extraction before the later page.
+- Correction: iterate bounded page indices and load inside the existing guard;
+  the regression now preserves ready/failed/ready segments and exact identities.
+- Test portability: cache hit/retry checks remain unconditional; mode 0600 is
+  asserted only on POSIX, without claiming verified Windows ACL privacy.
+- Test scheduling: SDK cancellation waits for mocked HTTP start; existing
+  wall-clock deadline tests cover timeout rejection and sibling-batch retention.
+- Cleanup: removed only the 18 imported whitespace-only lines flagged in review.
+  Reconciled current develop documentation and refreshed affected fingerprints.
+- No live provider calls or latency refinements were made for these corrections.
+
+- Packaging check: an existing ignored source-directory .env was included by the build backend. Added explicit source exclusions (also applied to wheels), retained the local env, and rebuilt the distributions for archive inspection. No artifacts were uploaded.
+
+## OBS-20261023-VIS02-LIVE-PDF
+
+Fresh OCR acquired all35pages in268.779s without old cache reuse. Allfour default LLM batches hit90s deadlines; a one-page/concurrency2 follow-up reused the fresh OCR and retained161 needs_review drafts in549.035s. Four pages timed out and six unsupported names were rejected; result remains incomplete. Source spans verified, field accuracy and acceptance pending. Defaults were not changed. See docs/ocr-delivery.md and test-data/README.md.

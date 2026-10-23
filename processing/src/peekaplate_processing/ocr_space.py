@@ -11,6 +11,7 @@ from http.client import HTTPException
 
 from peekaplate_processing.errors import ExtractionError
 from peekaplate_processing.images import MAX_OCR_BYTES
+from peekaplate_processing.ocr import OCRProvider
 from peekaplate_processing.storage import save_json
 from peekaplate_processing.ocr_regions import extract_regions
 
@@ -24,7 +25,7 @@ class NoRedirects(HTTPRedirectHandler):
         return None
 
 
-class OCRSpaceClient:
+class OCRSpaceClient(OCRProvider):
 
     def __init__(self, api_key:str|None, *, cache_dir:str|Path|None=None, timeout:float=90):
         if not math.isfinite(timeout) or not 0<timeout<=120:

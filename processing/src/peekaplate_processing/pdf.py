@@ -4,6 +4,7 @@ import pymupdf
 
 from peekaplate_processing.errors import ExtractionError
 from peekaplate_processing.images import prepare_ocr_image
+from peekaplate_processing.ocr import OCRProvider
 from peekaplate_processing.schemas import SourceSegment
 
 MAX_PDF_PAGES = 40
@@ -11,7 +12,7 @@ MAX_RENDER_PIXELS = 6_000_000
 MIN_NATIVE_TEXT_CHARS = 20
 
 
-def extract_pdf(data: bytes, source_id: str, ocr) -> list[SourceSegment]:
+def extract_pdf(data: bytes, source_id: str, ocr: OCRProvider) -> list[SourceSegment]:
     try:
         document = pymupdf.open(stream=data, filetype="pdf")
     except (RuntimeError, ValueError):
@@ -22,9 +23,10 @@ def extract_pdf(data: bytes, source_id: str, ocr) -> list[SourceSegment]:
         if not 1 <= len(document) <= MAX_PDF_PAGES:
             raise ExtractionError("PDF must contain between 1 and 40 pages.")
         pages = []
-        for index, page in enumerate(document):
+        for index in range(len(document)):
             segment = SourceSegment(segment_id=f"{source_id}#page-{index+1}", page_number=index+1, method="pdf_native")
             try:
+                page = document.load_page(index)
                 text = page.get_text("text", sort=True).strip()
                 if len(text) > 100_000:
                     raise ExtractionError("PDF page text exceeds the extraction limit.")

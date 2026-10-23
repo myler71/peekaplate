@@ -12,7 +12,7 @@ Staging links: [diner](https://peekaplate-diner-staging.pages.dev/) · [owner/st
 
 ## Implementation status
 
-Team analytics inspection uses individual GitHub tokens and live repository collaborator checks through the Worker. See [team data access](docs/team-data-access.md) for the two read APIs, authentication steps, safe fields and GitHub deployment-secret setup. These delayed diagnostic counts are separate from owner business reports. Hosted activation is still pending; the repository owner’s [activation checklist](docs/team-data-access.md#repository-owner-activate-and-hand-over) describes credentials, release order and access tests before team use. Hosted availability requires the migration and reviewed release; all repo collaborators become eligible after activation.
+Team analytics inspection is deployed in staging at release `afe45db`. Both read APIs returned 200 using an accepted repository collaborator's own GitHub token; missing/invalid tokens returned 401. See [team data access](docs/team-data-access.md) for the URL, authentication, safe fields and remaining hosted 403 tests. All accepted repository collaborators are eligible; nobody receives a shared database or deployment credential. These delayed diagnostic counts are separate from owner business reports. Full hosted acceptance remains open for a valid non-collaborator and a controlled collaborator-removal check; production is not configured.
 
 The repository contains diner and staff-console shells and a staff-command slice: signed staff-token verification, restaurant membership checks, and atomic dish-revision writes with tenant isolation. Staging hosts both shells and the API. Hosted acceptance with a genuine Supabase session verified authorized writes through Hyperdrive, retries, concurrent updates, cross-restaurant denial and membership revocation. A separate remote probe verified rollback and transaction-context reset. These are bounded synthetic checks, not pilot or production certification. Console login UI, menu publication, intent ingestion, POS integration and visual rendering are not implemented. Feature and pilot acceptance criteria are tracked in the [verification map](docs/verification.md).
 
@@ -43,14 +43,14 @@ Detailed boundaries, failure handling and deferred capabilities are documented i
 
 The backend can include both TypeScript and Python. The existing TypeScript/Hono API owns staff authentication, restaurant permissions and application commands. Python is an accepted option for a concrete processing or analysis job, such as checking supplied photos, validating an import or preparing an analytical result. Adding Python does not require rewriting the API or replacing Supabase.
 
-The first Python component is the local [menu-processing package](processing/README.md), with an isolated `uv` environment, locked dependencies and standard-library `unittest` tests. It acquires PDF/image text and extracts evidence-linked dish drafts with LangGraph/ChatOpenAI; it does not approve or publish content. See the [OCR review handoff](docs/ocr-delivery.md) for scope and outstanding acceptance work. A Python process cannot directly import the TypeScript/Zod contracts: define a versioned JSON request/result format and test both implementations against the same examples. Job requests must carry backend-authorized restaurant and input references; returned results must be checked against that job before any application change. Use the established command path for business changes rather than writing around permissions, event history or approval rules.
+Add the first Python component with its actual task, an isolated `uv` environment, a locked dependency set and `pytest` tests. A Python process cannot directly import the TypeScript/Zod contracts: define a versioned JSON request/result format and test both implementations against the same examples. Job requests must carry backend-authorized restaurant and input references; returned results must be checked against that job before any application change. Use the established command path for business changes rather than writing around permissions, event history or approval rules.
 
 Choose its runtime after checking the task's packages and resource needs:
 
 - **Cloudflare Python Worker:** an option for compatible, bounded work or calls to an external model service. It is a separate deployment, connected to the API through an authenticated interface or private service binding.
 - **Container or specialist compute service:** evaluate only when required libraries or workload limits rule out Workers. Running a model ourselves may need GPU compute; calling a model API does not. Deployment and cost approval are separate from adding Python source code.
 
-[Cloudflare's Python documentation](https://developers.cloudflare.com/workers/languages/python/) and [package compatibility guide](https://developers.cloudflare.com/workers/languages/python/packages/) describe the supported runtime. These are deployment options, not infrastructure already provisioned for this repository. Before staging integration, test timeout/failure handling, safe retries and duplicate results, tenant isolation and the TypeScript/Python data contract. Long processing must not block menu browsing. Local `pnpm` commands do not install Python dependencies; CI runs the processing tests and package build separately with pinned uv. Follow the processing README for local Python checks.
+[Cloudflare's Python documentation](https://developers.cloudflare.com/workers/languages/python/) and [package compatibility guide](https://developers.cloudflare.com/workers/languages/python/packages/) describe the supported runtime. These are deployment options, not infrastructure already provisioned for this repository. Before staging integration, test timeout/failure handling, safe retries and duplicate results, tenant isolation and the TypeScript/Python data contract. Long processing must not block menu browsing. Existing `pnpm` commands do not install or run Python jobs; add scoped CI checks with the first implementation.
 
 The current visual workflow remains manual and reviewed. A Python task does not authorize automatic publication, invented ingredients or generated edible surfaces. See [ADR 0004](docs/adr/0004-visual-tiers.md).
 
@@ -74,6 +74,7 @@ packages/contracts/  Shared runtime schemas and types
 migrations/          Ordered SQL migrations
 tests/               Database and browser integration tests
 scripts/             Repository checks and local test tools
+processing/          Local Python OCR and LLM dish extraction
 docs/                Architecture, decisions, delivery and context
 ```
 
@@ -149,3 +150,9 @@ Each contributor installs and authenticates their own Claude or Codex client and
 ## Optional product analytics
 
 See [PostHog setup and evidence limits](docs/posthog.md) for consent, separate staging/production build variables, taxonomy mapping, validation and manual project setup. Tracking is disabled until configured; current shells do not publish menu or owner-report events.
+
+Python processing uses `uv sync --project processing --frozen` and
+`uv run --project processing --frozen python -m unittest discover -s processing/tests`.
+The local package and review boundaries are described in the
+[processing guide](processing/README.md) and [delivery handoff](docs/ocr-delivery.md).
+Python tests and package builds run in CI alongside the repository checks.

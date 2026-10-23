@@ -40,6 +40,12 @@ Add your verification node after `synthesizer` in `workflow.py` when ready.
 
 ## Run
 
+OCR calls use the `OCRProvider` interface in `ocr.py`. `OCRSpaceClient` inherits
+from it and remains the default provider. Python callers can pass an existing
+provider with `extract_source(path, ocr_provider=provider)`; PDF and image
+acquisition depend on the interface's `extract(image)` method. The existing
+Engine 3 settings, response metadata, CLI flags and environment names are unchanged.
+
 From `processing`, configure your private `.env` using `.env.example`:
 
 ```sh
@@ -153,6 +159,13 @@ call. Schema and grounding checks run again on every reuse, including nulling
 unsupported optional fields. Batch metrics record `cache_hit`. Failed, truncated,
 refused or malformed responses are not cached. No raw response, reasoning or API
 key is stored in this cache. Use `--no-llm-cache` to disable reading and writing it.
+
+POSIX cache files are checked for mode `0600`. Windows permissions depend on
+the containing directory's ACLs; POSIX mode bits do not verify Windows privacy.
+Windows ACL enforcement has not been validated by this suite.
+Build configuration also excludes local environment files and the private
+project handoff from source distributions and wheels; Git ignore rules alone
+do not control package contents.
 The synthetic `check_llm` command always makes a fresh request.
 
 Existing runs predate this cache: their discarded model candidates cannot be

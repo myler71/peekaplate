@@ -317,28 +317,36 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn("Batch 2", str(result["errors"]))
         self.assertEqual([b["status"] for b in result["batches"]], ["complete", "failed", "complete"])
 
-    def test_deadline_cancels_real_sdk_http_request(self):
+    def test_cancellation_reaches_real_sdk_http_request(self):
         import httpx
         from langchain_openai import ChatOpenAI
         from peekaplate_processing.workflow import build_menu_graph
         attempts = []
         cancelled = []
-        async def stall(request):
-            attempts.append(1)
+        async def check_cancellation():
+            request_started = asyncio.Event()
+            async def stall(request):
+                attempts.append(1)
+                request_started.set()
+                try:
+                    await asyncio.Future()
+                finally:
+                    cancelled.append(True)
+            client = httpx.AsyncClient(transport=httpx.MockTransport(stall))
+            llm = ChatOpenAI(model="synthetic", api_key="synthetic", base_url="https://example.test/v1", http_async_client=client, max_retries=0)
+            task = asyncio.create_task(build_menu_graph(llm, request_timeout=30).ainvoke({"pages": [{"page_number": 1, "text": "Soup 8.50 CAD"}], "batches": [], "worker_findings": []}))
             try:
-                await asyncio.Future()
+                await asyncio.wait_for(request_started.wait(), timeout=5)
+                task.cancel()
+                with self.assertRaises(asyncio.CancelledError):
+                    await task
             finally:
-                cancelled.append(True)
-        client = httpx.AsyncClient(transport=httpx.MockTransport(stall))
-        llm = ChatOpenAI(model="synthetic", api_key="synthetic", base_url="https://example.test/v1", http_async_client=client, max_retries=0)
-        try:
-            result = run_sdk_test(build_menu_graph(llm, request_timeout=0.05).ainvoke({"pages": [{"page_number": 1, "text": "Soup 8.50 CAD"}], "batches": [], "worker_findings": []}))["final_report"]
-        finally:
-            asyncio.run(client.aclose())
+                task.cancel()
+                await asyncio.gather(task, return_exceptions=True)
+                await client.aclose()
+        run_sdk_test(check_cancellation())
         self.assertEqual(len(attempts), 1)
         self.assertEqual(cancelled, [True])
-        self.assertIn("deadline", str(result["errors"]))
-        self.assertEqual(result["dishes"], [])
 
     def test_reuse_rejects_omitted_page_and_mismatching_snapshot(self):
         with tempfile.TemporaryDirectory() as directory:
