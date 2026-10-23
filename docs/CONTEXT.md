@@ -145,7 +145,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "delivery",
       "status": "foundation",
-      "summary": "Main supplies staging and production under ADR 0012. Staging Pages, Worker, restricted Supabase/Hyperdrive and staff-command checks are recorded in operations. PRs 14/15 merged under explicit delegated setup approval; hosted PostHog shell views verified at main 2a135fa. Public repository main/develop remain unprotected. Export transfer, duplicate-safe repeat and permission checks passed; hourly staging schedule enabled. Product tickets can start. Hourly analytics export is separate from planned prompt owner-report updates; no freshness benchmark exists.",
+      "summary": "Main supplies staging and production under ADR 0012. Hosted staging Pages, Worker, restricted Supabase/Hyperdrive and staff-command evidence are recorded in operations. Hosted PostHog shell views and private export transfer, duplicate-safe repeat and permission checks passed; hourly staging export is enabled. Team analytics inspection is locally tested but not active: October 22 read-only SQL confirmed migration 20261021130000, its scope table and read function absent. Operator Wrangler OAuth works; the Worker has no secrets. GitHub environment secret names exist but their credentials remain unverified. Staging restricts deployments to main with no tags, required reviewers and prevent self-review; administrator bypass is allowed. The deployment flag remains unset. R2 is private and unbound; ingestion, login UI, pilot/load/recovery and production remain pending. Repository branch protection is separate.",
       "paths": [
         "README.md",
         "SECURITY.md",
@@ -189,7 +189,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "dd7b0be68f6abca5d880554b8c7d9e8a19f8e47c8049b9a22f30aacbdee291ea"
+      "sourceFingerprint": "ca397bffce1cd22b37d94da3ac8a9dc3b48901a01b538195e094e355d2b7791a"
     },
     {
       "id": "agents",
@@ -258,6 +258,21 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "next": "Get Harshita's confirmation of the implemented Save transitions and persistence, then request Sai's re-review. Fix 400/413 browser handling in contract tests; pin fact/view names with Louis. Retention, pilot consent and protected bindings stay with the accountable owners."
     },
     {
+      "summary": "Reconciled main into the PR 27 release branch, preserving October 22 staging controls, verified PostHog export history, team analytics access documentation and both error-ledger histories. Runtime, contracts, migrations and deployment workflow are unchanged from the reviewed develop release.",
+      "modules": [
+        "delivery",
+        "analytics"
+      ],
+      "next": "Review the reconciled PR 27 release after local checks. Read-only hosted audit confirmed migration 20261021130000 is absent; apply and record its forward migration through the database procedure before deployment. Operator OAuth is valid but does not verify GitHub-held tokens. Keep the activation flag off until protected credential/release checks, then deploy reviewed main and run hosted access acceptance."
+    },
+    {
+      "summary": "Recorded the October 22 staging environment settings: exact main branch restriction saved, required reviewers and prevent self-review enabled, administrator bypass allowed, and expected variable/secret names present. Updated stale environment-availability guidance. No secret values, activation flag, workflow code or deployment changed.",
+      "modules": [
+        "delivery"
+      ],
+      "next": "Review this documentation PR. Before Actions activation, verify credential permissions, intended staging bindings and the independent approval process; the settings observation is not a successful workflow or deployment test."
+    },
+    {
       "summary": "Updated deployment selection to main for both environments per the maintainer's explicit instruction. Configured verified non-secret staging account, issuer and Hyperdrive bindings. Provider audit found existing Supabase migrations, forced RLS, restricted staging login, an ES256 public key and uncached Hyperdrive; no duplicate database branch was created. Hosted request behavior remains unverified.",
       "modules": [
         "delivery",
@@ -293,21 +308,6 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "delivery"
       ],
       "next": "Use the linked Figma Make diner-menu V1 as the referenced design handoff."
-    },
-    {
-      "summary": "Updated the final team_guide plan from the dated Team Interests & Responsibilities document. Proposed bounded contributions and explicit handoffs, distinguished preferences from confirmed assignments, and kept reported capacity and unfilled engineering work visible. Existing delivery dependencies and runtime behavior are unchanged.",
-      "modules": [
-        "delivery"
-      ],
-      "next": "Confirm each selected task and current availability with its contributor, record the agreement in ClickUp, then follow the existing publication/exposure/linkage prerequisites and protected cloud-access checkpoint."
-    },
-    {
-      "summary": "Rewrote team_guide around a plain-language dish example, two event types and a function/line-linked code walkthrough. File, task and test inventories are expandable references; the final artifact-aligned plan separates parallel preparation from integration prerequisites. Includes 24 ClickUp tasks, seven scope subtasks and current design progress, distinct from implemented code. PR 9 merged at 413be96 with successful main CI. No runtime or external board/chat changes.",
-      "modules": [
-        "delivery",
-        "diner"
-      ],
-      "next": "Confirm the provider decision and sprint scope with linked deliverables, reconcile the completed approval ticket with missing approval/publication code, recover local Docker and stop at the protected cloud-credential checkpoint before hosted integration."
     },
     {
       "summary": "PRs 14/15 released hosted PostHog consented shell capture at main 2a135fa, verified by live synthetic capture and provider readback. Added private export landing migration, conflict-aware deduplication view and least-privilege tests. pnpm check and test:db pass; technical/security review found no supported defect and guide review corrections are applied. Hosted migration applied with explicit access approval; tables and effective role boundaries verified. Export connection created; first run failed TLS verification and schedule is paused. User reported correction requires project Admin access. No rows transferred; no bypass attempted.",
