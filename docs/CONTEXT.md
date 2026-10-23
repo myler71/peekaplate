@@ -23,7 +23,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "docs/adr/0015-integration-contracts-and-owner-evidence.md"
       ],
       "dependsOn": [],
-      "sourceFingerprint": "91f9224c262d73e487a8f8a3edc3b3f5bc202edec88aa4393ccee01031261491"
+      "sourceFingerprint": "7758fac7b94b8ddf45b0bbcae75617464bf2ec6fe6938067064b4eea03ec84c5"
     },
     {
       "id": "diner",
@@ -140,7 +140,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "backend"
       ],
-      "sourceFingerprint": "85800b853d6a4c21fe2a95efdbe3a1713997d9359026f94089a5cc6d5c534527"
+      "sourceFingerprint": "366a56e26d7a28b3f0d75cf080d9c74e1df914e50c72dc84ad728b5d7b25eee4"
     },
     {
       "id": "delivery",
@@ -244,18 +244,18 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "contracts"
       ],
-      "sourceFingerprint": "53d0ebe48f764411d4f27bb11caeb195a43ded8090570a73998cb77efd2f1ada"
+      "sourceFingerprint": "3b8a5e8736f962bc0840a4eb1e5c74770291eee9223d3f7f6cd7de001b47e8bb"
     }
   ],
   "handoffs": [
     {
-      "summary": "Proposed ADR 0015 for S3-ARC-01: six versioned integration contracts; owner metrics only from ADR 0003 canonical facts, with the ADR 0013 PostHog copy kept for reconciliation; server-derived (venue_id, event_id) identity; the ten-session floor; observation.v2 versioning (D6); proposed POST /observations with a Bearer menu token, server-derived venue/publication and accepted/retry/rejected receipts (accepted only after Queue acceptance; duplicate_same_payload and event_id_conflict best effort, consumer as final guarantee); proposed app_private.observation_* tables; reuse of the staging R2 bucket with a new Queue; Zhiliang owns the ingest endpoint, Teeyansh the Queue consumer, Jeffin the canonical migrations/tables and Louis the owner-report API. No contract, migration or collector code changed.",
+      "summary": "Proposed ADR 0015 for S3-ARC-01, revised after Sai's review: owner metrics only from ADR 0003 canonical facts; POST /observations with a Bearer menu token and accepted/retry/rejected receipts (accepted = durable Queue acceptance), terminal rejected items, uncertain sends retried and in-batch duplicates defined; canonical app_private.observation_index/conflict; D1 ten sessions, D6 observation.v2, D7 session-based rates and D8 timing recorded; owners Zhiliang (ingest), Teeyansh (consumer), Jeffin (migrations/views), Louis (reports). No contract, migration or collector code changed.",
       "modules": [
         "contracts",
         "measurement",
         "analytics"
       ],
-      "next": "Get Sai's approval; decide batch/body, age/skew, HTTP-code, partial-Queue, token-claim and consent limits, table names, D3/D4/D7/D8, retention, pilot consent; Sai and Vivien complete the protected Queue/R2 setup. Then implement the contracts with negative tests."
+      "next": "Agree numeric ingest limits, HTTP codes, reason codes and token claims with Zhiliang; transfer Adam's D3/D4 approvals and confirm Save transitions with Harshita; pin fact/view names with Louis; then request Sai's re-review. Retention, pilot consent and protected bindings stay with the accountable owners."
     },
     {
       "summary": "Updated deployment selection to main for both environments per the maintainer's explicit instruction. Configured verified non-secret staging account, issuer and Hyperdrive bindings. Provider audit found existing Supabase migrations, forced RLS, restricted staging login, an ES256 public key and uncached Hyperdrive; no duplicate database branch was created. Hosted request behavior remains unverified.",
