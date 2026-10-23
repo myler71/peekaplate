@@ -19,10 +19,11 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "packages/contracts/src/index.test.ts"
       ],
       "adrs": [
-        "docs/adr/0003-intent-evidence.md"
+        "docs/adr/0003-intent-evidence.md",
+        "docs/adr/0015-integration-contracts-and-owner-evidence.md"
       ],
       "dependsOn": [],
-      "sourceFingerprint": "fdf4978899a3bc17468a902d80cb8d0448f5d62681c482e02e8e76f018a3e922"
+      "sourceFingerprint": "17b4bf0b98b5808aa805cf10b4ad7763069bdde6194a2a5614cdeb422f0868e9"
     },
     {
       "id": "diner",
@@ -133,12 +134,13 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "docs/implementation_plan.md"
       ],
       "adrs": [
-        "docs/adr/0006-orders-and-measurement.md"
+        "docs/adr/0006-orders-and-measurement.md",
+        "docs/adr/0015-integration-contracts-and-owner-evidence.md"
       ],
       "dependsOn": [
         "backend"
       ],
-      "sourceFingerprint": "0408b5208254ea544057b4dd17e070e1577666b1d2a5ebf064d5cca10c8f08b0"
+      "sourceFingerprint": "5fc2bb2fddca8d87f6d03aab9cf8e1922e1d921d9c66d2eee027e5cba8fdf853"
     },
     {
       "id": "delivery",
@@ -187,7 +189,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "b7897b5d9060fe2bdbcc85dd3f228e52ff7261a1e127bb7f548d60387c23294e"
+      "sourceFingerprint": "ca397bffce1cd22b37d94da3ac8a9dc3b48901a01b538195e094e355d2b7791a"
     },
     {
       "id": "agents",
@@ -236,15 +238,25 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "docs/adr/0005-tenancy-and-privacy.md",
         "docs/adr/0006-orders-and-measurement.md",
         "docs/adr/0013-posthog-export-boundary.md",
-        "docs/adr/0014-team-analytics-access.md"
+        "docs/adr/0014-team-analytics-access.md",
+        "docs/adr/0015-integration-contracts-and-owner-evidence.md"
       ],
       "dependsOn": [
         "contracts"
       ],
-      "sourceFingerprint": "e9dec53a40c23283ab74d25001066d7640d93871b006ab40d646f1f9ef36ad38"
+      "sourceFingerprint": "874d1071b705723d9f765e64d273ecc621c6454ae9d4c4437da4461f2c887f05"
     }
   ],
   "handoffs": [
+    {
+      "summary": "Proposed ADR 0015 for S3-ARC-01, revised after Sai's review: owner metrics only from ADR 0003 canonical facts; POST /observations with a Bearer menu token and accepted/retry/rejected receipts (accepted = durable Queue acceptance), terminal rejected items, uncertain sends retried and in-batch duplicates defined; canonical app_private.observation_index/conflict; D1 ten sessions, D6 observation.v2, D7 session-based rates and D8 timing recorded; ingest limits agreed with Zhiliang (25 items/32 KiB, 24 h age, 5 min skew, per-jti 60/min burst 10, HTTP and reason codes, token claims); D3/D4 scope from matrix v0.1d; bounded 400/413 handling; remaining work split into the Save/UI acceptance decision and owned implementation/release prerequisites; owners Zhiliang (ingest), Teeyansh (consumer), Jeffin (migrations/views), Louis (reports). No contract, migration or collector code changed. Final technical review reconciled develop activation prerequisites; the ADR remains Proposed pending Save/UI confirmation.",
+      "modules": [
+        "contracts",
+        "measurement",
+        "analytics"
+      ],
+      "next": "Harshita confirms the Save/UI transitions, persistence, unsave/Undo, unavailable-storage behaviour and any Saved limit; Adam accepts, then record ADR acceptance. Owners deliver the listed contracts, ingest, consumer, migrations/views, report API, protected bindings, menu token, retention/consent and hosted validation through later PRs."
+    },
     {
       "summary": "Reconciled main into the PR 27 release branch, preserving October 22 staging controls, verified PostHog export history, team analytics access documentation and both error-ledger histories. Runtime, contracts, migrations and deployment workflow are unchanged from the reviewed develop release. Corrected the team-access activation checklist so migration/history, token permissions and final review/CI are explicit prerequisites to enabling the flag.",
       "modules": [
@@ -314,17 +326,6 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "delivery"
       ],
       "next": "Review PR 18 and merge under the human-comment policy. Jeffin owns contract/collection decisions; Zhiliang wires approved real UI events with tests. Each adds a ticket comment with PR and evidence when done. Observe the next automatic export; confirm monitoring, retention/deletion and billing limits before real diner data. Owner evidence pipeline/projections/API remain product work. Handoff drafts are local and unsent."
-    },
-    {
-      "summary": "Added staging-only team analytics GET APIs over the hourly PostHog Supabase copy. All current vivienk/peekaplate collaborators are eligible through individual GitHub user tokens and uncached identity/collaboration checks. Staff Supabase authentication is unchanged. A private fixed SQL function bounds staging scope and safe fields; runtime still cannot SELECT raw analytics. GitHub has no configured environments/secrets and current operator lacks admin. Hosted migration, checker secret, reviewed release and live authorization tests remain unactivated.",
-      "modules": [
-        "backend",
-        "contracts",
-        "database",
-        "analytics",
-        "delivery"
-      ],
-      "next": "DB tests cover duplicate collapse, safe property serialization, scope isolation and collaborator removal; all15 team SQL assertions and14 Worker integration cases passed after correcting unsupported Worker redirect:error to manual. Finish final build/browser verification and delta review, then open a single PR against develop. Vivien creates staging environment; supply scoped Cloudflare token plus repository Metadata-read TEAM_GITHUB_TOKEN to GitHub environment secrets. Deploy reviewed main release with checker secret, apply forward migration and verify collaborator/non-collaborator/removal behavior. No manual teammate allowlist or Supabase account enrollment required. Follow-up live inspection found Worker health200, analytics route404 and no Worker secrets; activation remains incomplete. User delegated the provider setup and merge to Vivien; point to the owner activation checklist and do not announce hosted availability before acceptance tests."
     }
   ]
 }
