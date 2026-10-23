@@ -54,7 +54,8 @@ The endpoint can return `duplicate_same_payload` or `event_id_conflict` only whe
   It feeds the Queue and never writes to the ADR 0013 export tables.
 - **Queue consumer: Teeyansh.** Archive to R2 first with a create-only key, then write the index and facts idempotently, then acknowledge the Queue. Failed batches go to the dead-letter queue.
 - **Review:** Jeffin and Sai review the architecture and security of both.
-- **Still open:** owners for the canonical migrations/tables and the owner-report API.
+- **Canonical migrations and tables: Jeffin.** Forward-only migrations in `migrations/` for the `app_private.observation_*` tables and report views, with RLS, restricted-role grants and pgTAP tests in `tests/db/`. Each migration is tested from an empty database and from the previous schema.
+- **Still open:** the owner-report API owner.
 
 **Merge order.** This ADR and the contracts merge first. Then diner controls (S3-DIN-02) and capture (S3-DATA-01), followed by live reporting (S3-DATA-02). Fixture, metric and layout work may continue in parallel against labelled synthetic data.
 
@@ -77,7 +78,7 @@ Numbers refer to the S3-DATA-01 event-field matrix v0.1c.
    - the menu-token claims;
    - where the consent check sits on this path.
 9. **Protected setup.** Sai and Vivien complete the GitHub secrets and workflow access, then create the Queue and bind it with R2.
-10. **Remaining owners** for the canonical migrations/tables and the owner-report API, with reviewer hours recorded per PR.
+10. **Remaining owner** for the owner-report API, with reviewer hours recorded per PR.
 
 ## Consequences
 
