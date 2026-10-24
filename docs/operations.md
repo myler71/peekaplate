@@ -1,5 +1,11 @@
 # Local and staging operations
 
+## Observation infrastructure — October 24, 2026
+
+Created only the missing staging source Queue and DLQ in the existing account, reused private `peekaplate-staging-assets`, and verified source retry-to-DLQ routing with HTTP pull consumers. The complete synthetic repeat at `2026-10-24T17:30:36.147Z` passed archive/readback before ACK, initial delivery plus three retries, DLQ arrival and exact probe cleanup. A separate real R2 concurrency check allowed exactly one create-only writer and preserved its bytes on conflicting attempts. Provider readback confirms both Queues empty and paused, 24-hour retention, `r2.dev` disabled, no custom domain and no CORS rule. No production resource, application consumer, database fact or unfinished PR changed.
+
+The [observation infrastructure handoff](observation-infrastructure.md) records names/IDs, configuration, test limits and consumer replacement steps. Staging producer/R2 bindings are prepared in `backend/wrangler.jsonc`; their live activation requires the reviewed `main` deployment. No ingestion route or successful placeholder Queue handler is added. This new setup record advances the earlier provisioning checkpoint below without claiming the full observation pipeline is implemented.
+
 ## Team analytics hosted verification — October 22, 2026
 
 The staging Worker is deployed and its collaborator read path works. This record supersedes the earlier same-day prerequisite audit below. The two hosted 403 cases were initially deferred; the [October 23 follow-up](#non-collaborator-confirmation--october-23-2026) now records successful non-collaborator denial. Controlled collaborator removal remains pending. This is staging development access, not pilot or production sign-off.

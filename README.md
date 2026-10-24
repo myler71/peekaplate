@@ -18,6 +18,8 @@ The repository contains diner and staff-console shells and a staff-command slice
 
 ## Technology and architecture
 
+Staging observation infrastructure is provisioned: the source Queue and DLQ are connected, the existing private R2 bucket is reused, and synthetic delivery/retry/DLQ and create-only archive checks pass. Delivery remains paused until the real consumer is reviewed and integrated. The staging producer/R2 binding configuration still needs its reviewed `main` deployment. See the [infrastructure handoff](docs/observation-infrastructure.md) for exact resources, retention, test evidence and Teeyansh's next steps.
+
 | Component | Technology | Current scope |
 | --- | --- | --- |
 | Diner frontend | TypeScript, Vite | Static shell with content available without JavaScript |
