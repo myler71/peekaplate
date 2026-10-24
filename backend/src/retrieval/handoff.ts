@@ -611,9 +611,7 @@ export function mapVis02SegmentToSourceSegment(seg: Vis02SourceSegment): SourceI
       : {}),
     ...(seg.method ? { method: seg.method } : {}),
     ...(seg.status ? { status: seg.status } : {}),
-    ...(seg.error !== null && seg.error !== undefined && seg.error.length > 0
-      ? { error: seg.error }
-      : {}),
+    ...(typeof seg.error === 'string' && seg.error.length > 0 ? { error: seg.error } : {}),
     ...(seg.warnings && seg.warnings.length > 0 ? { warnings: [...seg.warnings] } : {}),
     ...(Object.keys(metadata).length > 0 ? { metadata } : {}),
   };

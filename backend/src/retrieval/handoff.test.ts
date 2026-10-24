@@ -1,4 +1,8 @@
-import type { BoundedRetrievalResult } from '@peekaplate/contracts';
+import {
+  type BoundedRetrievalResult,
+  SourceInputSchema,
+  SourceInputSegmentSchema,
+} from '@peekaplate/contracts';
 import { describe, expect, it } from 'vitest';
 import {
   codePointToUtf16Offset,
@@ -688,7 +692,9 @@ describe('S3-VIS-04 × VIS-02 Compatibility Adapter & Handoff Integration', () =
 
       // Verify nullable fields are omitted rather than passed as null
       expect(mapped.page_number).toBeUndefined();
+      expect(mapped).not.toHaveProperty('page_number');
       expect(mapped.error).toBeUndefined();
+      expect(mapped).not.toHaveProperty('error');
 
       // Verify native_text was preserved in metadata
       expect(mapped.metadata?.native_text).toBe('Raw OCR token stream without normalization');
@@ -751,9 +757,177 @@ describe('S3-VIS-04 × VIS-02 Compatibility Adapter & Handoff Integration', () =
 
       expect(sourceInput.segments![0]?.page_number).toBe(1);
       expect(sourceInput.segments![0]?.status).toBe('ready');
+      expect(sourceInput.segments![0]).not.toHaveProperty('error');
 
       expect(sourceInput.segments![1]?.status).toBe('failed');
       expect(sourceInput.segments![1]?.error).toBe('Resolution too low');
+      expect(sourceInput.segments![1]).toHaveProperty('error', 'Resolution too low');
+    });
+
+    describe('VIS-01 error: null normalization and contract boundaries (Sai review)', () => {
+      it('Case 1 (Explicit null): input contains error: null; mapped output does not have own error property', () => {
+        const input: Vis02SourceSegment = {
+          segment_id: 'seg_explicit_null',
+          text: 'Wild Mushroom Risotto with truffle oil: $22.00',
+          status: 'ready',
+          method: 'pdf_native',
+          error: null,
+          warnings: [],
+        };
+
+        const mapped = mapVis02SegmentToSourceSegment(input);
+
+        expect(mapped.error).toBeUndefined();
+        expect(mapped).not.toHaveProperty('error');
+        expect(Object.prototype.hasOwnProperty.call(mapped, 'error')).toBe(false);
+        expect(mapped.text).toBe('Wild Mushroom Risotto with truffle oil: $22.00');
+        expect(mapped.status).toBe('ready');
+        expect(mapped.method).toBe('pdf_native');
+      });
+
+      it('Case 2 (Omitted field): input has no error property; mapped output does not have own error property', () => {
+        const input: Vis02SourceSegment = {
+          segment_id: 'seg_omitted_error',
+          text: 'Pan-seared Chilean Sea Bass: $34.00',
+          status: 'ready',
+          method: 'text',
+          warnings: [],
+        };
+        expect(input).not.toHaveProperty('error');
+
+        const mapped = mapVis02SegmentToSourceSegment(input);
+
+        expect(mapped.error).toBeUndefined();
+        expect(mapped).not.toHaveProperty('error');
+        expect(Object.prototype.hasOwnProperty.call(mapped, 'error')).toBe(false);
+        expect(mapped.text).toBe('Pan-seared Chilean Sea Bass: $34.00');
+        expect(mapped.status).toBe('ready');
+      });
+
+      it('Case 3 (Actual error): input contains an error string; mapped output preserves it', () => {
+        const input: Vis02SourceSegment = {
+          segment_id: 'seg_with_error',
+          text: 'Corrupted OCR text stream',
+          status: 'failed',
+          method: 'ocr',
+          error: 'OCR engine timed out after 10000ms',
+          warnings: ['Processing incomplete'],
+        };
+
+        const mapped = mapVis02SegmentToSourceSegment(input);
+
+        expect(mapped).toHaveProperty('error', 'OCR engine timed out after 10000ms');
+        expect(mapped.error).toBe('OCR engine timed out after 10000ms');
+        expect(mapped.status).toBe('failed');
+        expect(mapped.warnings).toEqual(['Processing incomplete']);
+      });
+
+      it('Case 4 (Failed status): a failed page/segment with error: null remains failed after mapping', () => {
+        const input: Vis02SourceSegment = {
+          segment_id: 'seg_failed_null_error',
+          page_number: 3,
+          text: 'Unparseable binary page stream',
+          status: 'failed',
+          method: 'ocr_space_engine3',
+          error: null,
+          warnings: ['Page decoding aborted by upstream worker'],
+        };
+
+        const mapped = mapVis02SegmentToSourceSegment(input);
+
+        // Crucial: Must remain failed even though error field is null and omitted
+        expect(mapped.status).toBe('failed');
+        expect(mapped).not.toHaveProperty('error');
+        expect(mapped.error).toBeUndefined();
+        expect(Object.prototype.hasOwnProperty.call(mapped, 'error')).toBe(false);
+        expect(mapped.page_number).toBe(3);
+        expect(mapped.warnings).toEqual(['Page decoding aborted by upstream worker']);
+      });
+
+      it('Case 5 (Contract validity): normalized output strictly satisfies SourceInputSegmentSchema and SourceInputSchema', () => {
+        const nullErrorSeg: Vis02SourceSegment = {
+          segment_id: 'seg_valid_null',
+          text: 'Tomato Basil Soup: $9.00',
+          method: 'pdf_native',
+          status: 'ready',
+          error: null,
+          warnings: [],
+        };
+        const omittedErrorSeg: Vis02SourceSegment = {
+          segment_id: 'seg_valid_omitted',
+          text: 'Garlic Bread: $6.00',
+          method: 'text',
+          status: 'ready',
+          warnings: [],
+        };
+        const actualErrorSeg: Vis02SourceSegment = {
+          segment_id: 'seg_valid_error',
+          text: 'Scanned beverage section',
+          method: 'ocr',
+          status: 'failed',
+          error: 'Resolution below 150 DPI threshold',
+          warnings: ['Quality check failed'],
+        };
+        const failedNullSeg: Vis02SourceSegment = {
+          segment_id: 'seg_valid_failed_null',
+          text: 'Empty page content',
+          method: 'ocr_space_engine3',
+          status: 'failed',
+          error: null,
+          warnings: ['No text detected'],
+        };
+
+        const mappedNull = mapVis02SegmentToSourceSegment(nullErrorSeg);
+        const mappedOmitted = mapVis02SegmentToSourceSegment(omittedErrorSeg);
+        const mappedError = mapVis02SegmentToSourceSegment(actualErrorSeg);
+        const mappedFailedNull = mapVis02SegmentToSourceSegment(failedNullSeg);
+
+        // Schema parse validations
+        expect(SourceInputSegmentSchema.safeParse(mappedNull).success).toBe(true);
+        expect(SourceInputSegmentSchema.safeParse(mappedOmitted).success).toBe(true);
+        expect(SourceInputSegmentSchema.safeParse(mappedError).success).toBe(true);
+        expect(SourceInputSegmentSchema.safeParse(mappedFailedNull).success).toBe(true);
+
+        // Property absence/presence assertions
+        expect(mappedNull).not.toHaveProperty('error');
+        expect(mappedOmitted).not.toHaveProperty('error');
+        expect(mappedFailedNull).not.toHaveProperty('error');
+        expect(mappedError).toHaveProperty('error', 'Resolution below 150 DPI threshold');
+
+        // Full handoff document schema validation
+        const fullHandoff: Vis02ExtractionHandoff = {
+          schema_version: 1,
+          pipeline_version: '2',
+          status: 'complete',
+          source: {
+            source_id: 'src_doc_norm_test',
+            sha256: '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+            kind: 'pdf',
+            location: 'https://restaurant.example.com/menu.pdf',
+            retrieved_at: '2026-10-24T12:00:00.000Z',
+            size_bytes: 2048,
+          },
+          segments: [nullErrorSeg, omittedErrorSeg, actualErrorSeg, failedNullSeg],
+          drafts: [],
+          evidence: [],
+          warnings: [],
+          errors: [],
+        };
+
+        const mappedSourceInput = mapVis02HandoffToSourceInput(fullHandoff);
+        const parsedSourceInput = SourceInputSchema.safeParse(mappedSourceInput);
+        expect(parsedSourceInput.success).toBe(true);
+
+        expect(mappedSourceInput.segments).toHaveLength(4);
+        expect(mappedSourceInput.segments![0]).not.toHaveProperty('error');
+        expect(mappedSourceInput.segments![1]).not.toHaveProperty('error');
+        expect(mappedSourceInput.segments![2]).toHaveProperty(
+          'error',
+          'Resolution below 150 DPI threshold',
+        );
+        expect(mappedSourceInput.segments![3]).not.toHaveProperty('error');
+        expect(mappedSourceInput.segments![3]?.status).toBe('failed');
+      });
     });
   });
 });

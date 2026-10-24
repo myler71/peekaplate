@@ -1,5 +1,6 @@
 import { BoundedRetrievalResultSchema, type RetrievalRequestInput } from '@peekaplate/contracts';
 import { describe, expect, it } from 'vitest';
+import { mapVis02SegmentToSourceSegment } from './handoff';
 import { parseHtmlSource, parsePlainTextSource } from './parser';
 import { extractPassageFromSegment, rankAndBoundPassages, tokenizeQuery } from './ranker';
 import { retrieveMenuEvidence } from './retriever';
@@ -577,6 +578,49 @@ Garlic Bread: $4.00
       expect(
         result.warnings.some((w) =>
           w.includes("Source 'src_failed_doc' contained no usable segments"),
+        ),
+      ).toBe(true);
+    });
+
+    it('never indexes a failed segment when error is null/omitted (Sai VIS-01 regression case)', async () => {
+      const failedSegmentWithoutError = mapVis02SegmentToSourceSegment({
+        segment_id: 'seg_failed_null_error',
+        text: 'Tomato Soup $12.00',
+        method: 'ocr',
+        status: 'failed',
+        error: null,
+        warnings: ['Extraction halted'],
+      });
+
+      expect(failedSegmentWithoutError).not.toHaveProperty('error');
+      expect(failedSegmentWithoutError.status).toBe('failed');
+
+      const request: RetrievalRequestInput = {
+        query: 'Tomato Soup',
+        sources: [
+          {
+            source_id: 'src_failed_doc_null_err',
+            kind: 'text',
+            segments: [failedSegmentWithoutError],
+          },
+        ],
+      };
+
+      const result = await retrieveMenuEvidence(request);
+
+      // The failed text must NEVER become evidence even without an error property
+      expect(result.passages).toHaveLength(0);
+      expect(result.status).not.toBe('success');
+      expect(
+        result.warnings.some((w) =>
+          w.includes(
+            "Source 'src_failed_doc_null_err' segment 'seg_failed_null_error' marked as failed",
+          ),
+        ),
+      ).toBe(true);
+      expect(
+        result.warnings.some((w) =>
+          w.includes("Source 'src_failed_doc_null_err' contained no usable segments"),
         ),
       ).toBe(true);
     });
