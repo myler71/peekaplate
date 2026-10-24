@@ -4,7 +4,7 @@ import warnings
 from PIL import Image, ImageOps, UnidentifiedImageError
 
 from peekaplate_processing.errors import ExtractionError
-from peekaplate_processing.ocr import OCRProvider
+from peekaplate_processing.ocr import OCRProvider, validate_ocr_settings
 
 
 MAX_IMAGE_PIXELS=24_000_000
@@ -61,6 +61,7 @@ def extract_image(data:bytes, source_id:str, ocr:OCRProvider):
 
     prepared,metadata=prepare_ocr_image(data)
     response=ocr.extract(prepared)
+    validate_ocr_settings(response)
     return SourceSegment(
         segment_id=f"{source_id}#image-1", method="ocr_space_engine3", text=response["text"],
         metadata={**metadata, "ocr_settings":response["settings"], "cache_hit":response["cache_hit"], "ocr_image_sha256":response.get("image_sha256"), "ocr_regions":response.get("regions", []), "ocr_region_status":response.get("region_status", "unavailable"), "ocr_coordinate_space":"uploaded_image_pixels"},

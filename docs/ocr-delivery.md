@@ -20,7 +20,7 @@ review warnings. Candidate-cache hits are revalidated. All dishes remain
 
 `python -m peekaplate_processing.extract_menus` acquires page text without LLM
 calls. `python -m peekaplate_processing.run_pipeline` performs extraction.
-The focused suite has 86 fixture/mocked-provider tests; the
+The focused suite has 89 fixture/mocked-provider tests; the
 source handoff passed them locally. CI runs the frozen dependencies, tests and
 wheel/sdist build. Check the PR for exact commands and current execution results.
 
@@ -38,6 +38,7 @@ application has been integrated or accepted.
 | Offsets | Python wire spans use Unicode code points. PR #23 owns conversion from JavaScript UTF-16 before emitting VIS-02 spans; nonzero passage offsets require original segment text. |
 | Prices and unknowns | Preserve decimal strings and explicit nulls. Retrieval's price placeholders remain unknown until grounded extraction; symbols do not establish currency. |
 | Partial pages | Retain failed/skipped segments, errors, warnings and coordinate metadata. A usable later page cannot conceal an incomplete source. |
+| Nullable errors | Python may emit `error: null`. VIS-01 owns mapping null to an omitted field for VIS-04's current schema, with regression coverage for both null and omitted inputs. |
 
 Mohammad owns the Python schemas/extraction and their regressions; Teeyansh owns
 the PR #23 adapter and VIS-01 integration tests; Jeffin reviews the shared
@@ -53,6 +54,12 @@ with the same strings; consuming this shared fixture in that adapter's tests is
 Teeyansh's follow-up when the branches are combined. These tests establish span
 semantics, not end-to-end ingestion or correct dish/price association.
 
+Teeyansh reported three passing isolated integration tests on October 24 using
+serialized Python output and the Node adapter, with mocked OCR/LLM. Test links
+and the exact tested commits are still requested in the
+[integration discussion](https://app.clickup.com/t/90141746115/86bcnfw5g?comment=90140272857390).
+That reported coverage does not establish live extraction accuracy or acceptance.
+
 Route future application changes through existing backend authority and human
 review. This package has no Worker endpoint, database writes, content approval
 or publication integration. Coordinate merge order #23, #24, then #25; the asset
@@ -64,6 +71,12 @@ PR must rebase onto the reviewed package rather than restore the older OCR copy.
 `OCRSpaceClient` implements it; callers can inject a provider into
 `extract_source` while OCR.space remains the default. No provider registry,
 factory, new dependency or extra OCR/LLM call is introduced.
+
+Injected results must be OCR.space Engine 3-compatible, with integer
+`settings.OCREngine=3`. PDF and image acquisition validate this before accepting
+OCR text. Incompatible/missing settings fail the segment; later native PDF
+pages remain readable. Regressions cover both rejection paths and compatible
+providers. Other providers require a deliberate evidence-contract update.
 
 PDF page loading now happens inside the per-page error boundary. A synthetic
 three-page regression injects a middle-page load failure and expects ready,

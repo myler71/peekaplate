@@ -384,3 +384,24 @@ Fresh OCR acquired all35pages in268.779s without old cache reuse. Allfour defaul
 Hosted run39931137291 failed biome formatting in scripts/processing-handoff.test.mjs; browser/database and docs/context/PR checks passed. Applied only the requested call/destructuring wraps. The same run showed account cache egress quota exhaustion and a roughly10minute setup delay; removed optional pnpm cache restore while preserving frozen installs and all checks. Node24.16.0/pnpm11.25.0 are available in temporary local tooling for native verification.
 
 Native verification: biome/typecheck/context/docs passed using pinned Node24.16.0/pnpm11.25.0. All56 Vitest cases and23 repository-script tests passed with bounded workers. One initial script-test invocation lacked the pnpm executable on PATH; rerunning in the installed pnpm environment passed without a source change.
+
+## OBS-20261024-VIS02-OCR-PROVENANCE
+
+An injected provider returning Engine 2 settings was accepted as complete while
+segment/report labels claimed Engine 3, for both image and PDF input. The new
+regressions reproduced this before the fix. Both callers now validate the
+current Engine-3-compatible response contract before accepting text; incompatible
+or missing settings fail the segment while native sibling pages survive.
+The 89-test Python suite passes with mocked providers; no live calls were made.
+
+<!-- automatic observation; not root cause -->
+```json
+{"kind":"automatic-check-observation","check":"typecheck","timestamp":"2026-10-24T06:28:20.278Z","exitCode":1}
+```
+
+Local verification initially lacked the cached pnpm launcher on PATH; native
+commands were rerun with that directory included. A main-checkout package-manager
+autostart was avoided by running its dependency-free context/link scripts directly.
+The first archive inspection also attempted to read uv's non-archive metadata;
+restricting inspection to wheel/sdist files passed. These were local command
+setup issues; no dependency, runtime or environment configuration was changed.

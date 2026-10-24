@@ -4,7 +4,7 @@ import pymupdf
 
 from peekaplate_processing.errors import ExtractionError
 from peekaplate_processing.images import prepare_ocr_image
-from peekaplate_processing.ocr import OCRProvider
+from peekaplate_processing.ocr import OCRProvider, validate_ocr_settings
 from peekaplate_processing.schemas import SourceSegment
 
 MAX_PDF_PAGES = 40
@@ -50,6 +50,7 @@ def extract_pdf(data: bytes, source_id: str, ocr: OCRProvider) -> list[SourceSeg
                     pixmap = page.get_pixmap(matrix=pymupdf.Matrix(scale, scale), colorspace=pymupdf.csRGB, alpha=False)
                     prepared, metadata = prepare_ocr_image(pixmap.tobytes("png"))
                     response = ocr.extract(prepared)
+                    validate_ocr_settings(response)
                     segment.text = response["text"]
                     segment.metadata.update({**metadata, "ocr_settings": response["settings"], "cache_hit": response["cache_hit"], "ocr_image_sha256": response.get("image_sha256"), "ocr_regions": response.get("regions", []), "ocr_region_status": response.get("region_status", "unavailable"), "ocr_coordinate_space": "uploaded_image_pixels"})
                     if response.get("cache_warning"):

@@ -249,7 +249,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "processing",
       "status": "foundation",
-      "summary": "Local PDF/image acquisition uses an injectable OCRProvider with OCRSpaceClient as default. LLM extraction produces needs_review drafts with source evidence, bounded calls and revalidated caches. Page-load failures preserve sibling pages. Shared Unicode fixtures check Python/JS spans. Integration, separate verification and quality acceptance remain pending.",
+      "summary": "Local PDF/image acquisition uses an injectable OCRProvider restricted to validated OCR.space Engine 3-compatible results. Incompatible OCR fails its segment and preserves later native pages. LLM extraction retains needs_review drafts and evidence. Shared Unicode fixtures check spans; combined integration, separate verification and quality acceptance remain pending.",
       "paths": [
         "processing/.gitignore",
         "processing/.python-version",
@@ -289,10 +289,18 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "docs/adr/0005-tenancy-and-privacy.md"
       ],
       "dependsOn": [],
-      "sourceFingerprint": "75fdf67c0d190a7e87d550803da8eaa2d674bb07ed853cdd69a37b56d64cfb45"
+      "sourceFingerprint": "929fb3bbb31657ffe307c3d5040770955f5ecd7d488af3f0ea329ed0bb05f119"
     }
   ],
   "handoffs": [
+    {
+      "summary": "Validate integer OCREngine=3 before accepting injected OCR text for images and PDFs. Regressions reject incompatible/missing settings and preserve later native pages. Keep the existing evidence schema/default provider. VIS-01 owns error:null to omitted mapping; reported mocked adapter tests still need links and tested commits.",
+      "modules": [
+        "processing",
+        "delivery"
+      ],
+      "next": "Sai re-review and current-head CI; Teeyansh links isolated integration evidence and covers null/omitted error mapping in VIS-01. Accuracy evaluation and PM acceptance remain open."
+    },
     {
       "summary": "Corrected formatter-required wrapping in the Unicode handoff script. Disabled optional pnpm cache restore after the hosted cache egress quota error delayed Node setup; frozen installation and all quality/browser/database checks remain required. No processing behavior changed.",
       "modules": [
@@ -364,14 +372,6 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "delivery"
       ],
       "next": "Obtain independent human review; reconcile open source PRs and establish provider parity before release or archival. Apply manual PR/CI gates because private branch enforcement is unavailable on the selected free plan."
-    },
-    {
-      "summary": "Recovered Windows Docker after checksummed offline disk backups and an official Desktop 4.95 upgrade. Real testing exposed a pnpm.mjs launcher rejection; the DB harness now invokes installed Vitest directly, with a failing-then-passing launcher regression. All 43 SQL assertions, 13 Worker/Postgres cases and local startup/demo/cleanup passed on Windows. Contributor Claude/Codex setup is independently owned.",
-      "modules": [
-        "database",
-        "delivery"
-      ],
-      "next": "Finish exact-head review and CI for the local recovery PR. Keep the GitHub protection policy in a separate owner-action PR; stop before Cloudflare/Supabase integration until protected credentials are supplied."
     }
   ]
 }

@@ -43,8 +43,12 @@ Add your verification node after `synthesizer` in `workflow.py` when ready.
 OCR calls use the `OCRProvider` interface in `ocr.py`. `OCRSpaceClient` inherits
 from it and remains the default provider. Python callers can pass an existing
 provider with `extract_source(path, ocr_provider=provider)`; PDF and image
-acquisition depend on the interface's `extract(image)` method. The existing
-Engine 3 settings, response metadata, CLI flags and environment names are unchanged.
+acquisition depend on the interface's `extract(image)` method. This boundary is
+currently OCR.space Engine 3-compatible only: returned `settings` must contain
+the integer `OCREngine=3`. Both input paths reject incompatible settings before
+accepting text, so another engine cannot silently produce Engine 3 evidence.
+Supporting a different provider requires an explicit evidence-contract update.
+The default provider, CLI flags and environment names are unchanged.
 
 From `processing`, configure your private `.env` using `.env.example`:
 
