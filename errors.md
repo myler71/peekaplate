@@ -346,6 +346,21 @@ These records describe local validation limits, not application failures.
 {"kind": "resolution", "references": {"id": "OBS-20261021-GITHUB-ENV-001"}, "status": "resolved", "cause": "Vivien configured the protected staging environment and credentials after the earlier administrator-access block.", "regression": "Run 39907285014 completed after an eligible separate reviewer approved it. Both hosted analytics GET endpoints returned 200 for hemu77; no secret value was published.", "remaining": "Valid non-collaborator and controlled collaborator-removal hosted 403 checks remain deferred; this resolution does not mark full hosted acceptance complete."}
 ```
 
+## October 23 hosted denial verification tooling
+
+```json
+{"id":"OBS-20261023-TEAM-CHECK-001","status":"resolved","area":"acceptance-tooling","observation":"An ad hoc local credential-input script supplied no completed identity or HTTP evidence. Its source is not in this repository, so its waiting state and underlying cause were not diagnosed.","prevention":"Use the repository-owned Node command with an expected GitHub login, private GitHub CLI credential lookup, visible steps and bounded requests. Never treat a hidden input prompt, invalid-token 401 or successful collaborator access as proof of outsider denial.","regression":"Ten focused tests pass, including timeout, wrong identity, 401/503/redirect, unexpected access and secret-redaction cases. A live collaborator control returned GitHub 200 and Worker 200/200 and correctly exited nonzero without reading analytics bodies.","remaining":"Valid non-collaborator 403/403 and controlled collaborator-removal hosted acceptance remain pending.","sources":["scripts/verify-team-access.mjs","scripts/verify-team-access.test.mjs","docs/team-data-access.md"]}
+```
+
+<!-- automatic observation; not root cause -->
+```json
+{"kind":"automatic-check-observation","check":"context:check","timestamp":"2026-10-24T05:35:02.469Z","exitCode":1}
+```
+
+```json
+{"kind":"resolution","references":{"check":"context:check","timestamp":"2026-10-24T05:35:02.469Z"},"status":"resolved","cause":"The first analytics context update exceeded the existing 1000-character summary limit.","prevention":"Keep module summaries bounded and put detailed verification in the handoff and linked runbook.","regression":"Shortened the summary, refreshed fingerprints, and reran pnpm check; context now validates nine modules and ten handoffs."}
+```
+
 ## OBS-20261022-VIS02-DRAFT-PREPARATION
 
 - Observation: the imported processing source has whitespace-only blank lines that
@@ -405,3 +420,9 @@ autostart was avoided by running its dependency-free context/link scripts direct
 The first archive inspection also attempted to read uv's non-archive metadata;
 restricting inspection to wheel/sdist files passed. These were local command
 setup issues; no dependency, runtime or environment configuration was changed.
+
+The current develop branch advanced to 5da1642 before publication. GitHub blocked
+pull-request CI on shared context/error-ledger conflicts. Reconciled those files
+by preserving develop nodes/records and retaining this processing node/handoff;
+processing sources were unchanged. Repeated 89 Python tests and native quality,
+context and documentation checks passed on the reconciled tree.
