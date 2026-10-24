@@ -181,6 +181,10 @@ and degrades to the T0 photo when 3D CSS or a layer is unavailable. It records
 `window.__peekaplateSpatialMetrics` with fetch, decode, frame-timing, viewport
 and fallback state, and offers a copy button for the same JSON.
 
+Serve the bundle over HTTP (`python -m http.server` inside the bundle directory)
+because browsers block the manifest `fetch` from `file://`, where the harness
+reports "Preview unavailable" after one retry.
+
 The harness is a feasibility measurement, not a diner renderer and not a phone
 benchmark. Real captured-dish review, rights review and publication approval
 remain human gates.

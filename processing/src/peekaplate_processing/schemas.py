@@ -312,6 +312,8 @@ class SpatialManifest(BaseModel):
     source_t0_manifest_sha256:str=Field(pattern=r"^[0-9a-f]{64}$")
     source_sha256:str=Field(pattern=r"^[0-9a-f]{64}$")
     dish:DishRef
+    capture_evidence:NonEmptyText
+    rights_confirmed:Literal[True]
     motion:MotionLimits
     layers:list[SpatialLayer]
     fallback:SpatialFallback

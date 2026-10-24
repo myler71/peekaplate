@@ -153,6 +153,29 @@ class SpatialTests(unittest.TestCase):
         self.assertEqual((first.directory/"spatial-manifest.json").read_bytes(), before)
         self.assertEqual(sorted(path.name for path in (self.root/"spatial").iterdir()), [first.asset_id])
 
+    def test_asset_id_tracks_layer_names_and_depths(self):
+        first=self.prepare(output_root=self.root/"spatial-a")
+        repeat=self.prepare(output_root=self.root/"spatial-a2")
+        self.assertEqual(first.asset_id, repeat.asset_id)
+        self.write_layers(layer_document(depths={"background":0.0, "subject":0.55, "accent":0.7}))
+        deeper=self.prepare(output_root=self.root/"spatial-b")
+        self.assertNotEqual(first.asset_id, deeper.asset_id)
+        self.write_layers(layer_document(
+            files={"background":"background.png", "subject":"subject.png", "garnish":"accent.png"},
+            depths={"background":0.0, "subject":0.4, "garnish":0.7},
+        ))
+        renamed=self.prepare(output_root=self.root/"spatial-c")
+        self.assertNotEqual(first.asset_id, renamed.asset_id)
+        self.assertNotEqual(deeper.asset_id, renamed.asset_id)
+
+    def test_manifest_records_capture_evidence_and_rights(self):
+        prepared=self.prepare()
+        self.assertEqual(prepared.manifest.capture_evidence, "Synthetic layered fixture; not a real dish.")
+        self.assertIs(prepared.manifest.rights_confirmed, True)
+        stored=SpatialManifest.model_validate_json((prepared.directory/"spatial-manifest.json").read_text())
+        self.assertEqual(stored.capture_evidence, prepared.manifest.capture_evidence)
+        self.assertIs(stored.rights_confirmed, True)
+
     def test_fallback_larger_than_manifest_limit_is_accepted(self):
         payload=(self.t0.directory/"detail-1280.jpg").read_bytes()
         padded=payload+b"\x00"*120_000

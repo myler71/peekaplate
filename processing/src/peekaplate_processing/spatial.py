@@ -71,8 +71,11 @@ def prepare_spatial_bundle(*, t0_manifest_path:Path, layers_manifest_path:Path, 
     if total_asset_bytes>budget_bytes:
         raise ExtractionError(f"Spatial asset bytes {total_asset_bytes} exceed the configured budget {budget_bytes}.")
     motion_json=json.dumps(layers_input.motion.model_dump(mode="json"), sort_keys=True, separators=(",", ":"))
-    layer_hashes=":".join(layer.sha256 for layer in layers)
-    asset_id="t1_"+hashlib.sha256(f"{t0.asset_id}:{layer_hashes}:{motion_json}:{RECIPE_VERSION}".encode()).hexdigest()[:32]
+    layer_signature=json.dumps(
+        [{"name":layer.name, "depth":layer.depth, "sha256":layer.sha256} for layer in layers],
+        sort_keys=True, separators=(",", ":"),
+    )
+    asset_id="t1_"+hashlib.sha256(f"{t0.asset_id}:{layer_signature}:{motion_json}:{RECIPE_VERSION}".encode()).hexdigest()[:32]
     final_directory=output_root/asset_id
     if final_directory.exists():
         raise ExtractionError(f"Output bundle already exists: {final_directory}. Choose a new output root to preserve the previous bundle.")
@@ -94,6 +97,8 @@ def prepare_spatial_bundle(*, t0_manifest_path:Path, layers_manifest_path:Path, 
             source_t0_manifest_sha256=hashlib.sha256(t0_manifest_bytes).hexdigest(),
             source_sha256=t0.source.sha256,
             dish=t0.dish,
+            capture_evidence=layers_input.capture_evidence,
+            rights_confirmed=layers_input.rights_confirmed,
             motion=layers_input.motion,
             layers=[SpatialLayer(
                 name=layer.name, path=layer.path, sha256=layer.sha256, size_bytes=layer.size_bytes,

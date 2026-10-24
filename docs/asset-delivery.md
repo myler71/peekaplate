@@ -27,7 +27,11 @@ dependency-free `harness.html`.
 Preparation is create-only and content-addressed. `asset_id` derives from the
 source bytes, the caller-supplied dish and revision identifiers, and the recipe
 version; there is no timestamp in the identity. An existing bundle directory is
-refused and never overwritten. Use one output root per revision.
+refused and never overwritten. Use one output root per revision. The spatial
+`asset_id` derives from the T0 `asset_id`, each layer's name, depth and SHA-256
+in manifest order, the motion limits and the recipe version, and the spatial
+manifest records the layers manifest's `capture_evidence` and
+`rights_confirmed`.
 
 The manifest never self-approves. `review.status` is `needs_review` and
 `publication.eligible` is `false` in every generated bundle, including the
