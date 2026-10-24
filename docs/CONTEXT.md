@@ -69,7 +69,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "backend",
       "status": "foundation",
-      "summary": "Hono Worker verifies staff JWTs and restaurant membership for atomic draft revisions. Existing hosted staff identity/isolation/retry/concurrency evidence remains valid within its dated scope. Staging/local-only team analytics GET endpoints verify individual GitHub identity and current collaboration on the fixed repository; server project, strict seven-day/100-row bounds and redacted responses remain enforced. Main afe45db deployed through protected run 39907285014; both hosted reads returned 200 for hemu77, invalid/missing credentials 401 and invalid queries 400. Full hosted acceptance awaits the two controlled 403 cases. No ingestion or publication endpoint; JWT logout revocation remains expiry-bounded.",
+      "summary": "Hono Worker verifies staff JWTs and restaurant membership for atomic draft revisions. Dated hosted staff identity/isolation/retry/concurrency evidence remains valid. Staging/local-only analytics GET endpoints verify individual GitHub identity and current collaboration; server project, seven-day/100-row bounds and redaction are enforced. Main afe45db deployed through protected run 39907285014; hosted collaborator reads returned 200, invalid/missing credentials 401 and invalid queries 400. Two user-run October 23 outsider checks returned GitHub 200 and Worker 403/403 forbidden. Controlled collaborator removal remains pending; production is untested. No ingestion or publication endpoint; JWT logout revocation remains expiry-bounded.",
       "paths": [
         "backend/src/index.ts",
         "backend/src/index.test.ts",
@@ -145,7 +145,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "delivery",
       "status": "foundation",
-      "summary": "Main supplies staging and later production under ADR 0012. Protected manual staging Worker run 39907285014 deployed exact main afe45db successfully after eligible hemu77 approved vivienk request without administrator bypass; flag is true, main-only controls remain and administrator bypass is allowed. Worker version 5922a293-6893-47fd-8bc5-a20f0afd8d0b; 14 hosted HTTP checks and eleven read-only database assertions passed. Existing uncached restricted Hyperdrive verified; hourly PostHog export continues. Token scope/January 20 2027 expiry are operator-confirmed, effective deployment/checker use passed. Two controlled hosted 403 cases deferred. Pages remain at their separate PostHog release. R2 is private/unbound; ingestion, product UI, pilot/load/recovery and production remain separate work.",
+      "summary": "Main supplies staging and later production under ADR 0012. Protected manual run 39907285014 deployed main afe45db after eligible hemu77 approved vivienk without administrator bypass; flag is true, main-only controls remain and administrator bypass is allowed. Worker version 5922a293-6893-47fd-8bc5-a20f0afd8d0b; 14 hosted HTTP checks and eleven database assertions passed. Restricted uncached Hyperdrive and hourly PostHog export are verified within dated scopes. Token scope/January 20 2027 expiry are operator-confirmed. October 23 user-run evidence closes outsider 403 denial; controlled collaborator removal remains pending. Pages retain their separate PostHog release. R2 is private/unbound; ingestion, product UI, pilot/load/recovery and production remain separate work.",
       "paths": [
         "README.md",
         "SECURITY.md",
@@ -189,7 +189,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "b1981372eb4039e6bc75faa3207a7650e01b080426bbf49c7d1d6628792ca066"
+      "sourceFingerprint": "b2a98a9724c8b6dd4dbcfc47688c7e766ca50c2434d8bed24e5a65cc9c05dce9"
     },
     {
       "id": "agents",
@@ -222,7 +222,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "analytics",
       "status": "foundation",
-      "summary": "Consented synthetic staging shell capture and restricted hourly PostHog export are verified; dish controls remain unconnected. Repeated exports retained eight raw copies/four deduplicated events. The collaborator-authorized internal API returns redacted records/counts, not owner reports. A read-only Node/GitHub CLI checker verifies login and both hosted denials with progress, timeouts and no token prompt. Local fixtures pass; a live collaborator control correctly fails the denial expectation. Valid outsider and controlled removal acceptance remain pending. Canonical owner facts and reporting are separate planned work.",
+      "summary": "Consented synthetic staging shell capture and restricted hourly PostHog export are verified; dish controls remain unconnected. Repeated exports retained eight raw copies/four deduplicated events. The collaborator-authorized API returns redacted diagnostics, not owner reports. The Node/GitHub CLI checker has progress, timeouts and no token prompt. Two user-run October 23 checks verified a valid outsider identity (200) and both endpoint denials (403 forbidden), including a fresh-clone repeat; sanitized evidence is in operations.md. Controlled collaborator-removal acceptance and production remain untested. Canonical owner facts and reporting remain planned.",
       "paths": [
         "packages/analytics/package.json",
         "packages/analytics/tsconfig.json",
@@ -246,7 +246,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "contracts"
       ],
-      "sourceFingerprint": "00235a0db45ec148174a70b23e8780bc66c4990e34e5ddfc57c144451a66f469"
+      "sourceFingerprint": "1dd5e77257b699965de953a06b67cae41efa432a18b804d92f6e69d68988d8e0"
     }
   ],
   "handoffs": [
@@ -321,11 +321,11 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "next": "Vivien must correct the connection or grant project Admin access. Complete the connection with the official Supabase CA, verify a bounded export and duplicate-safe retry, then resume schedule. Do not claim transfer success from backfill wrapper completion alone."
     },
     {
-      "summary": "Added first-party staging denial verification with no hidden token prompt, fixed destinations, login matching, request timeouts, redacted evidence and negative-path tests. A live collaborator control returned GitHub 200 and Worker 200/200 and correctly failed the denial expectation; no analytics bodies or credentials were printed.",
+      "summary": "PR #33 added the first-party staging denial checker. Harshita then helped run the valid outsider check twice, including from a fresh develop clone: GitHub identity 200 and both routes 403 forbidden. The maintainer supplied sanitized reports at 2026-10-24T05:52:32.802Z and 06:07:16.871Z (October 23 Phoenix). Recorded request IDs and updated README, team guide, access runbook, operations and context; no runtime, credential, grant, migration or deployment changed. Earlier collaborator 200 and invalid-token 401 evidence remains distinct.",
       "modules": [
         "analytics"
       ],
-      "next": "A valid non-collaborator runs the documented command and shares sanitized 200/403/403 evidence. Record that result separately from controlled collaborator-removal acceptance; do not claim either passed from local fixtures."
+      "next": "Collaborators can continue tickets using their own GitHub identity and the bounded staging API. An authorized operator still needs the separate disposable collaborator-removal test before full hosted access acceptance. Production, real menu ingestion and owner-report delivery remain separate work; do not infer their readiness from this check."
     }
   ]
 }
