@@ -222,7 +222,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "analytics",
       "status": "foundation",
-      "summary": "Consent-gated explicit PostHog capture: hosted diner/console shell views verified in staging. Dish adapter awaits real controls. Private export schema and duplicate/permission tests exist. Two hosted exports of one synthetic interval passed: eight raw copies, four deduplicated events, known diner/console records each matched once, no missing/conflicting/out-of-scope rows. Restricted grants verified; hourly schedule enabled. Next automatic run not observed. Hourly internal copy does not power live owner reports; validated evidence/projections and owner authorization remain planned. Internal inspection API returns safe deduplicated records/counts after live repo-collaborator authorization; no PostHog management token or owner-report endpoint.",
+      "summary": "Consented synthetic staging shell capture and restricted hourly PostHog export are verified; dish controls remain unconnected. Repeated exports retained eight raw copies/four deduplicated events. The collaborator-authorized internal API returns redacted records/counts, not owner reports. A read-only Node/GitHub CLI checker verifies login and both hosted denials with progress, timeouts and no token prompt. Local fixtures pass; a live collaborator control correctly fails the denial expectation. Valid outsider and controlled removal acceptance remain pending. Canonical owner facts and reporting are separate planned work.",
       "paths": [
         "packages/analytics/package.json",
         "packages/analytics/tsconfig.json",
@@ -231,7 +231,9 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "packages/analytics/src/index.test.ts",
         "docs/posthog.md",
         "docs/posthog-export.md",
-        "docs/team-data-access.md"
+        "docs/team-data-access.md",
+        "scripts/verify-team-access.mjs",
+        "scripts/verify-team-access.test.mjs"
       ],
       "adrs": [
         "docs/adr/0003-intent-evidence.md",
@@ -244,20 +246,10 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "dependsOn": [
         "contracts"
       ],
-      "sourceFingerprint": "f05d04b31c6356819de9070d794df58cff36d0cf0ccafdbc05a9d1bfce270581"
+      "sourceFingerprint": "00235a0db45ec148174a70b23e8780bc66c4990e34e5ddfc57c144451a66f469"
     }
   ],
   "handoffs": [
-    {
-      "summary": "October 22 staging activation is deployed: main afe45db, protected run 39907285014 and Worker 5922a293-6893-47fd-8bc5-a20f0afd8d0b. Fourteen live HTTP checks passed using the maintainer individual GitHub credential; eleven read-only database assertions passed, including migration history and restricted grants. Hyperdrive caching is disabled; recent hourly export runs completed with no new rows, existing eight raw/four unique records unchanged. README, team guide, access/export runbooks and operations now distinguish deployed diagnostics from planned owner reporting. No runtime, grant, schema or deployment change in this documentation handoff.",
-      "modules": [
-        "backend",
-        "database",
-        "delivery",
-        "analytics"
-      ],
-      "next": "Obtain review and merge the documentation update. Contributors can continue local and bounded staging ticket work. Complete valid non-collaborator 403 and controlled collaborator-removal checks before closing full hosted acceptance; they are explicitly deferred. Canonical diner ingestion/owner reports and any production resources/release remain separate approved work."
-    },
     {
       "summary": "Proposed ADR 0015 for S3-ARC-01, revised after Sai's review: owner metrics only from ADR 0003 canonical facts; POST /observations with a Bearer menu token and accepted/retry/rejected receipts (accepted = durable Queue acceptance), terminal rejected items, uncertain sends retried and in-batch duplicates defined; canonical app_private.observation_index/conflict; D1 ten sessions, D6 observation.v2, D7 session-based rates and D8 timing recorded; ingest limits agreed with Zhiliang (25 items/32 KiB, 24 h age, 5 min skew, per-jti 60/min burst 10, HTTP and reason codes, token claims); D3/D4 scope from matrix v0.1d; bounded 400/413 handling; remaining work split into the Save/UI acceptance decision and owned implementation/release prerequisites; owners Zhiliang (ingest), Teeyansh (consumer), Jeffin (migrations/views), Louis (reports). No contract, migration or collector code changed. Final technical review reconciled develop activation prerequisites; the ADR remains Proposed pending Save/UI confirmation.",
       "modules": [
@@ -327,6 +319,13 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "delivery"
       ],
       "next": "Vivien must correct the connection or grant project Admin access. Complete the connection with the official Supabase CA, verify a bounded export and duplicate-safe retry, then resume schedule. Do not claim transfer success from backfill wrapper completion alone."
+    },
+    {
+      "summary": "Added first-party staging denial verification with no hidden token prompt, fixed destinations, login matching, request timeouts, redacted evidence and negative-path tests. A live collaborator control returned GitHub 200 and Worker 200/200 and correctly failed the denial expectation; no analytics bodies or credentials were printed.",
+      "modules": [
+        "analytics"
+      ],
+      "next": "A valid non-collaborator runs the documented command and shares sanitized 200/403/403 evidence. Record that result separately from controlled collaborator-removal acceptance; do not claim either passed from local fixtures."
     }
   ]
 }

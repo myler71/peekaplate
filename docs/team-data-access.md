@@ -49,6 +49,21 @@ Errors: 401 means missing/invalid GitHub user token; 403 means not a current rep
 
 Verified staging base URL: `https://peekaplate-api-staging.vxkong.workers.dev`. A PR/local test alone does not activate a hosted endpoint; the deployment above does. There is no browser sign-in screen in this slice; use a local API client. A future UI must use a reviewed OAuth flow and origin controls rather than embedding privileged tokens.
 
+### Run the non-collaborator check without pasting a token
+
+From a checkout containing [the verification command](../scripts/verify-team-access.mjs), use Node 24 and GitHub CLI. No pnpm installation or provider credentials are needed for this command. Sign in to **your own GitHub account**, then replace `YOUR_GITHUB_USERNAME` with that account's login:
+
+```sh
+gh auth login --hostname github.com
+node scripts/verify-team-access.mjs --login YOUR_GITHUB_USERNAME
+```
+
+If already signed in, skip `gh auth login`. Check the active account rather than borrowing someone else's credential. The script reads GitHub CLI's credential privately, verifies its identity before contacting the fixed staging Worker, and prints each step. It has **no hidden token-entry prompt**; credential lookup and each HTTP request have a ten-second timeout. It does not print/save tokens, follow redirects or read analytics bodies when access unexpectedly succeeds. The historical one-hour query window is intentional: this is an authorization test, not a freshness check.
+
+PASS requires GitHub identity `200` with the expected username and **both** staging endpoints returning `403` with `error=forbidden`. An invalid token/`401`, unexpected access/`200`, redirect, malformed denial or provider error is a failed/incomplete test and exits nonzero. Share only the printed sanitized report (UTC time, login, statuses and safe request IDs). Do not share tokens or full authorization headers.
+
+The local `verify-denial.ps1` from an earlier manual attempt is not part of this repository. This command replaces that ad hoc workflow; it does not diagnose that private file or change the API's access rules. A valid non-collaborator must run it to finish the hosted outsider check. Removing a controlled disposable collaborator after successful access is still a **separate** acceptance case. Production is not tested.
+
 ## Operator: scope and revocation
 
 Apply migration `20261021130000` before the reviewed Worker deployment. The private `team_api_private.project_scope` row enables only staging PostHog project `675372`. No teammate list is copied into the public repository or manually maintained in Supabase. The Worker obtains the caller's login from GitHub's authenticated `/user` response, then calls the fixed repository's collaborator-check endpoint using the private server token. Client-supplied usernames or editable profile fields are never authority.
