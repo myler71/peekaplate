@@ -533,11 +533,115 @@ Garlic Bread: $4.00
       expect(extractPrices('Entree CAD 18.00')).toEqual(['18.00']);
       expect(extractPrices('Pasta €14.50')).toEqual(['14.50']);
       expect(extractPrices('Tacos $12')).toEqual(['12.00']);
+      expect(extractPrices('Complimentary Bread $0.00')).toEqual(['0.00']);
+      expect(extractPrices('Free Sauce $0')).toEqual(['0.00']);
+      expect(extractPrices('Item CAD 0.00')).toEqual(['0.00']);
 
       expect(hasConflictingPrices('Soup $12.00', 'Soup $18.00')).toBe(true);
       expect(hasConflictingPrices('Soup $12.00', 'Soup $12.00')).toBe(false);
       expect(hasConflictingPrices('Soup with bread', 'Soup with bread')).toBe(false);
       expect(hasConflictingPrices('Soup $12.00', 'Soup with bread')).toBe(false);
+      expect(hasConflictingPrices('Soup $0.00', 'Soup $18.00')).toBe(true);
+      expect(hasConflictingPrices('Soup $0.00', 'Soup $0.00')).toBe(false);
+      expect(hasConflictingPrices('Soup $0.00', 'Soup $0')).toBe(false);
+    });
+
+    it('preserves explicit zero-price ($0.00 vs $18.00) contradiction and marks ambiguity (Hemu review finding)', async () => {
+      const zeroPriceDesc = 'Tomato Soup with fresh basil cream and toasted sourdough bread $0.00';
+      const positivePriceDesc =
+        'Tomato Soup with fresh basil cream and toasted sourdough bread $18.00';
+
+      const request: RetrievalRequestInput = {
+        query: 'Tomato Soup',
+        sources: [
+          {
+            source_id: 'src_zero_price',
+            kind: 'text',
+            segments: [
+              {
+                segment_id: 'seg_zero_1',
+                text: zeroPriceDesc,
+                status: 'ready',
+              },
+            ],
+          },
+          {
+            source_id: 'src_positive_price',
+            kind: 'text',
+            segments: [
+              {
+                segment_id: 'seg_pos_1',
+                text: positivePriceDesc,
+                status: 'ready',
+              },
+            ],
+          },
+        ],
+      };
+
+      const result = await retrieveMenuEvidence(request);
+
+      // 1. Both source passages survive retrieval/deduplication
+      expect(result.passages).toHaveLength(2);
+      const texts = result.passages.map((p) => p.text);
+      expect(texts).toContain(zeroPriceDesc);
+      expect(texts).toContain(positivePriceDesc);
+
+      // 2. The conflicting price values remain available as evidence in the passages
+      const sourceIds = result.passages.map((p) => p.source.source_id);
+      expect(sourceIds).toContain('src_zero_price');
+      expect(sourceIds).toContain('src_positive_price');
+
+      // 3. Result is marked ambiguous, not an unambiguous success
+      expect(result.status).toBe('ambiguous');
+      expect(result.status).not.toBe('success');
+      expect(
+        result.warnings.some((w) =>
+          w.includes(
+            'Ambiguous evidence detected: multiple candidate menu entries matched with differing details',
+          ),
+        ),
+      ).toBe(true);
+    });
+
+    it('deduplicates matching zero-price passages ($0.00 vs $0.00) cleanly without false conflict', async () => {
+      const zeroPriceDesc = 'Tomato Soup with fresh basil cream and toasted sourdough bread $0.00';
+
+      const request: RetrievalRequestInput = {
+        query: 'Tomato Soup',
+        sources: [
+          {
+            source_id: 'src_zero_a',
+            kind: 'text',
+            segments: [
+              {
+                segment_id: 'seg_zero_a1',
+                text: zeroPriceDesc,
+                status: 'ready',
+              },
+            ],
+          },
+          {
+            source_id: 'src_zero_b',
+            kind: 'text',
+            segments: [
+              {
+                segment_id: 'seg_zero_b1',
+                text: zeroPriceDesc,
+                status: 'ready',
+              },
+            ],
+          },
+        ],
+      };
+
+      const result = await retrieveMenuEvidence(request);
+
+      // Identical zero prices deduplicate to one passage with success status
+      expect(result.passages).toHaveLength(1);
+      expect(result.passages[0]?.text).toBe(zeroPriceDesc);
+      expect(result.status).toBe('success');
+      expect(result.status).not.toBe('ambiguous');
     });
   });
 

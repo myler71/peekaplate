@@ -221,7 +221,7 @@ export function extractPrices(text: string): string[] {
     const val = m[1] ?? m[2];
     if (val !== undefined) {
       const num = Number.parseFloat(val);
-      if (!Number.isNaN(num) && num > 0) {
+      if (!Number.isNaN(num) && num >= 0) {
         prices.add(num.toFixed(2));
       }
     }
