@@ -4,10 +4,13 @@ import {
   codePointToUtf16Offset,
   convertSpanToCodePoints,
   convertSpanToUtf16,
+  mapVis02HandoffToSourceInput,
+  mapVis02SegmentToSourceSegment,
   prepareS3Vis01Handoff,
   transformRetrievalToVis02Evidence,
   utf16ToCodePointOffset,
   type Vis02ExtractionHandoff,
+  type Vis02SourceSegment,
   validateSpanSourceSlice,
 } from './handoff';
 
@@ -412,6 +415,345 @@ describe('S3-VIS-04 × VIS-02 Compatibility Adapter & Handoff Integration', () =
       };
 
       expect(() => prepareS3Vis01Handoff(invalidResult, { dishName: 'Tacos' })).toThrow();
+    });
+  });
+
+  describe('Finding P2: Apply correct Unicode offsets to the VIS-01 handoff (prepareS3Vis01Handoff)', () => {
+    const soupEmojiText = 'Soup 🍜 $8.50';
+    const soupSegmentId = 'sha256:abc#page-1';
+
+    const soupResultAtZero: BoundedRetrievalResult = {
+      schema_version: 1,
+      status: 'success',
+      passages: [
+        {
+          passage_id: 'p_soup_0_13',
+          source: {
+            source_id: 'sha256:abc',
+            segment_id: soupSegmentId,
+          },
+          text: soupEmojiText,
+          start_offset: 0,
+          end_offset: 13, // 13 UTF-16 code units (🍜 is 2 code units)
+          score: 0.95,
+          rank: 1,
+        },
+      ],
+      warnings: [],
+    };
+
+    const embeddedSegText = 'Special 🍲: Soup 🍜 $8.50 - Extra Spicy';
+    const embeddedResult: BoundedRetrievalResult = {
+      schema_version: 1,
+      status: 'success',
+      passages: [
+        {
+          passage_id: 'p_soup_12_25',
+          source: {
+            source_id: 'sha256:abc',
+            segment_id: soupSegmentId,
+          },
+          text: soupEmojiText,
+          start_offset: 12, // in UTF-16
+          end_offset: 25, // 12 + 13 = 25 in UTF-16
+          score: 0.92,
+          rank: 1,
+        },
+      ],
+      warnings: [],
+    };
+
+    it('emits Python code-point end offset 12 instead of UTF-16 end offset 13 for Soup 🍜 $8.50 at offset 0', () => {
+      const handoff = prepareS3Vis01Handoff(soupResultAtZero, { dishName: 'Ramen Soup' });
+
+      expect(handoff.candidates).toHaveLength(1);
+      expect(handoff.decoupledEvidence).toHaveLength(1);
+
+      const candidateSpan = handoff.candidates[0]!.evidence.spans[0]!;
+      const decoupledSpan = handoff.decoupledEvidence[0]!.spans[0]!;
+
+      // Both VIS-01 and decoupled VIS-02 spans must have code-point offsets
+      expect(candidateSpan.start).toBe(0);
+      expect(candidateSpan.end).toBe(12); // 12 code points, NOT 13 UTF-16 code units!
+      expect(decoupledSpan.start).toBe(0);
+      expect(decoupledSpan.end).toBe(12);
+
+      // Reconstructed slice using code-point offsets matches exact text
+      const reconstructed = Array.from(soupEmojiText)
+        .slice(candidateSpan.start, candidateSpan.end)
+        .join('');
+      expect(reconstructed).toBe(soupEmojiText);
+    });
+
+    it('converts offsets accurately when emoji precedes a passage at a non-zero offset', () => {
+      const handoff = prepareS3Vis01Handoff(
+        embeddedResult,
+        { dishName: 'Ramen Soup' },
+        { sourceSegments: { [soupSegmentId]: embeddedSegText } },
+      );
+
+      const candidateSpan = handoff.candidates[0]!.evidence.spans[0]!;
+      // 'Special 🍲: ' has 1 emoji, taking 12 UTF-16 units and 11 code points
+      // In code points, span must be [11, 23]
+      expect(candidateSpan.start).toBe(11);
+      expect(candidateSpan.end).toBe(23);
+
+      const reconstructed = Array.from(embeddedSegText)
+        .slice(candidateSpan.start, candidateSpan.end)
+        .join('');
+      expect(reconstructed).toBe(soupEmojiText);
+    });
+
+    it('handles multiple non-BMP characters preceding a passage accurately', () => {
+      const multiEmojiPrefix = '🌮 🍕 🍜 - Specials: Soup 🍜 $8.50';
+      // '🌮 🍕 🍜 - Specials: ' has 3 emojis (each 2 UTF-16 units, 1 code point)
+      // Length in UTF-16: 6 + 15 = 21
+      // Length in code points: 3 + 15 = 18
+      const multiEmojiResult: BoundedRetrievalResult = {
+        schema_version: 1,
+        status: 'success',
+        passages: [
+          {
+            passage_id: 'p_soup_multi',
+            source: { source_id: 'sha256:abc', segment_id: soupSegmentId },
+            text: soupEmojiText,
+            start_offset: 21,
+            end_offset: 34,
+            rank: 1,
+          },
+        ],
+        warnings: [],
+      };
+
+      const handoff = prepareS3Vis01Handoff(
+        multiEmojiResult,
+        { dishName: 'Soup' },
+        { sourceSegments: { [soupSegmentId]: multiEmojiPrefix } },
+      );
+
+      const span = handoff.candidates[0]!.evidence.spans[0]!;
+      expect(span.start).toBe(18);
+      expect(span.end).toBe(30);
+
+      const reconstructed = Array.from(multiEmojiPrefix).slice(span.start, span.end).join('');
+      expect(reconstructed).toBe(soupEmojiText);
+    });
+
+    it('fails explicitly when start_offset > 0 and source segment text is unavailable', () => {
+      expect(() => prepareS3Vis01Handoff(embeddedResult, { dishName: 'Soup' })).toThrow(
+        /Cannot convert segment offsets to Unicode code points without source segment text/,
+      );
+    });
+
+    it('fails explicitly when source slice text does not match expected passage text', () => {
+      expect(() =>
+        prepareS3Vis01Handoff(
+          embeddedResult,
+          { dishName: 'Soup' },
+          { sourceSegments: { [soupSegmentId]: 'Completely mismatched source text content' } },
+        ),
+      ).toThrow(/out of bounds for segment|Slice validation failed/);
+    });
+
+    it('supports explicit offsetUnit: "utf16" override', () => {
+      const handoff = prepareS3Vis01Handoff(
+        soupResultAtZero,
+        { dishName: 'Soup' },
+        { offsetUnit: 'utf16' },
+      );
+
+      const span = handoff.candidates[0]!.evidence.spans[0]!;
+      expect(span.start).toBe(0);
+      expect(span.end).toBe(13); // Preserved as UTF-16 code units
+    });
+  });
+
+  describe('Finding P3: Validate code-point bounds before offset conversion', () => {
+    it('rejects the exact reviewer reproduction case (end: 999 on "Soup")', () => {
+      // The validator must return valid: false, not valid: true
+      const result = validateSpanSourceSlice(
+        'Soup',
+        { segment_id: 's', start: 0, end: 999 },
+        'Soup',
+        'codepoint',
+      );
+
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain('exceed segment code-point length');
+    });
+
+    it('rejects negative start or negative end offsets', () => {
+      expect(
+        validateSpanSourceSlice('Soup', { segment_id: 's', start: -1, end: 4 }, 'Soup', 'codepoint')
+          .valid,
+      ).toBe(false);
+
+      expect(
+        validateSpanSourceSlice('Soup', { segment_id: 's', start: 0, end: -1 }, 'Soup', 'codepoint')
+          .valid,
+      ).toBe(false);
+    });
+
+    it('rejects fractional offsets', () => {
+      expect(
+        validateSpanSourceSlice(
+          'Soup',
+          { segment_id: 's', start: 0.5, end: 3.5 },
+          'Soup',
+          'codepoint',
+        ).valid,
+      ).toBe(false);
+    });
+
+    it('rejects inverted offsets where start > end', () => {
+      expect(
+        validateSpanSourceSlice('Soup', { segment_id: 's', start: 4, end: 2 }, 'Soup', 'codepoint')
+          .valid,
+      ).toBe(false);
+    });
+
+    it('rejects start beyond segment length', () => {
+      expect(
+        validateSpanSourceSlice(
+          'Soup',
+          { segment_id: 's', start: 10, end: 12 },
+          'Soup',
+          'codepoint',
+        ).valid,
+      ).toBe(false);
+    });
+
+    it('accepts valid end-of-string offsets', () => {
+      const result = validateSpanSourceSlice(
+        'Soup',
+        { segment_id: 's', start: 0, end: 4 },
+        'Soup',
+        'codepoint',
+      );
+      expect(result.valid).toBe(true);
+      expect(result.actualSlice).toBe('Soup');
+    });
+
+    it('accepts valid code-point span containing non-BMP emoji', () => {
+      const result = validateSpanSourceSlice(
+        'Soup 🍜',
+        { segment_id: 's', start: 0, end: 6 }, // 6 code points
+        'Soup 🍜',
+        'codepoint',
+      );
+      expect(result.valid).toBe(true);
+      expect(result.actualSlice).toBe('Soup 🍜');
+    });
+
+    it('rejects empty spans when expected passage text is non-empty', () => {
+      expect(
+        validateSpanSourceSlice('Soup', { segment_id: 's', start: 2, end: 2 }, 'Soup', 'codepoint')
+          .valid,
+      ).toBe(false);
+    });
+
+    it('codePointToUtf16Offset and utf16ToCodePointOffset throw on out-of-bounds or invalid inputs instead of clamping', () => {
+      expect(() => codePointToUtf16Offset('Soup', 999)).toThrow(RangeError);
+      expect(() => codePointToUtf16Offset('Soup', -1)).toThrow(RangeError);
+      expect(() => codePointToUtf16Offset('Soup', 1.5)).toThrow(RangeError);
+
+      expect(() => utf16ToCodePointOffset('Soup', 999)).toThrow(RangeError);
+      expect(() => utf16ToCodePointOffset('Soup', -1)).toThrow(RangeError);
+      expect(() => utf16ToCodePointOffset('Soup', 2.5)).toThrow(RangeError);
+    });
+
+    it('convertSpanToUtf16 and convertSpanToCodePoints throw on invalid spans', () => {
+      expect(() => convertSpanToUtf16('Soup', { segment_id: 's', start: 0, end: 999 })).toThrow();
+      expect(() =>
+        convertSpanToCodePoints('Soup', { segment_id: 's', start: 0, end: 999 }),
+      ).toThrow();
+    });
+  });
+
+  describe('Requirement 9: Explicit VIS-01 adapter mapping & Python schema compatibility', () => {
+    it('maps Python segment with nullable fields and extra fields into valid TypeScript SourceInputSegment', () => {
+      const pythonSegmentFixture: Vis02SourceSegment = {
+        segment_id: 'seg_py_1',
+        text: 'Artisan Sourdough with salted butter: $7.00',
+        page_number: null, // Python None
+        method: 'ocr_space_engine3',
+        status: 'ready',
+        native_text: 'Raw OCR token stream without normalization',
+        error: null, // Python None
+        warnings: ['Low confidence on symbol $'],
+        metadata: { ocr_engine: 'engine3' },
+      };
+
+      const mapped = mapVis02SegmentToSourceSegment(pythonSegmentFixture);
+
+      // Verify nullable fields are omitted rather than passed as null
+      expect(mapped.page_number).toBeUndefined();
+      expect(mapped.error).toBeUndefined();
+
+      // Verify native_text was preserved in metadata
+      expect(mapped.metadata?.native_text).toBe('Raw OCR token stream without normalization');
+      expect(mapped.metadata?.ocr_engine).toBe('engine3');
+
+      // Verify status, method, warnings, and text are preserved
+      expect(mapped.status).toBe('ready');
+      expect(mapped.method).toBe('ocr_space_engine3');
+      expect(mapped.warnings).toEqual(['Low confidence on symbol $']);
+      expect(mapped.text).toBe('Artisan Sourdough with salted butter: $7.00');
+    });
+
+    it('maps full Vis02ExtractionHandoff into valid SourceInput passing Zod schema validation', () => {
+      const pythonHandoffFixture: Vis02ExtractionHandoff = {
+        schema_version: 1,
+        pipeline_version: '2',
+        status: 'complete',
+        source: {
+          source_id: 'src_doc_123',
+          sha256: 'a1b2c3d4e5f60123456789abcdef0123456789abcdef0123456789abcdef1234',
+          kind: 'pdf',
+          location: 'https://restaurant.example.com/menu.pdf',
+          retrieved_at: '2026-10-24T12:00:00.000Z',
+          size_bytes: 1048576,
+        },
+        segments: [
+          {
+            segment_id: 'src_doc_123#page-1',
+            page_number: 1,
+            method: 'pdf_native',
+            status: 'ready',
+            text: 'Caesar Salad: crisp romaine, shaved parmesan, garlic croutons $14.00',
+            native_text: null,
+            error: null,
+            warnings: [],
+          },
+          {
+            segment_id: 'src_doc_123#page-2',
+            page_number: 2,
+            method: 'ocr',
+            status: 'failed',
+            text: 'Unreadable scanned beverage list',
+            native_text: null,
+            error: 'Resolution too low',
+            warnings: ['Failed to process page 2'],
+          },
+        ],
+        drafts: [],
+        evidence: [],
+        warnings: [],
+        errors: [],
+      };
+
+      const sourceInput = mapVis02HandoffToSourceInput(pythonHandoffFixture);
+
+      expect(sourceInput.source_id).toBe('src_doc_123');
+      expect(sourceInput.sha256).toBe(pythonHandoffFixture.source?.sha256);
+      expect(sourceInput.kind).toBe('pdf');
+      expect(sourceInput.segments).toHaveLength(2);
+
+      expect(sourceInput.segments![0]?.page_number).toBe(1);
+      expect(sourceInput.segments![0]?.status).toBe('ready');
+
+      expect(sourceInput.segments![1]?.status).toBe('failed');
+      expect(sourceInput.segments![1]?.error).toBe('Resolution too low');
     });
   });
 });

@@ -83,6 +83,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "backend/src/index.ts",
         "backend/src/retrieval/api.test.ts",
         "backend/src/retrieval/fetcher.ts",
+        "backend/src/retrieval/fetcher.workerd.test.ts",
         "backend/src/retrieval/handoff.test.ts",
         "backend/src/retrieval/handoff.ts",
         "backend/src/retrieval/index.ts",
@@ -108,7 +109,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "contracts",
         "database"
       ],
-      "sourceFingerprint": "76ebeda2fe6b359318df6a3e50a5a3d0018ee22bbe145b5eb5ce010b56bf39e8"
+      "sourceFingerprint": "9299eef3781eda06d55163e2bb0d1beca5bf967424d20c4a2c87fc7791d3f487"
     },
     {
       "id": "database",
@@ -279,12 +280,12 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
       "next": "Harshita confirms the Save/UI transitions, persistence, unsave/Undo, unavailable-storage behaviour and any Saved limit; Adam accepts, then record ADR acceptance. Owners deliver the listed contracts, ingest, consumer, migrations/views, report API, protected bindings, menu token, retention/consent and hosted validation through later PRs."
     },
     {
-      "summary": "Implemented S3-VIS-04: Bounded Menu Evidence Retrieval and VIS-02/S3-VIS-01 compatibility handoff adapter. Added shared schemas (BoundedRetrievalResultSchema, EvidencePassageSchema, RetrievalRequestSchema, SourceInputSchema with image/website support, SourceReferenceSchema with URL provenance). Implemented safe SSRF fetcher (DNS pinning, private/loopback/link-local/multicast IP blocking, redirect limits, scheme downgrade defense), HTML/text parser, deterministic ranking engine, and VIS-02 compatibility adapter with decoupled drafts/evidence, Python Unicode code-point <-> UTF-16 code-unit offset translation, exact slice equality validation, removed heuristic regex price fabrication, and preservation of partial/failed page statuses and warnings.",
+      "summary": "Resolved review findings in S3-VIS-04 (PR #23): established transaction-local app.actor_id before staff membership query under restricted database role; preserved contradictory evidence during approximate deduplication; excluded failed/skipped segments from indexing; enforced Unicode code-point offset translation across VIS-01 and VIS-02 handoffs; corrected astral numeric HTML entity decoding without truncation; validated code-point bounds before offset conversion; added explicit VIS-02 segment mapping; added regression and workerd-level external fetch security tests.",
       "modules": [
         "contracts",
         "backend"
       ],
-      "next": "Teeyansh to wire S3-VIS-01 structured candidate ingestion to consume BoundedRetrievalResult and generate review-ready dish drafts. Mohammad to confirm Python LangGraph integration consuming decoupled drafts/evidence. Raghav to review PR #23."
+      "next": "Submit PR #23 for re-review with permanent regression test coverage across all 6 review findings."
     },
     {
       "summary": "Reconciled main into the PR 27 release branch, preserving October 22 staging controls, verified PostHog export history, team analytics access documentation and both error-ledger histories. Runtime, contracts, migrations and deployment workflow are unchanged from the reviewed develop release. Corrected the team-access activation checklist so migration/history, token permissions and final review/CI are explicit prerequisites to enabling the flag. Final guide cleanup distinguishes the enabled hourly export from the pending team inspection API and links its activation checklist; PR verification metadata is refreshed for the final candidate.",

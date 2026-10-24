@@ -2,6 +2,10 @@ import {
   type BoundedRetrievalResult,
   BoundedRetrievalResultSchema,
   type EvidencePassage,
+  type SourceInput,
+  SourceInputSchema,
+  type SourceInputSegment,
+  SourceInputSegmentSchema,
 } from '@peekaplate/contracts';
 
 /**
@@ -18,16 +22,24 @@ import {
  * Converts a UTF-16 string index (JS offset) to a Unicode code-point index (Python offset).
  */
 export function utf16ToCodePointOffset(text: string, utf16Offset: number): number {
-  if (utf16Offset <= 0) return 0;
-  const boundedOffset = Math.min(text.length, utf16Offset);
-  return Array.from(text.slice(0, boundedOffset)).length;
+  if (!Number.isInteger(utf16Offset) || utf16Offset < 0) {
+    throw new RangeError(`Invalid UTF-16 offset: ${utf16Offset}. Must be a non-negative integer.`);
+  }
+  if (utf16Offset > text.length) {
+    throw new RangeError(`UTF-16 offset ${utf16Offset} exceeds text length (${text.length})`);
+  }
+  return Array.from(text.slice(0, utf16Offset)).length;
 }
 
 /**
  * Converts a Unicode code-point index (Python offset) to a UTF-16 string index (JS offset).
  */
 export function codePointToUtf16Offset(text: string, codePointOffset: number): number {
-  if (codePointOffset <= 0) return 0;
+  if (!Number.isInteger(codePointOffset) || codePointOffset < 0) {
+    throw new RangeError(
+      `Invalid code point offset: ${codePointOffset}. Must be a non-negative integer.`,
+    );
+  }
   let cp = 0;
   let i = 0;
   while (i < text.length && cp < codePointOffset) {
@@ -35,6 +47,11 @@ export function codePointToUtf16Offset(text: string, codePointOffset: number): n
     if (code === undefined) break;
     i += code > 0xffff ? 2 : 1;
     cp++;
+  }
+  if (cp < codePointOffset) {
+    throw new RangeError(
+      `Code point offset ${codePointOffset} exceeds text code-point length (${cp})`,
+    );
   }
   return i;
 }
@@ -46,6 +63,18 @@ export function convertSpanToCodePoints(
   segmentText: string,
   span: { segment_id: string; start: number; end: number },
 ): { segment_id: string; start: number; end: number } {
+  if (
+    !Number.isInteger(span.start) ||
+    !Number.isInteger(span.end) ||
+    span.start < 0 ||
+    span.end < span.start ||
+    span.start > segmentText.length ||
+    span.end > segmentText.length
+  ) {
+    throw new Error(
+      `Invalid UTF-16 span [${span.start}, ${span.end}] for segment text of length ${segmentText.length}`,
+    );
+  }
   return {
     segment_id: span.segment_id,
     start: utf16ToCodePointOffset(segmentText, span.start),
@@ -60,6 +89,19 @@ export function convertSpanToUtf16(
   segmentText: string,
   span: { segment_id: string; start: number; end: number },
 ): { segment_id: string; start: number; end: number } {
+  const totalCodePoints = Array.from(segmentText).length;
+  if (
+    !Number.isInteger(span.start) ||
+    !Number.isInteger(span.end) ||
+    span.start < 0 ||
+    span.end < span.start ||
+    span.start > totalCodePoints ||
+    span.end > totalCodePoints
+  ) {
+    throw new Error(
+      `Invalid code-point span [${span.start}, ${span.end}] for segment text of length ${totalCodePoints} code points`,
+    );
+  }
   return {
     segment_id: span.segment_id,
     start: codePointToUtf16Offset(segmentText, span.start),
@@ -79,7 +121,12 @@ export function validateSpanSourceSlice(
   expectedPassageText: string,
   offsetUnit: 'utf16' | 'codepoint' = 'utf16',
 ): { valid: boolean; actualSlice: string; error?: string } {
-  if (span.start < 0 || span.end <= span.start) {
+  if (
+    !Number.isInteger(span.start) ||
+    !Number.isInteger(span.end) ||
+    span.start < 0 ||
+    span.end < span.start
+  ) {
     return {
       valid: false,
       actualSlice: '',
@@ -87,20 +134,38 @@ export function validateSpanSourceSlice(
     };
   }
 
-  let utf16Start = span.start;
-  let utf16End = span.end;
-
-  if (offsetUnit === 'codepoint') {
-    utf16Start = codePointToUtf16Offset(segmentText, span.start);
-    utf16End = codePointToUtf16Offset(segmentText, span.end);
-  }
-
-  if (utf16Start > segmentText.length || utf16End > segmentText.length) {
+  if (span.start === span.end && expectedPassageText.length > 0) {
     return {
       valid: false,
       actualSlice: '',
-      error: `Span [${utf16Start}, ${utf16End}] exceeds segment text length (${segmentText.length})`,
+      error: `Empty span [${span.start}, ${span.end}] for non-empty expected text`,
     };
+  }
+
+  let utf16Start: number;
+  let utf16End: number;
+
+  if (offsetUnit === 'codepoint') {
+    const totalCodePoints = Array.from(segmentText).length;
+    if (span.start > totalCodePoints || span.end > totalCodePoints) {
+      return {
+        valid: false,
+        actualSlice: '',
+        error: `Span code-point offsets [${span.start}, ${span.end}] exceed segment code-point length (${totalCodePoints})`,
+      };
+    }
+    utf16Start = codePointToUtf16Offset(segmentText, span.start);
+    utf16End = codePointToUtf16Offset(segmentText, span.end);
+  } else {
+    if (span.start > segmentText.length || span.end > segmentText.length) {
+      return {
+        valid: false,
+        actualSlice: '',
+        error: `Span [${span.start}, ${span.end}] exceeds segment text length (${segmentText.length})`,
+      };
+    }
+    utf16Start = span.start;
+    utf16End = span.end;
   }
 
   const actualSlice = segmentText.slice(utf16Start, utf16End);
@@ -248,69 +313,77 @@ export type TransformToVis02Options = {
  * - Removal of heuristic price regex: price_amount is strictly null until extracted by downstream LLM.
  * - Strict 'needs_review' review boundary.
  */
-export function transformRetrievalToVis02Evidence(
-  rawResult: unknown,
+/**
+ * Helper to convert and validate a passage's character offsets for downstream handoffs.
+ * Ensures consistent Unicode code-point and UTF-16 offset handling across both VIS-01 and VIS-02 paths.
+ */
+export function convertPassageSpan(
+  passage: EvidencePassage,
   options: TransformToVis02Options = {},
-): {
-  drafts: Vis02DishDraft[];
-  evidence: Vis02DraftEvidence[];
-  warnings: string[];
-} {
-  const result = BoundedRetrievalResultSchema.parse(rawResult);
+): { spanStart: number; spanEnd: number } {
   const offsetUnit = options.offsetUnit ?? 'codepoint';
   const sourceSegments = options.sourceSegments;
   const strictSliceValidation = options.strictSliceValidation !== false;
-  const warnings: string[] = [...result.warnings];
 
-  const drafts: Vis02DishDraft[] = [];
-  const evidence: Vis02DraftEvidence[] = [];
+  let spanStart: number;
+  let spanEnd: number;
 
-  for (let i = 0; i < result.passages.length; i++) {
-    const passage = result.passages[i];
-    if (!passage) continue;
+  if (offsetUnit === 'codepoint') {
+    if (sourceSegments) {
+      const segText =
+        sourceSegments instanceof Map
+          ? sourceSegments.get(passage.source.segment_id)
+          : sourceSegments[passage.source.segment_id];
 
-    const draftId = `draft_${passage.passage_id}`;
+      if (segText === undefined) {
+        throw new Error(
+          `Missing source segment text for segment "${passage.source.segment_id}"; cannot convert offsets to Unicode code points.`,
+        );
+      }
 
-    // Compute span offsets in requested unit
-    let spanStart: number;
-    let spanEnd: number;
+      if (
+        passage.start_offset < 0 ||
+        passage.end_offset > segText.length ||
+        passage.start_offset > passage.end_offset
+      ) {
+        throw new Error(
+          `Passage offsets [${passage.start_offset}, ${passage.end_offset}] out of bounds for segment "${passage.source.segment_id}" (length ${segText.length})`,
+        );
+      }
 
-    if (offsetUnit === 'codepoint') {
-      if (sourceSegments) {
-        const segText =
-          sourceSegments instanceof Map
-            ? sourceSegments.get(passage.source.segment_id)
-            : sourceSegments[passage.source.segment_id];
+      const expectedSlice = segText.slice(passage.start_offset, passage.end_offset);
+      if (expectedSlice !== passage.text) {
+        throw new Error(
+          `Slice validation failed for passage ${passage.passage_id}: segment text at [${passage.start_offset}, ${passage.end_offset}] does not match passage text`,
+        );
+      }
 
-        if (segText === undefined) {
+      spanStart = utf16ToCodePointOffset(segText, passage.start_offset);
+      spanEnd = utf16ToCodePointOffset(segText, passage.end_offset);
+
+      if (strictSliceValidation) {
+        const check = validateSpanSourceSlice(
+          segText,
+          { segment_id: passage.source.segment_id, start: spanStart, end: spanEnd },
+          passage.text,
+          'codepoint',
+        );
+        if (!check.valid) {
           throw new Error(
-            `Missing source segment text for segment "${passage.source.segment_id}"; cannot convert offsets to Unicode code points.`,
+            `Slice validation failed for passage ${passage.passage_id}: ${check.error}`,
           );
         }
-
-        if (
-          passage.start_offset < 0 ||
-          passage.end_offset > segText.length ||
-          passage.start_offset > passage.end_offset
-        ) {
-          throw new Error(
-            `Passage offsets [${passage.start_offset}, ${passage.end_offset}] out of bounds for segment "${passage.source.segment_id}" (length ${segText.length})`,
-          );
-        }
-
-        const expectedSlice = segText.slice(passage.start_offset, passage.end_offset);
-        if (expectedSlice !== passage.text) {
-          throw new Error(
-            `Slice validation failed for passage ${passage.passage_id}: segment text at [${passage.start_offset}, ${passage.end_offset}] does not match passage text`,
-          );
-        }
-
-        spanStart = utf16ToCodePointOffset(segText, passage.start_offset);
-        spanEnd = utf16ToCodePointOffset(segText, passage.end_offset);
+      }
+    } else {
+      // sourceSegments is absent.
+      // If start_offset is 0, passage.text is the exact segment prefix from offset 0 to end_offset.
+      if (passage.start_offset === 0) {
+        spanStart = 0;
+        spanEnd = utf16ToCodePointOffset(passage.text, passage.text.length);
 
         if (strictSliceValidation) {
           const check = validateSpanSourceSlice(
-            segText,
+            passage.text,
             { segment_id: passage.source.segment_id, start: spanStart, end: spanEnd },
             passage.text,
             'codepoint',
@@ -322,66 +395,70 @@ export function transformRetrievalToVis02Evidence(
           }
         }
       } else {
-        // sourceSegments is absent.
-        // If start_offset is 0, passage.text is the exact segment prefix from offset 0 to end_offset.
-        if (passage.start_offset === 0) {
-          spanStart = 0;
-          spanEnd = utf16ToCodePointOffset(passage.text, passage.text.length);
-
-          if (strictSliceValidation) {
-            const check = validateSpanSourceSlice(
-              passage.text,
-              { segment_id: passage.source.segment_id, start: spanStart, end: spanEnd },
-              passage.text,
-              'codepoint',
-            );
-            if (!check.valid) {
-              throw new Error(
-                `Slice validation failed for passage ${passage.passage_id}: ${check.error}`,
-              );
-            }
-          }
-        } else {
-          // When start_offset > 0, characters preceding start_offset in the original segment are unknown.
-          // Any non-BMP characters in that prefix would shift code-point offsets.
-          // Conversion cannot be safely established without the original segment text.
-          throw new Error(
-            `Cannot convert segment offsets to Unicode code points without source segment text when passage start_offset (${passage.start_offset}) > 0 for passage "${passage.passage_id}". Provide sourceSegments to enable safe offset conversion.`,
-          );
-        }
-      }
-    } else {
-      // offsetUnit === 'utf16'
-      spanStart = passage.start_offset;
-      spanEnd = passage.end_offset;
-
-      if (sourceSegments) {
-        const segText =
-          sourceSegments instanceof Map
-            ? sourceSegments.get(passage.source.segment_id)
-            : sourceSegments[passage.source.segment_id];
-
-        if (segText !== undefined) {
-          if (strictSliceValidation) {
-            const check = validateSpanSourceSlice(
-              segText,
-              { segment_id: passage.source.segment_id, start: spanStart, end: spanEnd },
-              passage.text,
-              'utf16',
-            );
-            if (!check.valid) {
-              throw new Error(
-                `Slice validation failed for passage ${passage.passage_id}: ${check.error}`,
-              );
-            }
-          }
-        } else if (strictSliceValidation) {
-          throw new Error(
-            `Missing source segment text for segment "${passage.source.segment_id}" in sourceSegments`,
-          );
-        }
+        // When start_offset > 0, characters preceding start_offset in the original segment are unknown.
+        // Any non-BMP characters in that prefix would shift code-point offsets.
+        // Conversion cannot be safely established without the original segment text.
+        throw new Error(
+          `Cannot convert segment offsets to Unicode code points without source segment text when passage start_offset (${passage.start_offset}) > 0 for passage "${passage.passage_id}". Provide sourceSegments to enable safe offset conversion.`,
+        );
       }
     }
+  } else {
+    // offsetUnit === 'utf16'
+    spanStart = passage.start_offset;
+    spanEnd = passage.end_offset;
+
+    if (sourceSegments) {
+      const segText =
+        sourceSegments instanceof Map
+          ? sourceSegments.get(passage.source.segment_id)
+          : sourceSegments[passage.source.segment_id];
+
+      if (segText !== undefined) {
+        if (strictSliceValidation) {
+          const check = validateSpanSourceSlice(
+            segText,
+            { segment_id: passage.source.segment_id, start: spanStart, end: spanEnd },
+            passage.text,
+            'utf16',
+          );
+          if (!check.valid) {
+            throw new Error(
+              `Slice validation failed for passage ${passage.passage_id}: ${check.error}`,
+            );
+          }
+        }
+      } else if (strictSliceValidation) {
+        throw new Error(
+          `Missing source segment text for segment "${passage.source.segment_id}" in sourceSegments`,
+        );
+      }
+    }
+  }
+
+  return { spanStart, spanEnd };
+}
+
+export function transformRetrievalToVis02Evidence(
+  rawResult: unknown,
+  options: TransformToVis02Options = {},
+): {
+  drafts: Vis02DishDraft[];
+  evidence: Vis02DraftEvidence[];
+  warnings: string[];
+} {
+  const result = BoundedRetrievalResultSchema.parse(rawResult);
+  const warnings: string[] = [...result.warnings];
+
+  const drafts: Vis02DishDraft[] = [];
+  const evidence: Vis02DraftEvidence[] = [];
+
+  for (let i = 0; i < result.passages.length; i++) {
+    const passage = result.passages[i];
+    if (!passage) continue;
+
+    const draftId = `draft_${passage.passage_id}`;
+    const { spanStart, spanEnd } = convertPassageSpan(passage, options);
 
     const span: Vis02SourceSpan = {
       segment_id: passage.source.segment_id,
@@ -424,13 +501,13 @@ export function transformRetrievalToVis02Evidence(
  * to SourceSpan objects, and enforces the review boundary by ensuring all
  * candidate drafts are marked 'needs_review' and never automatically published.
  *
- * NOTE: In compliance with Mohammad's VIS-02 audit, this function NO LONGER uses
- * a naive regex to extract the first '$' price in a passage, preventing ungrounded
- * price fabrication.
+ * In compliance with Mohammad's VIS-02 audit, this function applies Unicode code-point
+ * offset conversion and source-slice validation consistently with VIS-02.
  */
 export function prepareS3Vis01Handoff(
   rawResult: unknown,
   metadata: { dishName: string; currency?: string },
+  options: TransformToVis02Options = {},
 ): S3Vis01HandoffResult {
   const result = BoundedRetrievalResultSchema.parse(rawResult);
 
@@ -459,11 +536,13 @@ export function prepareS3Vis01Handoff(
     if (!passage) continue;
 
     const draftId = `draft_${passage.passage_id}`;
+    const { spanStart, spanEnd } = convertPassageSpan(passage, options);
+
     const spans: IngestionSourceSpan[] = [
       {
         segment_id: passage.source.segment_id,
-        start: passage.start_offset,
-        end: passage.end_offset,
+        start: spanStart,
+        end: spanEnd,
       },
     ];
 
@@ -506,4 +585,56 @@ export function prepareS3Vis01Handoff(
     decoupledEvidence,
     unresolvedWarnings: warnings,
   };
+}
+
+/**
+ * ============================================================================
+ * EXPLICIT VIS-02 -> RETRIEVAL SOURCE INPUT ADAPTER
+ * ============================================================================
+ * Maps upstream Python extraction output into the strict TypeScript SourceInputSchema.
+ * Explicitly normalizes nullable fields (null -> undefined) and preserves
+ * provenance, metadata, warnings, and errors without arbitrary passthrough.
+ */
+export function mapVis02SegmentToSourceSegment(seg: Vis02SourceSegment): SourceInputSegment {
+  const metadata: Record<string, unknown> = {
+    ...(seg.metadata ?? {}),
+  };
+  if (seg.native_text !== null && seg.native_text !== undefined) {
+    metadata.native_text = seg.native_text;
+  }
+
+  const normalized = {
+    segment_id: seg.segment_id,
+    text: seg.text,
+    ...(seg.page_number !== null && seg.page_number !== undefined && seg.page_number > 0
+      ? { page_number: seg.page_number }
+      : {}),
+    ...(seg.method ? { method: seg.method } : {}),
+    ...(seg.status ? { status: seg.status } : {}),
+    ...(seg.error !== null && seg.error !== undefined && seg.error.length > 0
+      ? { error: seg.error }
+      : {}),
+    ...(seg.warnings && seg.warnings.length > 0 ? { warnings: [...seg.warnings] } : {}),
+    ...(Object.keys(metadata).length > 0 ? { metadata } : {}),
+  };
+
+  return SourceInputSegmentSchema.parse(normalized);
+}
+
+export function mapVis02HandoffToSourceInput(handoff: Vis02ExtractionHandoff): SourceInput {
+  const source = handoff.source;
+  const sourceId = source?.source_id ?? 'vis02_source';
+
+  const segments = (handoff.segments || []).map(mapVis02SegmentToSourceSegment);
+
+  const normalized = {
+    source_id: sourceId,
+    ...(source?.sha256 ? { sha256: source.sha256 } : {}),
+    ...(source?.kind ? { kind: source.kind } : {}),
+    ...(source?.location ? { location: source.location } : {}),
+    ...(source?.retrieved_at ? { retrieved_at: source.retrieved_at } : {}),
+    ...(segments.length > 0 ? { segments } : {}),
+  };
+
+  return SourceInputSchema.parse(normalized);
 }

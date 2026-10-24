@@ -65,6 +65,9 @@ export async function retrieveMenuEvidence(
       };
 
       if (src.segments && src.segments.length > 0) {
+        let validSegmentCount = 0;
+        let failedSegmentCount = 0;
+
         for (const seg of src.segments) {
           // Preserve upstream segment-level warnings
           if (seg.warnings && seg.warnings.length > 0) {
@@ -75,13 +78,17 @@ export async function retrieveMenuEvidence(
 
           // Handle incomplete / failed / skipped pages explicitly
           if (seg.status === 'failed' || seg.status === 'skipped' || seg.error) {
+            failedSegmentCount++;
             warnings.push(
               `Source '${src.source_id}' segment '${seg.segment_id}' marked as ${seg.status ?? 'failed'}${seg.error ? `: ${seg.error}` : ''}`,
             );
-            // If the segment has no readable text, skip indexing it as an evidence passage
-            if (!seg.text || seg.text.trim().length === 0) {
-              continue;
-            }
+            // CRITICAL: Never index a segment marked failed or skipped, regardless of whether it has text
+            continue;
+          }
+
+          // If the segment has no readable text, skip indexing it
+          if (!seg.text || seg.text.trim().length === 0) {
+            continue;
           }
 
           allSegments.push({
@@ -95,8 +102,22 @@ export async function retrieveMenuEvidence(
               provenance: sourceProvenance,
             },
           });
+          validSegmentCount++;
         }
-        successfulSourceCount++;
+
+        if (validSegmentCount > 0) {
+          successfulSourceCount++;
+          if (failedSegmentCount > 0) {
+            warnings.push(
+              `Source '${src.source_id}' partially indexed (${validSegmentCount} valid, ${failedSegmentCount} failed/skipped)`,
+            );
+          }
+        } else {
+          failedSourceCount++;
+          warnings.push(
+            `Source '${src.source_id}' contained no usable segments (${failedSegmentCount} failed/skipped)`,
+          );
+        }
       } else if (src.content) {
         if (src.kind === 'html' || src.kind === 'website') {
           const parsed = parseHtmlSource(src.content, src.source_id, src.location);

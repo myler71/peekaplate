@@ -432,4 +432,341 @@ Garlic Bread: $4.00
       expect(passageSource?.retrieved_at).toBeDefined();
     });
   });
+
+  describe('Finding P2: Contradictory evidence preservation before deduplication', () => {
+    const desc1 = 'Tomato Soup with fresh basil cream and toasted sourdough bread $12.00';
+    const desc2 = 'Tomato Soup with fresh basil cream and toasted sourdough bread $18.00';
+
+    it('preserves conflicting prices for identical descriptions so contradictions remain detectable', async () => {
+      const request: RetrievalRequestInput = {
+        query: 'Tomato Soup',
+        sources: [
+          {
+            source_id: 'src_menu_a',
+            kind: 'text',
+            segments: [
+              {
+                segment_id: 'seg_a1',
+                text: desc1,
+                status: 'ready',
+              },
+            ],
+          },
+          {
+            source_id: 'src_menu_b',
+            kind: 'text',
+            segments: [
+              {
+                segment_id: 'seg_b1',
+                text: desc2,
+                status: 'ready',
+              },
+            ],
+          },
+        ],
+      };
+
+      const result = await retrieveMenuEvidence(request);
+
+      // Both contradictory passages must be preserved
+      expect(result.passages).toHaveLength(2);
+      expect(result.passages.map((p) => p.text)).toEqual([desc1, desc2]);
+
+      // Both distinct source references must be preserved
+      const sourceIds = result.passages.map((p) => p.source.source_id);
+      expect(sourceIds).toContain('src_menu_a');
+      expect(sourceIds).toContain('src_menu_b');
+
+      // Ambiguity must be surfaced in status and warnings
+      expect(result.status).toBe('ambiguous');
+      expect(
+        result.warnings.some((w) =>
+          w.includes(
+            'Ambiguous evidence detected: multiple candidate menu entries matched with differing details',
+          ),
+        ),
+      ).toBe(true);
+    });
+
+    it('deduplicates identical passages with matching prices as normal', async () => {
+      const request: RetrievalRequestInput = {
+        query: 'Tomato Soup',
+        sources: [
+          {
+            source_id: 'src_menu_1',
+            kind: 'text',
+            segments: [
+              {
+                segment_id: 'seg_1',
+                text: desc1,
+                status: 'ready',
+              },
+            ],
+          },
+          {
+            source_id: 'src_menu_2',
+            kind: 'text',
+            segments: [
+              {
+                segment_id: 'seg_2',
+                text: desc1, // Identical description AND price
+                status: 'ready',
+              },
+            ],
+          },
+        ],
+      };
+
+      const result = await retrieveMenuEvidence(request);
+
+      // Only one passage should survive deduplication
+      expect(result.passages).toHaveLength(1);
+      expect(result.passages[0]?.text).toBe(desc1);
+      expect(result.status).toBe('success');
+    });
+
+    it('extractPrices and hasConflictingPrices detect disagreements across formats', async () => {
+      const { extractPrices, hasConflictingPrices } = await import('./ranker');
+
+      expect(extractPrices('Soup: $12.00 and Salad: $8.50')).toEqual(['12.00', '8.50'].sort());
+      expect(extractPrices('Entree CAD 18.00')).toEqual(['18.00']);
+      expect(extractPrices('Pasta €14.50')).toEqual(['14.50']);
+      expect(extractPrices('Tacos $12')).toEqual(['12.00']);
+
+      expect(hasConflictingPrices('Soup $12.00', 'Soup $18.00')).toBe(true);
+      expect(hasConflictingPrices('Soup $12.00', 'Soup $12.00')).toBe(false);
+      expect(hasConflictingPrices('Soup with bread', 'Soup with bread')).toBe(false);
+      expect(hasConflictingPrices('Soup $12.00', 'Soup with bread')).toBe(false);
+    });
+  });
+
+  describe('Finding P2: Exclude failed and skipped segments from evidence indexing', () => {
+    it('never indexes a failed segment with non-empty text and an error (Hemu review case)', async () => {
+      const request: RetrievalRequestInput = {
+        query: 'Tomato Soup',
+        sources: [
+          {
+            source_id: 'src_failed_doc',
+            kind: 'text',
+            segments: [
+              {
+                segment_id: 'seg_failed_ocr',
+                text: 'Tomato Soup $12.00',
+                status: 'failed',
+                error: 'OCR extraction failed',
+              },
+            ],
+          },
+        ],
+      };
+
+      const result = await retrieveMenuEvidence(request);
+
+      // The failed text must NEVER become evidence
+      expect(result.passages).toHaveLength(0);
+      expect(result.status).not.toBe('success');
+
+      // The failure diagnostics must be preserved in warnings
+      expect(
+        result.warnings.some((w) =>
+          w.includes(
+            "Source 'src_failed_doc' segment 'seg_failed_ocr' marked as failed: OCR extraction failed",
+          ),
+        ),
+      ).toBe(true);
+      expect(
+        result.warnings.some((w) =>
+          w.includes("Source 'src_failed_doc' contained no usable segments"),
+        ),
+      ).toBe(true);
+    });
+
+    it('never indexes a skipped segment even with non-empty text', async () => {
+      const request: RetrievalRequestInput = {
+        query: 'Minestrone',
+        sources: [
+          {
+            source_id: 'src_skipped_doc',
+            kind: 'text',
+            segments: [
+              {
+                segment_id: 'seg_skipped_page',
+                text: 'Minestrone Classico: $9.50',
+                status: 'skipped',
+              },
+            ],
+          },
+        ],
+      };
+
+      const result = await retrieveMenuEvidence(request);
+      expect(result.passages).toHaveLength(0);
+      expect(result.status).not.toBe('success');
+      expect(
+        result.warnings.some((w) =>
+          w.includes("Source 'src_skipped_doc' segment 'seg_skipped_page' marked as skipped"),
+        ),
+      ).toBe(true);
+    });
+
+    it('indexes valid successful segments while excluding failed segments from the same source', async () => {
+      const request: RetrievalRequestInput = {
+        query: 'Soup',
+        sources: [
+          {
+            source_id: 'src_partial_menu',
+            kind: 'text',
+            segments: [
+              {
+                segment_id: 'seg_page_1',
+                text: 'Tuscan White Bean Soup with rosemary: $11.50',
+                page_number: 1,
+                status: 'ready',
+              },
+              {
+                segment_id: 'seg_page_2',
+                text: 'French Onion Soup with gruyere: $13.50',
+                page_number: 2,
+                status: 'failed',
+                error: 'OCR blur threshold exceeded',
+              },
+            ],
+          },
+        ],
+      };
+
+      const result = await retrieveMenuEvidence(request);
+
+      // Page 1 should be retrieved
+      expect(result.passages).toHaveLength(1);
+      expect(result.passages[0]?.text).toContain('Tuscan White Bean Soup');
+      expect(result.passages[0]?.source.segment_id).toBe('seg_page_1');
+
+      // Page 2 should NOT be in passages
+      expect(result.passages.some((p) => p.text.includes('French Onion Soup'))).toBe(false);
+
+      // Warnings must record page 2 failure and indicate partial extraction
+      expect(
+        result.warnings.some((w) =>
+          w.includes(
+            "Source 'src_partial_menu' segment 'seg_page_2' marked as failed: OCR blur threshold exceeded",
+          ),
+        ),
+      ).toBe(true);
+      expect(
+        result.warnings.some((w) =>
+          w.includes("Source 'src_partial_menu' partially indexed (1 valid, 1 failed/skipped)"),
+        ),
+      ).toBe(true);
+    });
+
+    it('reports failure when all sources have only failed or skipped segments', async () => {
+      const request: RetrievalRequestInput = {
+        query: 'Soup',
+        sources: [
+          {
+            source_id: 'src_all_failed_1',
+            kind: 'text',
+            segments: [
+              {
+                segment_id: 'seg_1',
+                text: 'Soup $10.00',
+                status: 'failed',
+                error: 'Page unreadable',
+              },
+            ],
+          },
+          {
+            source_id: 'src_all_failed_2',
+            kind: 'text',
+            segments: [
+              {
+                segment_id: 'seg_2',
+                text: 'Chowder $12.00',
+                status: 'skipped',
+              },
+            ],
+          },
+        ],
+      };
+
+      const result = await retrieveMenuEvidence(request);
+      expect(result.passages).toHaveLength(0);
+      expect(result.status).toBe('failed');
+      expect(result.warnings.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('Finding P2: Decode numeric HTML entities without truncating Unicode', () => {
+    it('decodes decimal astral entity &#127836; to 🍜 (Soup 🍜 $8.50)', async () => {
+      const html = '<html><body><p>Soup &#127836; $8.50</p></body></html>';
+      const parsed = parseHtmlSource(html, 'src_test');
+
+      expect(parsed.segments).toHaveLength(1);
+      expect(parsed.segments[0]?.text).toBe('Soup 🍜 $8.50');
+      // Verify length in code points vs UTF-16 code units
+      expect(parsed.segments[0]?.text.length).toBe(13); // JS UTF-16
+      expect(Array.from(parsed.segments[0]?.text ?? '').length).toBe(12); // Python Unicode code points
+    });
+
+    it('decodes hexadecimal astral entity &#x1F35C; and &#X1F35C; to 🍜', async () => {
+      const html = '<html><body><p>Soup &#x1F35C; $8.50 and Bowl &#X1F35C; $9.50</p></body></html>';
+      const parsed = parseHtmlSource(html, 'src_test');
+
+      expect(parsed.segments[0]?.text).toBe('Soup 🍜 $8.50 and Bowl 🍜 $9.50');
+    });
+
+    it('decodes multiple astral entities in sequence correctly', async () => {
+      const html = '<html><body><p>Menu: &#127829;&#127836;&#127790; $25.00</p></body></html>';
+      const parsed = parseHtmlSource(html, 'src_test');
+
+      expect(parsed.segments[0]?.text).toBe('Menu: 🍕🍜🌮 $25.00');
+    });
+
+    it('handles out-of-range code points and surrogates safely with replacement character', async () => {
+      const { decodeHtmlEntities } = await import('./parser');
+
+      // Out of range (> 0x10FFFF)
+      expect(decodeHtmlEntities('Test &#9999999; End')).toBe('Test \uFFFD End');
+
+      // Surrogate code points (0xD800 - 0xDFFF)
+      expect(decodeHtmlEntities('Test &#55296; End')).toBe('Test \uFFFD End');
+    });
+
+    it('preserves existing named entities and avoids double decoding', async () => {
+      const { decodeHtmlEntities } = await import('./parser');
+
+      expect(decodeHtmlEntities('&quot;Soup&quot; &amp; &lt;Salad&gt; &apos;Bread&apos;')).toBe(
+        '"Soup" & <Salad> \'Bread\'',
+      );
+
+      // Verify no double decoding of &amp;#127836;
+      expect(decodeHtmlEntities('&amp;#127836;')).toBe('&#127836;');
+    });
+
+    it('preserves correct downstream passage offsets after entity decoding', async () => {
+      const html = '<main id="menu"><p>Signature Ramen: Soup &#127836; $8.50 - Hot</p></main>';
+      const request: RetrievalRequestInput = {
+        query: 'Signature Ramen',
+        sources: [
+          {
+            source_id: 'src_ramen',
+            kind: 'html',
+            content: html,
+          },
+        ],
+      };
+
+      const result = await retrieveMenuEvidence(request);
+      expect(result.status).toBe('success');
+      expect(result.passages).toHaveLength(1);
+
+      const passage = result.passages[0]!;
+      expect(passage.text).toContain('Soup 🍜 $8.50');
+
+      // Reconstructed slice from the segment text must match exactly
+      const segmentText = result.passages[0]?.text ?? '';
+      expect(segmentText.slice(0, passage.text.length)).toBe(passage.text);
+    });
+  });
 });
