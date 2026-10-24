@@ -49,6 +49,8 @@ ClickUp's “Complete” status describes a task's recorded progress. It is not 
 
 ### Where to open staging
 
+The [observation Queue, DLQ and private R2 setup](observation-infrastructure.md) is now provisioned and tested with synthetic messages. Think of the Queue as the waiting room, R2 as the original evidence archive and the DLQ as the recovery tray for work that repeatedly fails. Both Queues are paused while Teeyansh's real consumer is unfinished. They retain messages for 24 hours even while paused, so real collection must remain off. The staging binding configuration needs its reviewed release before the API Worker can use it; actual archive-to-database processing remains separate work.
+
 **Staging is our shared online test environment.** It lets the team test the same version before real restaurant use. We are keeping these existing names; no domain purchase or rename is needed.
 
 | Open this | Who it is for | What to expect today |
