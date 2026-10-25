@@ -34,10 +34,11 @@ env:
 
 jobs:
   build:
-    # Fork PRs receive no secrets, so they get CI only.
+    # Fork and Dependabot PRs receive no Actions secrets, so they get CI only.
     if: >-
       github.event_name == 'pull_request' && github.event.action != 'closed' &&
       github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
       vars.PREVIEW_DEPLOYMENT_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
@@ -101,8 +102,8 @@ jobs:
           for app in diner console; do
             # Keep previews out of search results.
             printf '/*\n  X-Robots-Tag: noindex\n' > "preview/$app/_headers"
-            project_var="${app^^}_PROJECT"
-            project="${!project_var}"
+            project="$DINER_PROJECT"
+            test "$app" = console && project="$CONSOLE_PROJECT"
             npx --yes "wrangler@$WRANGLER_VERSION" pages deploy "preview/$app" \
               --project-name "$project" --branch "$branch" --commit-hash "$SHA" --commit-dirty=true
             url="https://$branch.$project.pages.dev"

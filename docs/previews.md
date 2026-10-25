@@ -14,7 +14,7 @@ A PR preview is a temporary copy of the diner and console pages built from one p
 No comment means one of these:
 
 - the PR changes no files under `frontend/`, `packages/` or the workspace/lockfile;
-- it comes from a fork, which receives no deployment credentials;
+- it comes from a fork or Dependabot, which receive no deployment credentials;
 - previews are switched off (see [Setup](#setup));
 - the **PR preview** check failed. Open it from the PR's checks list.
 
