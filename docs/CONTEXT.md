@@ -193,8 +193,10 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "playwright.posthog.config.ts",
         "tests/e2e/posthog.spec.ts",
         "docs/observation-infrastructure.md",
-        ".github/workflows/preview.yml",
-        "docs/previews.md"
+        ".github/workflows/deploy-preview.yml",
+        "docs/previews.md",
+        "scripts/preview.mjs",
+        "scripts/preview.test.mjs"
       ],
       "adrs": [
         "docs/adr/0007-delivery-and-recovery.md",
@@ -205,7 +207,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "9061f02a39b16ee4fe543feb4b24a3220ebf80181acf4b68390ab90914b0fdb1"
+      "sourceFingerprint": "796bba6b6159e71bb0e3414a7c052abe1c79cef64d2ae4917f60808e1ad780bb"
     },
     {
       "id": "agents",
@@ -312,11 +314,11 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
   ],
   "handoffs": [
     {
-      "summary": "Added a disabled-by-default PR preview workflow for S3 preview deployments. Same-repository PRs that change frontend or shared packages build static diner/console pages with analytics disabled and no credentials; a separate job uploads only those files to dedicated peekaplate-diner-preview/peekaplate-console-preview Pages projects under the pr-<number> alias using a Pages-only token in a preview environment, checks both links and updates one PR comment. Closing a PR deletes its deployments; manual dispatch repeats cleanup. Reviewer guide, isolation limits and setup are in docs/previews.md. No preview project, token or run has been created or verified.",
+      "summary": "Added a disabled-by-default PR preview workflow for S3 preview deployments. Same-repository PRs using trusted base workflow code build static diner/console pages with analytics disabled and no credentials; a separate job uploads only those files to dedicated peekaplate-diner-preview/peekaplate-console-preview Pages projects under the pr-<number> alias using a Pages-only token in a preview environment, checks both links and updates one PR comment. Closing a PR deletes its deployments; manual dispatch repeats cleanup. Reviewer guide, isolation limits and setup are in docs/previews.md. The preview token name and account variable were verified in GitHub; exact develop/main environment branch restrictions were configured. Project availability, token validity and hosted workflow execution remain unverified. Static-artifact and provider checks fail closed; cleanup is independent of the deployment toggle.",
       "modules": [
         "delivery"
       ],
-      "next": "An administrator creates the two preview Pages projects, a Pages-edit-only token, the preview environment and PREVIEW_DEPLOYMENT_ENABLED. After merge to develop and PR #37 retargeting to develop, validate deploy, comment, page load and close cleanup on PR #37 and record the run in operations.md."
+      "next": "Verify the two preview Pages projects and token scope, then enable PREVIEW_DEPLOYMENT_ENABLED after human review and merge to develop. PR #37 already targets develop. Validate deployment, comment, page load and cleanup; record actual hosted evidence in operations.md."
     },
     {
       "summary": "Fixed the Docker database readiness race observed after PR #24 in develop run 40146434333: SQL assertions and Worker integration passed, but the fresh local-smoke database refused TCP migrations. The readiness probe now uses 127.0.0.1:5432 instead of accepting the socket-only bootstrap server. A deterministic regression failed with the same connection-refused error before the fix and passes afterward. Real Docker checks passed all 73 SQL assertions, 20 integration cases and local startup/demo/cleanup. No application, schema, credentials or deployment behavior changed.",
