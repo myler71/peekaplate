@@ -429,7 +429,7 @@ The six current tables have simple jobs: `venues` identifies restaurants; `staff
 | [.github/dependabot.yml](../.github/dependabot.yml) | Monthly grouped routine updates and separate security-update grouping |
 | [.github/workflows/ci.yml](../.github/workflows/ci.yml) | The five purposeful CI jobs described above |
 | [.github/workflows/deploy-staging.yml](../.github/workflows/deploy-staging.yml) | Manual main-branch Worker deployment using a staging environment and protected credentials |
-| [.github/workflows/preview.yml](../.github/workflows/preview.yml) | Static diner/console preview links for same-repository PRs, deleted when the PR closes; see [PR previews](previews.md) |
+| [.github/workflows/deploy-preview.yml](../.github/workflows/deploy-preview.yml) | Static diner/console preview links for same-repository PRs, deleted when the PR closes; see [PR previews](previews.md) |
 
 ### Agent files: who does which job
 

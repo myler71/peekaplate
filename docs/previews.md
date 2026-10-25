@@ -74,7 +74,7 @@ PR #37 (design tokens) is the first validation case:
 
 ## October 25 verification boundary
 
-- PR #37 head `23cfe85f7d0a823a1e8aa09092c54e6ed203266f` has passing existing CI; this is not a preview deployment result.
+- PR #37 head `23cfe85f7d0a823a1e8aa09092c54e6ed203266f` has passing existing CI. Both local frontend builds and the static artifact sanitizer pass; this is not a preview deployment result.
 - GitHub readback confirmed the preview token secret name and nonempty account variable. Secret values were not read; token scope/validity remains unverified.
 - Preview environment branch restrictions were set to `develop` and `main`.
 - Repository variable `PREVIEW_DEPLOYMENT_ENABLED` is absent, so deployment stays off.
