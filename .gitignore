@@ -17,3 +17,4 @@ PROJECT_CONTEXT.local.md
 __pycache__/
 .venv/
 .pytest_cache/
+.pnpm-store/
