@@ -544,6 +544,129 @@ Garlic Bread: $4.00
       expect(hasConflictingPrices('Soup $0.00', 'Soup $18.00')).toBe(true);
       expect(hasConflictingPrices('Soup $0.00', 'Soup $0.00')).toBe(false);
       expect(hasConflictingPrices('Soup $0.00', 'Soup $0')).toBe(false);
+
+      // Comma-separated thousands prices
+      expect(extractPrices('Imperial Caviar Service $1,200.00')).toEqual(['1200.00']);
+      expect(extractPrices('Imperial Caviar Service $1,200')).toEqual(['1200.00']);
+      expect(extractPrices('Reserve Wine €2,500.50')).toEqual(['2500.50']);
+      expect(
+        hasConflictingPrices(
+          'Imperial Caviar Service $1,200.00',
+          'Imperial Caviar Service $1200.00',
+        ),
+      ).toBe(false);
+      expect(
+        hasConflictingPrices(
+          'Imperial Caviar Service $1,200.00',
+          'Imperial Caviar Service $1,500.00',
+        ),
+      ).toBe(true);
+      expect(
+        hasConflictingPrices(
+          'Imperial Caviar Service $1,200.00',
+          'Imperial Caviar Service $200.00',
+        ),
+      ).toBe(true);
+
+      // Descriptive text, dates, calories, and non-price numbers
+      expect(
+        extractPrices('Established in 1998, serving 450 calories per portion at 1200 Market St'),
+      ).toEqual([]);
+      expect(extractPrices('Published on 2026-10-25 with 0 grams added sugar')).toEqual([]);
+      expect(
+        hasConflictingPrices(
+          'Tasting Menu: 12 courses for 2 guests',
+          'Tasting Menu: 12 courses for 4 guests',
+        ),
+      ).toBe(false);
+      expect(
+        hasConflictingPrices(
+          'Grand Tasting $1,200.00 with 12 courses',
+          'Grand Tasting $1,200.00 with 14 courses',
+        ),
+      ).toBe(false);
+    });
+
+    it('preserves $1,200.00 vs $1,500.00 contradictory evidence and marks ambiguity through real retrieval path', async () => {
+      const desc1 =
+        'Grand Seafood Tower: Maine lobster, oysters, king crab legs, and caviar service: $1,200.00';
+      const desc2 =
+        'Grand Seafood Tower: Maine lobster, oysters, king crab legs, and caviar service: $1,500.00';
+
+      const request: RetrievalRequestInput = {
+        query: 'Grand Seafood Tower',
+        sources: [
+          {
+            source_id: 'src_menu_a',
+            kind: 'text',
+            segments: [
+              {
+                segment_id: 'seg_a',
+                text: desc1,
+                status: 'ready',
+              },
+            ],
+          },
+          {
+            source_id: 'src_menu_b',
+            kind: 'text',
+            segments: [
+              {
+                segment_id: 'seg_b',
+                text: desc2,
+                status: 'ready',
+              },
+            ],
+          },
+        ],
+      };
+
+      const result = await retrieveMenuEvidence(request);
+
+      expect(result.passages).toHaveLength(2);
+      expect(result.status).toBe('ambiguous');
+      expect(result.warnings.some((w) => w.includes('Ambiguous evidence detected'))).toBe(true);
+    });
+
+    it('deduplicates $1,200.00 vs $1200.00 cleanly without false conflict through real retrieval path', async () => {
+      const desc1 =
+        'Grand Seafood Tower: Maine lobster, oysters, king crab legs, and caviar service: $1,200.00';
+      const desc2 =
+        'Grand Seafood Tower: Maine lobster, oysters, king crab legs, and caviar service: $1200.00';
+
+      const request: RetrievalRequestInput = {
+        query: 'Grand Seafood Tower',
+        sources: [
+          {
+            source_id: 'src_menu_a',
+            kind: 'text',
+            segments: [
+              {
+                segment_id: 'seg_a',
+                text: desc1,
+                status: 'ready',
+              },
+            ],
+          },
+          {
+            source_id: 'src_menu_b',
+            kind: 'text',
+            segments: [
+              {
+                segment_id: 'seg_b',
+                text: desc2,
+                status: 'ready',
+              },
+            ],
+          },
+        ],
+      };
+
+      const result = await retrieveMenuEvidence(request);
+
+      expect(result.passages).toHaveLength(1);
+      expect(result.status).toBe('success');
+      expect(result.warnings.some((w) => w.includes('Ambiguous evidence detected'))).toBe(false);
     });
 
     it('preserves explicit zero-price ($0.00 vs $18.00) contradiction and marks ambiguity (Hemu review finding)', async () => {

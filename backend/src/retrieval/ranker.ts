@@ -215,12 +215,14 @@ export function extractPassageFromSegment(
  * Extracts and normalizes explicit prices from text for conflict detection.
  */
 export function extractPrices(text: string): string[] {
-  const priceRegex = /(?:\$|CAD|USD|EUR|€|£)\s*(\d+(?:\.\d{1,2})?)|\b(\d+\.\d{2})\b/g;
+  const priceRegex =
+    /(?:\$|CAD|USD|EUR|€|£)\s*(\d{1,3}(?:,\d{3})+(?:\.\d{1,2})?|\d+(?:\.\d{1,2})?)|\b(\d{1,3}(?:,\d{3})+\.\d{2}|\d+\.\d{2})\b/g;
   const prices = new Set<string>();
   for (const m of text.matchAll(priceRegex)) {
     const val = m[1] ?? m[2];
     if (val !== undefined) {
-      const num = Number.parseFloat(val);
+      const cleanVal = val.replace(/,/g, '');
+      const num = Number.parseFloat(cleanVal);
       if (!Number.isNaN(num) && num >= 0) {
         prices.add(num.toFixed(2));
       }
