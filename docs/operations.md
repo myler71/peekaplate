@@ -194,6 +194,10 @@ The October 22 environment settings record supersedes the earlier assumption tha
 
 The staff-command cloud checks above are complete within their recorded scope: existing migration versions and effective runtime grants, genuine login, restricted uncached Hyperdrive, isolation, retries, concurrency, membership revocation, rollback and transaction-context reset. Do not recreate accounts or resources merely to repeat initial setup. Remaining pilot work includes the session-lifetime policy, representative latency/load, physical pooled-connection reuse evidence and backup restoration. A fresh hosted migration rehearsal remains unrun. Local connection reuse is evidence for application logic, not proof of a hosted pool. Supabase remains the accepted provider under ADR 0005; a Neon switch needs an explicit decision and equivalent auth integration evidence.
 
+## PR previews
+
+Static diner and console previews for PRs use separate `*-preview` Pages projects and a Pages-only token in the `preview` GitHub environment. They are switched off until `PREVIEW_DEPLOYMENT_ENABLED` is `true`. Setup, isolation limits, retention and the PR #37 validation steps are in [PR previews](previews.md). No preview run has been verified yet.
+
 ## Later Actions-based staging activation
 
 Team analytics API release and collaborator access are documented in [team data access](team-data-access.md). The forward migration grants only checked function execution to the existing runtime. Merging the release does not establish hosted activation.

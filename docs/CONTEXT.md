@@ -158,7 +158,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "delivery",
       "status": "foundation",
-      "summary": "Main supplies staging and later production under ADR0012; protected manual deployment/independent review remain required. Last recorded Worker release afe45db and existing Pages/Hyperdrive are preserved. October 24 inventory found no Queues: missing staging source/DLQ created, 24-hour retention, paused HTTP pull consumers and three source retries. Reused private staging R2. Real conditional-write race and synthetic Queue-to-R2-before-ACK/retry-to-DLQ checks passed; both Queues empty and paused after cleanup. Binding configuration still needs reviewed main deployment. Teeyansh PR31/32 and production resources untouched; actual consumer/DB pipeline remains unverified.",
+      "summary": "Main supplies staging and later production under ADR0012; protected manual deployment/independent review remain required. Last recorded Worker release afe45db and existing Pages/Hyperdrive are preserved. October 24 inventory found no Queues: missing staging source/DLQ created, 24-hour retention, paused HTTP pull consumers and three source retries. Reused private staging R2. Real conditional-write race and synthetic Queue-to-R2-before-ACK/retry-to-DLQ checks passed; both Queues empty and paused after cleanup. Binding configuration still needs reviewed main deployment. Teeyansh PR31/32 and production resources untouched; actual consumer/DB pipeline remains unverified. A disabled-by-default PR preview workflow builds static diner/console pages without credentials, deploys them to separate preview Pages projects with a Pages-only token and deletes them on PR close; no preview run is verified yet.",
       "paths": [
         "README.md",
         "SECURITY.md",
@@ -192,7 +192,9 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "docs/delivery.md",
         "playwright.posthog.config.ts",
         "tests/e2e/posthog.spec.ts",
-        "docs/observation-infrastructure.md"
+        "docs/observation-infrastructure.md",
+        ".github/workflows/preview.yml",
+        "docs/previews.md"
       ],
       "adrs": [
         "docs/adr/0007-delivery-and-recovery.md",
@@ -203,7 +205,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "a6b7acbb465ffd51390a48ec7cc40b6b158a57d0d75817d80f5c04c9a0acf6c7"
+      "sourceFingerprint": "8e6c3a7b360ffb60b2e265e3590d155fce27ce132b998688a4a3c62c1fb85801"
     },
     {
       "id": "agents",
@@ -310,6 +312,13 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
   ],
   "handoffs": [
     {
+      "summary": "Added a disabled-by-default PR preview workflow for S3 preview deployments. Same-repository PRs that change frontend or shared packages build static diner/console pages with analytics disabled and no credentials; a separate job uploads only those files to dedicated peekaplate-diner-preview/peekaplate-console-preview Pages projects under the pr-<number> alias using a Pages-only token in a preview environment, checks both links and updates one PR comment. Closing a PR deletes its deployments; manual dispatch repeats cleanup. Reviewer guide, isolation limits and setup are in docs/previews.md. No preview project, token or run has been created or verified.",
+      "modules": [
+        "delivery"
+      ],
+      "next": "An administrator creates the two preview Pages projects, a Pages-edit-only token, the preview environment and PREVIEW_DEPLOYMENT_ENABLED. After merge to develop and PR #37 retargeting to develop, validate deploy, comment, page load and close cleanup on PR #37 and record the run in operations.md."
+    },
+    {
       "summary": "Fixed the Docker database readiness race observed after PR #24 in develop run 40146434333: SQL assertions and Worker integration passed, but the fresh local-smoke database refused TCP migrations. The readiness probe now uses 127.0.0.1:5432 instead of accepting the socket-only bootstrap server. A deterministic regression failed with the same connection-refused error before the fix and passes afterward. Real Docker checks passed all 73 SQL assertions, 20 integration cases and local startup/demo/cleanup. No application, schema, credentials or deployment behavior changed.",
       "modules": [
         "database",
@@ -357,14 +366,6 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "backend"
       ],
       "next": "Review and test the staging configuration, run hosted identity and tenant-isolation checks, and record deployment evidence. Production requires separate resources and human release approval for the same tested main SHA."
-    },
-    {
-      "summary": "Recovered Windows Docker after checksummed offline disk backups and an official Desktop 4.95 upgrade. Real testing exposed a pnpm.mjs launcher rejection; the DB harness now invokes installed Vitest directly, with a failing-then-passing launcher regression. All 43 SQL assertions, 13 Worker/Postgres cases and local startup/demo/cleanup passed on Windows. Contributor Claude/Codex setup is independently owned.",
-      "modules": [
-        "database",
-        "delivery"
-      ],
-      "next": "Finish exact-head review and CI for the local recovery PR. Keep the GitHub protection policy in a separate owner-action PR; stop before Cloudflare/Supabase integration until protected credentials are supplied."
     },
     {
       "summary": "PRs 14/15 released hosted PostHog consented shell capture at main 2a135fa, verified by live synthetic capture and provider readback. Added private export landing migration, conflict-aware deduplication view and least-privilege tests. pnpm check and test:db pass; technical/security review found no supported defect and guide review corrections are applied. Hosted migration applied with explicit access approval; tables and effective role boundaries verified. Export connection created; first run failed TLS verification and schedule is paused. User reported correction requires project Admin access. No rows transferred; no bypass attempted.",
