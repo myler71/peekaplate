@@ -456,3 +456,23 @@ Processing files are unchanged from reviewed 0e3f204. The 89 Python tests, four
 context/Unicode script tests, context freshness and local documentation links
 passed. PR #23 remains separate; reconcile its merged result and rerun CI before
 the final integrated approval in the agreed #23 -> #24 -> #25 order.
+
+## OBS-20261024-DB-TCP-READINESS
+
+Develop run [40146434333](https://github.com/vivienk/peekaplate/actions/runs/40146434333)
+passed 73 SQL assertions and 20 Worker/Postgres cases, then failed the separate
+local-development smoke test while installing its fresh database schema:
+`connect: connection refused`. The aggregate `ci` failure followed that database
+failure; quality and browser checks passed.
+
+The hostless readiness command could accept PostgreSQL's temporary Unix-socket
+bootstrap server before the TCP listener used by dbmate existed. The installed
+official image entrypoint starts that temporary server with `listen_addresses=''`.
+The shared probe now explicitly checks `127.0.0.1:5432`; its existing bounded wait
+and immediate migration-error handling remain intact.
+
+Regression: `node --test scripts/test-db.test.mjs` reproduced the same migration
+connection refusal when socket readiness preceded TCP, then passed all six tests
+after the correction. `pnpm verify test:db` passed the 73 SQL assertions, 20 real
+integration cases and the fresh local startup/demo/cleanup path. This changes
+disposable local/CI startup only, without a hosted database or application change.
