@@ -203,7 +203,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "4b887c58755cf31dd931c14cab2887066ae0d72e0afcd425f04b949e30922957"
+      "sourceFingerprint": "a6b7acbb465ffd51390a48ec7cc40b6b158a57d0d75817d80f5c04c9a0acf6c7"
     },
     {
       "id": "agents",
@@ -261,9 +261,64 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "contracts"
       ],
       "sourceFingerprint": "1dd5e77257b699965de953a06b67cae41efa432a18b804d92f6e69d68988d8e0"
+    },
+    {
+      "id": "processing",
+      "status": "foundation",
+      "summary": "Local PDF/image acquisition uses an injectable OCRProvider restricted to validated OCR.space Engine 3-compatible results. Incompatible OCR fails its segment and preserves later native pages. LLM extraction retains needs_review drafts and evidence. Shared Unicode fixtures check spans; combined integration, separate verification and quality acceptance remain pending.",
+      "paths": [
+        "processing/.gitignore",
+        "processing/.python-version",
+        "processing/README.md",
+        "processing/pyproject.toml",
+        "processing/src/peekaplate_processing/__init__.py",
+        "processing/src/peekaplate_processing/check_llm.py",
+        "processing/src/peekaplate_processing/errors.py",
+        "processing/src/peekaplate_processing/extract_menus.py",
+        "processing/src/peekaplate_processing/images.py",
+        "processing/src/peekaplate_processing/model_cache.py",
+        "processing/src/peekaplate_processing/ocr_regions.py",
+        "processing/src/peekaplate_processing/ocr_space.py",
+        "processing/src/peekaplate_processing/pdf.py",
+        "processing/src/peekaplate_processing/run_pipeline.py",
+        "processing/src/peekaplate_processing/schemas.py",
+        "processing/src/peekaplate_processing/sources.py",
+        "processing/src/peekaplate_processing/storage.py",
+        "processing/src/peekaplate_processing/workflow.py",
+        "processing/tests/fixture_factory.py",
+        "processing/tests/test_ocr_regions.py",
+        "processing/tests/test_ocr_space.py",
+        "processing/tests/test_pdf_images.py",
+        "processing/tests/test_schemas.py",
+        "processing/tests/test_workflow.py",
+        "processing/uv.lock",
+        "docs/ocr-delivery.md",
+        "processing/tests/fixtures/source-spans.json",
+        "processing/tests/test_handoff.py",
+        "scripts/processing-handoff.test.mjs",
+        "processing/src/peekaplate_processing/ocr.py",
+        "processing/tests/test_ocr_provider.py",
+        "test-data/README.md"
+      ],
+      "adrs": [
+        "docs/adr/0001-scope-and-repository.md",
+        "docs/adr/0005-tenancy-and-privacy.md"
+      ],
+      "dependsOn": [],
+      "sourceFingerprint": "929fb3bbb31657ffe307c3d5040770955f5ecd7d488af3f0ea329ed0bb05f119"
     }
   ],
   "handoffs": [
+    {
+      "summary": "Reconciled PR #24 with merged PR #23 at develop 138a4b7. Preserved the retrieval/contracts nodes, local Python processing node, staging Queue/R2/access handoffs and both append-only error histories. Processing sources remain identical to reviewed 0e3f204; the merge adds no extraction, authorization, deployment or publication behavior. Windows checks passed: 89 Python, 187 TypeScript and 33 script tests, lint/types/context/docs, application dry-run builds and Python wheel/sdist. Four optional workerd cases were not rerun here. Retired only the historical design-link-only handoff to retain the ten-entry cap.",
+      "modules": [
+        "processing",
+        "backend",
+        "contracts",
+        "delivery"
+      ],
+      "next": "Keep shared-source adapter/application integration, representative OCR/LLM accuracy evidence, the verification layer and PM acceptance separate from package merge. PR #25 must rebase onto the merged extraction package rather than restore its old copy; follow #23 then #24 then #25."
+    },
     {
       "summary": "Resolved review findings in S3-VIS-04 (PR #23): established transaction-local app.actor_id before staff membership query under restricted database role; preserved contradictory evidence during approximate deduplication including explicit zero values ($0.00 vs $18.00); excluded failed/skipped segments from indexing; enforced Unicode code-point offset translation across VIS-01 and VIS-02 handoffs; corrected astral numeric HTML entity decoding without truncation; validated code-point bounds before offset conversion; added explicit VIS-02 segment mapping; added regression and live workerd-level external fetch security tests.",
       "modules": [
@@ -309,13 +364,6 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "delivery"
       ],
       "next": "Finish exact-head review and CI for the local recovery PR. Keep the GitHub protection policy in a separate owner-action PR; stop before Cloudflare/Supabase integration until protected credentials are supplied."
-    },
-    {
-      "summary": "Corrected the design hyperlink in docs/team_guide.md to the owner-supplied Figma Make diner-menu V1 URL. No design or runtime behavior changed.",
-      "modules": [
-        "delivery"
-      ],
-      "next": "Use the linked Figma Make diner-menu V1 as the referenced design handoff."
     },
     {
       "summary": "PRs 14/15 released hosted PostHog consented shell capture at main 2a135fa, verified by live synthetic capture and provider readback. Added private export landing migration, conflict-aware deduplication view and least-privilege tests. pnpm check and test:db pass; technical/security review found no supported defect and guide review corrections are applied. Hosted migration applied with explicit access approval; tables and effective role boundaries verified. Export connection created; first run failed TLS verification and schedule is paused. User reported correction requires project Admin access. No rows transferred; no bypass attempted.",
