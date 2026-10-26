@@ -196,7 +196,7 @@ The staff-command cloud checks above are complete within their recorded scope: e
 
 ## PR previews
 
-Static diner and console previews for PRs use separate `*-preview` Pages projects and a Pages-only token in the `preview` GitHub environment. They are switched off until `PREVIEW_DEPLOYMENT_ENABLED` is `true`. Setup, isolation limits, retention and the PR #37 validation steps are in [PR previews](previews.md). No preview run has been verified yet.
+Static diner and console previews for PRs use separate `*-preview` Pages projects and a Pages-only token in the `preview` GitHub environment. October 26 readback found `PREVIEW_DEPLOYMENT_ENABLED=true`; automatic activation still requires the reviewed workflow and helper on default branch `main`. The merged `develop` CI passed, but no automatic preview run has been verified. Setup, exact-commit readiness, isolation, retention and lifecycle acceptance are in [PR previews](previews.md).
 
 ## Later Actions-based staging activation
 
@@ -259,3 +259,13 @@ GitHub readback confirmed `CLOUDFLARE_PREVIEW_API_TOKEN` by name and the nonempt
 PASS: `pnpm check` (189 Vitest tests, 47 script tests including 13 preview regressions), actionlint 1.7.7, both frontend builds, context and documentation checks. Exact PR #37 head `23cfe85f7d0a823a1e8aa09092c54e6ed203266f` builds both apps with analytics disabled; their artifact payloads pass the static sanitizer. Existing PR #37 CI was green. These are local/CI checks, not hosted preview acceptance.
 
 NOT VERIFIED: Cloudflare project existence/configuration, GitHub-held token scope/validity, real upload, rendered PR content, bot comment and live cleanup. Read-only local Cloudflare inspection failed at the network/TLS transport. Keep new deployments disabled until provider prerequisites are verified and PR #41 is human-reviewed and merged into the trusted base. No staging or production workflow or cloud resource was changed.
+
+## PR preview repair — October 26, 2026
+
+PR #41 merged into `develop` at `aa7c717`; [merged CI](https://github.com/vivienk/peekaplate/actions/runs/40254354113) passed. The preview enable variable is now true. GitHub resolves `pull_request_target` workflow code and `github.sha` from default branch `main`; the workflow/helper are absent there, explaining the lack of automatic preview runs. The delivery-only follow-up adds those files to main without promoting the unreleased processing/retrieval application changes or changing the manual staging workflow.
+
+Local reproduction found the preview symlink test relied on `/etc/passwd` and Windows file-symlink privileges. A real directory junction on Windows and directory symlink elsewhere now exercise rejection without skipping it. Trusted generated commit markers and bounded alias checks prevent an existing HTTP 200 preview from being labelled as a newer SHA. Staging/backend resources are not changed by these repairs. Automatic upload/comment/close cleanup still requires the reviewed main merge and an actual GitHub run.
+
+Read-only provider checks at `2026-10-26T19:55:24Z` confirmed both preview projects are isolated Direct Upload projects with production branch `unused-production`, no canonical production deployment and no resource/secret bindings accepted by the preflight. The manually uploaded PR #37 aliases returned HTTP 200 with API connections blocked by CSP. These observations do not validate GitHub-held credentials or automatic cleanup.
+
+Staging diner and console, Worker health and both authenticated team analytics read routes returned HTTP 200. Pages deployment IDs remain `013f89a7-d20a-42ef-b3f9-0a3612301e60` and `9ebf0f78-b3f4-47b1-857d-d04abf76ab55`, serving frontend commit `2a135fa`. The active Worker version remains `fcb87dc6-f1c6-4f1c-84c9-542a8014520f`, deployed October 24. This pass made no hosted writes, deployment, migration or credential changes; no separate production application was tested.

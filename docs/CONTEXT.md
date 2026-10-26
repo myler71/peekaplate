@@ -158,7 +158,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "delivery",
       "status": "foundation",
-      "summary": "Main supplies staging and later production under ADR0012; protected manual deployment/independent review remain required. Last recorded Worker release afe45db and existing Pages/Hyperdrive are preserved. October 24 inventory found no Queues: missing staging source/DLQ created, 24-hour retention, paused HTTP pull consumers and three source retries. Reused private staging R2. Real conditional-write race and synthetic Queue-to-R2-before-ACK/retry-to-DLQ checks passed; both Queues empty and paused after cleanup. Binding configuration still needs reviewed main deployment. Teeyansh PR31/32 and production resources untouched; actual consumer/DB pipeline remains unverified. A disabled-by-default PR preview workflow builds static diner/console pages without credentials, deploys them to separate preview Pages projects with a Pages-only token and deletes them on PR close; no preview run is verified yet.",
+      "summary": "Main supplies protected manual staging and later production releases under ADR0012. October 26 read-only checks found staging Pages at 2a135fa, Worker version fcb87dc6, and healthy team analytics reads. Observation producer/R2 infrastructure is present; consumer and canonical reporting remain separate work. PR41 merged previews into develop, but GitHub requires the workflow/helper on default main. Preview-only repair adds credential-free PR builds, isolated Pages upload/cleanup, trusted SHA markers and exact-alias readiness. The enable variable is true; actual GitHub upload/comment/close acceptance and production remain unverified.",
       "paths": [
         "README.md",
         "SECURITY.md",
@@ -207,7 +207,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "db105a5da51d496ef3d64cc9accb584c04dcb3ffcda167c88f9bfe0233534ede"
+      "sourceFingerprint": "81293a3edbf5e685aea08f0342b815f8bff3a3744d01ebf213e4cc9aed542a91"
     },
     {
       "id": "agents",
@@ -314,11 +314,11 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
   ],
   "handoffs": [
     {
-      "summary": "Added a disabled-by-default PR preview workflow for S3 preview deployments. Same-repository PRs using trusted base workflow code build static diner/console pages with analytics disabled and no credentials; a separate job uploads only those files to dedicated peekaplate-diner-preview/peekaplate-console-preview Pages projects under the pr-<number> alias using a Pages-only token in a preview environment, checks both links and updates one PR comment. Closing a PR deletes its deployments; manual dispatch repeats cleanup. Reviewer guide, isolation limits and setup are in docs/previews.md. The preview token name and account variable were verified in GitHub; exact develop/main environment branch restrictions were configured. Project availability, token validity and hosted workflow execution remain unverified. Static-artifact and provider checks fail closed; cleanup is independent of the deployment toggle.",
+      "summary": "Investigated accidental PR41 develop merge aa7c717: merged CI passed; read-only staging health, frontend and team reads remain HTTP200 with unchanged provider versions. Found default-main workflow activation prerequisite and a Windows EPERM symlink fixture failure. Preview-only main repair carries trusted orchestration/helpers without unreleased app changes, uses a real portable directory link test and exact-SHA alias markers. Local focused tests pass; hosted writes, credentials, staging deployment and migrations are unchanged.",
       "modules": [
         "delivery"
       ],
-      "next": "Verify the two preview Pages projects and token scope, then enable PREVIEW_DEPLOYMENT_ENABLED after human review and merge to develop. PR #37 already targets develop. Validate deployment, comment, page load and cleanup; record actual hosted evidence in operations.md."
+      "next": "Review the narrow main PR and exact-head CI. After human merge approval, verify an eligible PR upload/comment/render and close cleanup through GitHub Actions, then synchronize preview repairs into develop. Keep application promotion and protected staging deployment separate."
     },
     {
       "summary": "Fixed the Docker database readiness race observed after PR #24 in develop run 40146434333: SQL assertions and Worker integration passed, but the fresh local-smoke database refused TCP migrations. The readiness probe now uses 127.0.0.1:5432 instead of accepting the socket-only bootstrap server. A deterministic regression failed with the same connection-refused error before the fix and passes afterward. Real Docker checks passed all 73 SQL assertions, 20 integration cases and local startup/demo/cleanup. No application, schema, credentials or deployment behavior changed.",
