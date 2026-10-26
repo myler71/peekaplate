@@ -158,7 +158,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "delivery",
       "status": "foundation",
-      "summary": "Main supplies protected manual staging and later production releases under ADR0012. October 26 read-only checks found staging Pages at 2a135fa, Worker version fcb87dc6, and healthy team analytics reads. Observation producer/R2 infrastructure is present; consumer and canonical reporting remain separate work. PR41 merged previews into develop, but GitHub requires the workflow/helper on default main. Preview-only repair adds credential-free PR builds, isolated Pages upload/cleanup, trusted SHA markers and exact-alias readiness. The enable variable is true; actual GitHub upload/comment/close acceptance and production remain unverified.",
+      "summary": "Main supplies protected manual staging and later production releases under ADR 0012. October 26 readback found unchanged staging Pages at 2a135fa, Worker version fcb87dc6 and healthy team analytics reads. PR #47 main merge ab6f9c4 activated isolated PR previews: credential-free head builds, trusted SHA markers, exact-alias readiness and scoped cleanup. GitHub run 40393096652 deployed synthetic PR #48; both screens/markers and one bot comment passed. Close run 40393553935 removed both deployments and edge aliases settled to 404. No application, database or staging release occurred. Observation consumer/canonical reporting and production remain separate work.",
       "paths": [
         "README.md",
         "SECURITY.md",
@@ -207,7 +207,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "81293a3edbf5e685aea08f0342b815f8bff3a3744d01ebf213e4cc9aed542a91"
+      "sourceFingerprint": "6fd3f20a6d1ebc5428942487183593bdaaa7ab7c35d8b20dd9559add0f5fa997"
     },
     {
       "id": "agents",
@@ -314,11 +314,11 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
   ],
   "handoffs": [
     {
-      "summary": "Investigated accidental PR41 develop merge aa7c717: merged CI passed; read-only staging health, frontend and team reads remain HTTP200 with unchanged provider versions. Found default-main workflow activation prerequisite and a Windows EPERM symlink fixture failure. Preview-only main repair carries trusted orchestration/helpers without unreleased app changes, uses a real portable directory link test and exact-SHA alias markers. Local focused tests pass; hosted writes, credentials, staging deployment and migrations are unchanged.",
+      "summary": "PR41 merge audit found staging healthy with unchanged deployments, default-main preview activation missing and a Windows link-fixture failure. Main-only repair PR #47 merged as ab6f9c4 with green CI. GitHub-held credentials passed synthetic PR #48 upload, exact-SHA aliases, browser rendering and one bot comment in run 40393096652. Closing PR #48 triggered cleanup 40393553935; both provider lists became empty and aliases/markers settled to 404. Portable link rejection and stale-marker regressions pass. Evidence is in docs/previews.md; staging, migrations and production are unchanged.",
       "modules": [
         "delivery"
       ],
-      "next": "Review the narrow main PR and exact-head CI. After human merge approval, verify an eligible PR upload/comment/render and close cleanup through GitHub Actions, then synchronize preview repairs into develop. Keep application promotion and protected staging deployment separate."
+      "next": "Finish the reviewed develop companion merge and recheck its final automatic cleanup. Review future PRs through their bot preview links; repeat lifecycle acceptance after workflow/provider changes. Application promotion and protected staging/production deployments remain separate."
     },
     {
       "summary": "Fixed the Docker database readiness race observed after PR #24 in develop run 40146434333: SQL assertions and Worker integration passed, but the fresh local-smoke database refused TCP migrations. The readiness probe now uses 127.0.0.1:5432 instead of accepting the socket-only bootstrap server. A deterministic regression failed with the same connection-refused error before the fix and passes afterward. Real Docker checks passed all 73 SQL assertions, 20 integration cases and local startup/demo/cleanup. No application, schema, credentials or deployment behavior changed.",

@@ -523,3 +523,14 @@ Sanitization now generates the marker from a checked SHA, rejects supplied
 markers and verifies both deployed aliases against that SHA before announcing
 readiness. Focused tests reject a stale HTTP 200 marker and pass the matching
 commit; provider writes are not part of these local tests.
+## ERR-20261026-PREVIEW-REPAIR · Hosted resolution
+
+Maintainer-authorized PR47 main merge ab6f9c4 registered the trusted workflow.
+Actual GitHub run 40393096652 uploaded the exact synthetic PR48 head, verified
+both SHA markers and posted one bot comment. Close cleanup 40393553935 removed
+both provider deployments and changed that comment to removed. Edge readback
+briefly returned 500 after deletion; subsequent bounded readback confirmed
+both aliases and markers 404 at 2026-10-26T20:13:56Z. Provider deletion success
+alone does not establish instantaneous edge retirement. Staging deployment
+IDs and app data were unchanged; detailed evidence is in docs/previews.md.
+
