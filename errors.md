@@ -379,3 +379,23 @@ These records describe local validation limits, not application failures.
 ```json
 {"id":"OBS-20261024-INFRA-TOOLING-001","status":"resolved","area":"operator-tooling","observation":"Initial account-wide R2 inventory could not choose between two authorized accounts; a CORS read returned the documented no-configuration 404. A local probe syntax check, one atomic documentation patch and an intermediate scan-draft schema submission also rejected invalid local input before completion.","cause":"Account selection must be explicit for these commands; no CORS configuration is represented by provider error 10059. Local tooling input did not match its file/API schema.","prevention":"Pin the intended non-secret account, distinguish the exact no-CORS response from other errors, syntax-check probes before execution, inspect patch context and use documented scan fields. Never print credential-bearing subprocess output.","regression":"Corrected account-specific inventory, private-bucket readback, real R2/Queue probes and scan checkpoint succeeded. No token, raw analytics payload or private conversation was retained."}
 ```
+# ERR-20261026-PREVIEW-REPAIR
+
+PR #41 merged successfully into develop, but automatic previews did not run:
+GitHub now reads pull_request_target workflow code and github.sha from the
+default branch, which still lacked the workflow and helper. Repository readback
+showed the enable variable true; a variable cannot supply missing trusted code.
+The follow-up promotes only preview orchestration to main and corrects the
+activation guide. GitHub-held token/lifecycle acceptance remains separate.
+
+`node --test scripts/preview.test.mjs` also reproduced 12 passes and one Windows
+EPERM while creating a file symlink to `/etc/passwd`; this failed before the
+sanitizer was exercised. The fixture now uses a real Windows directory junction
+or a directory symlink elsewhere. All rejection assertions remain enabled.
+
+A new exact-commit marker regression failed with ENOENT before implementation.
+Sanitization now generates the marker from a checked SHA, rejects supplied
+markers and verifies both deployed aliases against that SHA before announcing
+readiness. Focused tests reject a stale HTTP 200 marker and pass the matching
+commit; provider writes are not part of these local tests.
+

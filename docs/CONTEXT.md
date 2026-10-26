@@ -145,7 +145,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "delivery",
       "status": "foundation",
-      "summary": "Main supplies staging and later production under ADR0012; protected manual deployment/independent review remain required. Last recorded Worker release afe45db and existing Pages/Hyperdrive are preserved. October 24 inventory found no Queues: missing staging source/DLQ created, 24-hour retention, paused HTTP pull consumers and three source retries. Reused private staging R2. Real conditional-write race and synthetic Queue-to-R2-before-ACK/retry-to-DLQ checks passed; both Queues empty and paused after cleanup. Binding configuration still needs reviewed main deployment. Teeyansh PR31/32 and production resources untouched; actual consumer/DB pipeline remains unverified.",
+      "summary": "Main supplies protected manual staging and later production releases under ADR0012. October 26 read-only checks found staging Pages at 2a135fa, Worker version fcb87dc6, and healthy team analytics reads. Observation producer/R2 infrastructure is present; consumer and canonical reporting remain separate work. PR41 merged previews into develop, but GitHub requires the workflow/helper on default main. Preview-only repair adds credential-free PR builds, isolated Pages upload/cleanup, trusted SHA markers and exact-alias readiness. The enable variable is true; actual GitHub upload/comment/close acceptance and production remain unverified.",
       "paths": [
         "README.md",
         "SECURITY.md",
@@ -179,7 +179,11 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "docs/delivery.md",
         "playwright.posthog.config.ts",
         "tests/e2e/posthog.spec.ts",
-        "docs/observation-infrastructure.md"
+        "docs/observation-infrastructure.md",
+        ".github/workflows/deploy-preview.yml",
+        "docs/previews.md",
+        "scripts/preview.mjs",
+        "scripts/preview.test.mjs"
       ],
       "adrs": [
         "docs/adr/0007-delivery-and-recovery.md",
@@ -190,7 +194,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "4b887c58755cf31dd931c14cab2887066ae0d72e0afcd425f04b949e30922957"
+      "sourceFingerprint": "4aa39dd6578114269d320aecf8903ee77e683092e7eb37cb7bd6373533e429e5"
     },
     {
       "id": "agents",
@@ -252,6 +256,13 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
   ],
   "handoffs": [
     {
+      "summary": "Investigated accidental PR41 develop merge aa7c717: merged CI passed; read-only staging health, frontend and team reads remain HTTP200 with unchanged provider versions. Found default-main workflow activation prerequisite and a Windows EPERM symlink fixture failure. Preview-only main repair carries trusted orchestration/helpers without unreleased app changes, uses a real portable directory link test and exact-SHA alias markers. Local focused tests pass; hosted writes, credentials, staging deployment and migrations are unchanged.",
+      "modules": [
+        "delivery"
+      ],
+      "next": "Review the narrow main PR and exact-head CI. After human merge approval, verify an eligible PR upload/comment/render and close cleanup through GitHub Actions, then synchronize preview repairs into develop. Keep application promotion and protected staging deployment separate."
+    },
+    {
       "summary": "Reconciled main into the PR 27 release branch, preserving October 22 staging controls, verified PostHog export history, team analytics access documentation and both error-ledger histories. Runtime, contracts, migrations and deployment workflow are unchanged from the reviewed develop release. Corrected the team-access activation checklist so migration/history, token permissions and final review/CI are explicit prerequisites to enabling the flag. Final guide cleanup distinguishes the enabled hourly export from the pending team inspection API and links its activation checklist; PR verification metadata is refreshed for the final candidate.",
       "modules": [
         "delivery",
@@ -295,13 +306,6 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "delivery"
       ],
       "next": "Finish exact-head review and CI for the local recovery PR. Keep the GitHub protection policy in a separate owner-action PR; stop before Cloudflare/Supabase integration until protected credentials are supplied."
-    },
-    {
-      "summary": "Corrected the design hyperlink in docs/team_guide.md to the owner-supplied Figma Make diner-menu V1 URL. No design or runtime behavior changed.",
-      "modules": [
-        "delivery"
-      ],
-      "next": "Use the linked Figma Make diner-menu V1 as the referenced design handoff."
     },
     {
       "summary": "PRs 14/15 released hosted PostHog consented shell capture at main 2a135fa, verified by live synthetic capture and provider readback. Added private export landing migration, conflict-aware deduplication view and least-privilege tests. pnpm check and test:db pass; technical/security review found no supported defect and guide review corrections are applied. Hosted migration applied with explicit access approval; tables and effective role boundaries verified. Export connection created; first run failed TLS verification and schedule is paused. User reported correction requires project Admin access. No rows transferred; no bypass attempted.",
