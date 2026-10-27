@@ -28,6 +28,28 @@ staging deployment. Preserve Hyperdrive, Auth, `TEAM_GITHUB_TOKEN` and both
 observation bindings. No database, production resource, subscription or extra
 bucket is created by this change; normal provider usage can still incur charges.
 
+## Release and deployment attempt — October 27, 2026
+
+[PR #54](https://github.com/vivienk/peekaplate/pull/54) merged to develop and
+[PR #55](https://github.com/vivienk/peekaplate/pull/55) promoted the reviewed
+setup to main `58838e1b17321685d3b0869484b9a68437eea564`.
+[Main CI](https://github.com/vivienk/peekaplate/actions/runs/40577056970) passed.
+Deployment was attempted from that exact commit; it was not left untested.
+
+| Check at 20:25 UTC | Actual result | Next action |
+| --- | --- | --- |
+| [Protected API deployment](https://github.com/vivienk/peekaplate/actions/runs/40577213391) | Waiting for an independent staging reviewer; the initiating account cannot approve itself. | Jeffin or Teeyansh approves the pending deployment. After it succeeds, verify the new `INGESTION_QUEUE` and `INGESTION_REPORTS_BUCKET` bindings. |
+| Existing API | Health HTTP 200; October 24 version `fcb87dc6-f1c6-4f1c-84c9-542a8014520f` is still active. Its existing bindings and secret names are unchanged. | Do not claim the new aliases are live before provider readback. |
+| Container deployment | Docker build completed, but Cloudflare rejected `/containers/me` with HTTP 401: Workers Paid is required. | Vivien activates the planned Workers Paid subscription; retry the same reviewed configuration. No upgrade was purchased here. |
+| Partial extraction Worker | Upload created version `7c275801-96e3-4638-8aaa-8128f05fa062`, but its workers.dev route is disabled and health/extract URLs return 404. Settings readback returned provider HTTP 500. No working container service is established. | Reuse `peekaplate-extraction-staging` on retry; do not create a duplicate host or configure it as a healthy extraction endpoint. |
+| Queue/R2 resources | Source/DLQ still exist, with the tested routing, private bucket and paused delivery. | Teeyansh can continue local integration now. Keep real submissions off until the consumer and full acceptance pass. |
+
+The Paid-plan rejection blocks hosted Python extraction, not ongoing contract,
+adapter, migration or local-test work. Protected service/signing/provider secrets
+and real OCR/LLM extraction still need verification after host activation.
+The complete menu-to-draft flow has not been tested in staging. No database
+migration, production deployment or existing observation resource was changed.
+
 ## Queue settings and storage layout
 
 | Setting | Source | DLQ |
