@@ -534,3 +534,30 @@ both aliases and markers 404 at 2026-10-26T20:13:56Z. Provider deletion success
 alone does not establish instantaneous edge retirement. Staging deployment
 IDs and app data were unchanged; detailed evidence is in docs/previews.md.
 
+
+## October 27 VIS-01 infrastructure validation
+
+```json
+{"id":"OBS-20261027-VIS01-QUEUE-CREATE","status":"resolved","area":"operator-resource-provisioning","observation":"Initial Queue create request containing delivery_paused returned HTTP 500/code 10013; exact-name readback confirmed no resource was created.","cause":"The installed Wrangler creation path uses retention settings followed by a separate queue-name/paused PATCH; the provider did not accept the initial request shape in this run. A provider root cause was not established.","prevention":"Follow the installed CLI request contract. Read back exact names after an error before retrying; create with no producers, pause immediately, then attach the controlled consumer. Never repeat a create blindly.","regression":"The corrected sequence provisioned exactly two menu queues. Real source/R2/readback/retry-to-DLQ and cleanup passed; both empty/paused and observation settings unchanged.","sources":["backend/wrangler.jsonc","scripts/menu-ingestion-infra.test.mjs","docs/menu-ingestion-infrastructure.md"]}
+```
+
+```json
+{"id":"OBS-20261027-EXTRACTION-HOST-ACCESS","status":"open","area":"staging-service-activation","observation":"Installed Wrangler containers list stopped before inventory because containers:write is absent from the current OAuth login. Cloudflare host dry-run, Docker build and local HTTP boundary checks are separate evidence.","prevention":"Keep the new host inactive until scoped Container deployment access is authorized. Preserve current Worker/Pages scopes; never request every default scope or infer service readiness from packaging.","sources":["backend/wrangler.extraction.jsonc","docs/menu-ingestion-infrastructure.md"],"resolutionRequired":"Authorize the required scoped deployment access, configure provider/service secrets, deploy the reviewed host and record genuine service/source/extraction acceptance."}
+```
+
+```json
+{"id":"ERR-20261027-CONTEXT-SUMMARY","status":"resolved","area":"context-validation","cause":"Appending service details exceeded the existing context node summary bound; refresh rejected the graph before writing fingerprints.","prevention":"Keep node summaries concise and link detailed runbooks instead of accumulating prose.","regression":"Backend summary condensed without dropping authority/readiness boundaries; context refresh and check required before commit.","sources":["docs/CONTEXT.md","scripts/context.mjs"]}
+```
+
+```json
+{"id":"ERR-20261027-EXTRACTION-DRYRUN-OUTPUT","status":"resolved","area":"local-verification-artifacts","cause":"A dry-run output directory outside the existing ignored dist path was included by the lint scan.","prevention":"Write operator probe/build outputs outside the checkout or into its established ignored dist path; never format generated bundles to satisfy source lint.","regression":"Moved only the generated evidence directory to the task output folder; final pnpm check must pass on source files.","sources":["docs/menu-ingestion-infrastructure.md"]}
+```
+
+```json
+{"id":"ERR-20261027-EXTRACTION-COMPAT-DATE","status":"resolved","area":"local-worker-runtime","cause":"The pinned local Wrangler binary supports compatibility dates through October 13; a new October 27 test configuration could not start.","prevention":"Keep this existing project's new Worker on the already tested compatibility date until a separately verified runtime upgrade.","regression":"Actual hosting Worker source/auth routes with remote private R2 passed on the matching October 13 date, including exact cleanup.","sources":["backend/wrangler.extraction.jsonc","docs/menu-ingestion-infrastructure.md"]}
+```
+
+<!-- automatic observation; not root cause -->
+```json
+{"kind":"automatic-check-observation","check":"lint","timestamp":"2026-10-27T19:21:00.026Z","exitCode":1}
+```

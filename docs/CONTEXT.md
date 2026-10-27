@@ -69,7 +69,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "backend",
       "status": "foundation",
-      "summary": "Hono Worker verifies staff JWTs/membership for atomic draft revisions and individual GitHub collaboration for bounded staging analytics. Dated hosted 200/401/400 and genuine outsider 403 evidence remains in operations. Staging configuration adds OBSERVATION_QUEUE and OBSERVATION_ARCHIVE_BUCKET; live activation awaits reviewed main deployment. Source/DLQ delivery is paused; controlled access-removal acceptance and production remain separate checks. Provides S3-VIS-04 bounded menu evidence retrieval (SSRF defense, deterministic ranking, aggregate context limits, and VIS-02/S3-VIS-01 structured candidate handoff). No ingestion route, Queue handler, direct live publication or canonical observation writes are added; JWT logout revocation remains expiry-bounded.",
+      "summary": "Hono Worker verifies staff JWT/membership for atomic draft revisions and individual GitHub collaboration for bounded staging analytics. October 24 deployed observation bindings; source/DLQ remain paused. VIS-04 retrieval enforces SSRF, Unicode spans and aggregate context limits. New config adds a separate menu Queue/report bucket alias, awaiting reviewed main deployment. A separate staging-only authenticated extraction host is prepared for one sleeping Cloudflare Container and exact tenant/job R2 source relay; current login lacks containers:write, so it is not hosted. No ingestion route, feature consumer, canonical observation writes or publication are added. Hosted access-removal acceptance and production remain separate; JWT logout revocation is expiry-bounded.",
       "paths": [
         "backend/local.mjs",
         "backend/local.test.mjs",
@@ -98,7 +98,12 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "backend/src/team-analytics.ts",
         "backend/src/team-auth.test.ts",
         "backend/src/team-auth.ts",
-        "backend/wrangler.jsonc"
+        "backend/wrangler.jsonc",
+        "docs/menu-ingestion-infrastructure.md",
+        "scripts/menu-ingestion-infra.test.mjs",
+        "backend/src/extraction-host.ts",
+        "backend/src/extraction-host.test.ts",
+        "backend/wrangler.extraction.jsonc"
       ],
       "adrs": [
         "docs/adr/0002-selective-event-sourcing.md",
@@ -110,7 +115,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "contracts",
         "database"
       ],
-      "sourceFingerprint": "a49e8af89492163dd04d21cb1fd7afe0633ebc97af38019be0de3d174b7b82d6"
+      "sourceFingerprint": "bb6971d9a5745a597a561a5f9e81bd209a3f2519ab47d2f2cc1e18d9bba2d2f6"
     },
     {
       "id": "database",
@@ -196,7 +201,9 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         ".github/workflows/deploy-preview.yml",
         "docs/previews.md",
         "scripts/preview.mjs",
-        "scripts/preview.test.mjs"
+        "scripts/preview.test.mjs",
+        "docs/menu-ingestion-infrastructure.md",
+        "scripts/menu-ingestion-infra.test.mjs"
       ],
       "adrs": [
         "docs/adr/0007-delivery-and-recovery.md",
@@ -207,7 +214,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "6fd3f20a6d1ebc5428942487183593bdaaa7ab7c35d8b20dd9559add0f5fa997"
+      "sourceFingerprint": "46628224b6a16395d3646d2cc3a160e6ff436e1c74098726590e550a69b0c9c7"
     },
     {
       "id": "agents",
@@ -269,7 +276,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "processing",
       "status": "foundation",
-      "summary": "Local PDF/image acquisition uses an injectable OCRProvider restricted to validated OCR.space Engine 3-compatible results. Incompatible OCR fails its segment and preserves later native pages. LLM extraction retains needs_review drafts and evidence. Shared Unicode fixtures check spans; combined integration, separate verification and quality acceptance remain pending.",
+      "summary": "Local PDF/image acquisition uses an injectable OCRProvider restricted to validated OCR.space Engine 3-compatible results. Incompatible OCR fails its segment and preserves later native pages. LLM extraction retains needs_review drafts and evidence. Shared Unicode fixtures check spans; combined integration, separate verification and quality acceptance remain pending. Optional staging FastAPI/Uvicorn service authenticates a trusted Worker, verifies tenant/job-derived private R2 sources and hashes, and runs the existing pipeline in a bounded subprocess. It has no database access, URL fetch path or publication ability; hosting/credentials and PR45 admission/deadline/report-adapter alignment remain pending.",
       "paths": [
         "processing/.gitignore",
         "processing/.python-version",
@@ -302,17 +309,30 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "scripts/processing-handoff.test.mjs",
         "processing/src/peekaplate_processing/ocr.py",
         "processing/tests/test_ocr_provider.py",
-        "test-data/README.md"
+        "test-data/README.md",
+        "processing/src/peekaplate_processing/service.py",
+        "processing/tests/test_service.py",
+        "processing/Dockerfile",
+        "processing/.dockerignore"
       ],
       "adrs": [
         "docs/adr/0001-scope-and-repository.md",
         "docs/adr/0005-tenancy-and-privacy.md"
       ],
       "dependsOn": [],
-      "sourceFingerprint": "929fb3bbb31657ffe307c3d5040770955f5ecd7d488af3f0ea329ed0bb05f119"
+      "sourceFingerprint": "99162c4fafe4b9890822d3fde9d5ac346dfaa4079d1d7d0f6c28d2852dbcc856"
     }
   ],
   "handoffs": [
+    {
+      "summary": "October 27 VIS-01 setup created only the missing staging menu Queue/DLQ, reused private staging-assets and verified real R2 readback/create-only contention, source attempts 0–3 to DLQ and exact cleanup. Both new queues are empty/paused; observations unchanged. Added staging producer/report aliases and optional bounded Python HTTP service with synthetic tests and container packaging plus a separate authenticated Cloudflare hosting Worker (one basic instance, 60-second idle sleep). No separate R2 credentials are needed. No feature PR, database or production change; new bindings await main deployment and the service is not hosted.",
+      "modules": [
+        "backend",
+        "processing",
+        "delivery"
+      ],
+      "next": "Release bindings through protected staging approval. Authorize the scoped Containers deployment permissions, deploy the prepared Cloudflare host and configure its private service/OCR/LLM secrets. Teeyansh must align source materialization/hash/key and runtime budgets in PR45, inject report storage, land reviewed migrations/consumer, replace the temporary pull consumer and pass full menu-to-draft/retry/DLQ/tenant acceptance before enabling collection. See menu-ingestion-infrastructure.md."
+    },
     {
       "summary": "PR41 merge audit found staging healthy with unchanged deployments, default-main preview activation missing and a Windows link-fixture failure. Main-only repair PR #47 merged as ab6f9c4 with green CI. GitHub-held credentials passed synthetic PR #48 upload, exact-SHA aliases, browser rendering and one bot comment in run 40393096652. Closing PR #48 triggered cleanup 40393553935; both provider lists became empty and aliases/markers settled to 404. Portable link rejection and stale-marker regressions pass. Evidence is in docs/previews.md; staging, migrations and production are unchanged.",
       "modules": [
@@ -384,14 +404,6 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "analytics"
       ],
       "next": "Collaborators can continue tickets using their own GitHub identity and the bounded staging API. An authorized operator still needs the separate disposable collaborator-removal test before full hosted access acceptance. Production, real menu ingestion and owner-report delivery remain separate work; do not infer their readiness from this check."
-    },
-    {
-      "summary": "Provisioned missing staging observation Queue f4979c52a09a4c40ad55e46d32b0ff93 and DLQ 45eda79d781d47fe8bca7bb6f5d05bde, reused private staging-assets R2, configured paused HTTP pull consumers with 24-hour retention/three source retries. R2 conditional race passed; complete synthetic archive-before-ACK and retry-to-DLQ repeat passed at 2026-10-24T17:30:36.147Z. Cleaned only probe objects/messages; both Queues empty/paused. Added staging producer/R2 config and handoff docs; no unfinished consumer, DB or production change.",
-      "modules": [
-        "backend",
-        "delivery"
-      ],
-      "next": "Review binding-only change and deploy an approved exact main release. Teeyansh then integrates the real consumer using these binding names and Jeffin migrations; replace temporary HTTP pull source consumer without dropping messages, run full archive-to-DB/ACK/recovery acceptance, then enable collection. Keep queues paused until then; pause does not stop 24-hour expiry."
     }
   ]
 }
