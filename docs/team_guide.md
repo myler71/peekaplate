@@ -52,7 +52,8 @@ ClickUp's “Complete” status describes a task's recorded progress. It is not 
 **Menu extraction setup:** its own Queue and failed-job Queue now exist, and both
 passed real synthetic delivery tests. Reports will use the existing private R2
 bucket. The new Python HTTP service wraps the existing OCR/extraction code and
-has local tests and a Docker build; it still needs an approved host and credentials.
+has local tests and a Docker build; its Cloudflare host awaits Vivien's planned
+$5/month Workers Paid upgrade and protected provider credentials.
 Teeyansh must connect the real consumer, report adapter and reviewed database
 changes before live menu tests. The queues stay paused until then. Follow the
 [VIS-01 setup and handoff](menu-ingestion-infrastructure.md) for exact names,

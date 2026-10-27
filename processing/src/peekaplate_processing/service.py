@@ -61,9 +61,10 @@ class ExtractRequest(BaseModel):
         return f"menu-ingestion/sources/{self.tenant_id}/{self.job_id}/source"
 
 
-def read_source(job, settings):
+def read_source(job, settings, capability):
     url = f"{settings.source_origin}/sources/{job.tenant_id}/{job.job_id}"
-    with httpx.stream("GET", url, headers={"Authorization": "Bearer " + settings.secret},
+    with httpx.stream("GET", url, headers={"Authorization": "Bearer " + settings.secret,
+                      "X-Source-Capability": capability, "X-Source-Hash": job.source_hash},
                       timeout=20, follow_redirects=False) as response:
         if response.status_code != 200:
             raise ValueError("Source unavailable.")
@@ -87,13 +88,16 @@ def run_extraction(data, kind, timeout):
         source.chmod(0o600)
         env = {key: value for key, value in os.environ.items()
                if not key.startswith(("R2_", "EXTRACTION_"))}
-        subprocess.run(
+        completed = subprocess.run(
             [sys.executable, "-m", "peekaplate_processing.run_pipeline",
              "--input", str(source), "--run-dir", str(root / "result"),
              "--batch-pages", "1", "--llm-concurrency", "2", "--no-llm-cache"],
-            cwd=root, env=env, timeout=timeout, check=True,
+            cwd=root, env=env, timeout=timeout, check=False,
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
         )
+        # The CLI writes usable incomplete/failed reports before its expected exit 2.
+        if completed.returncode not in (0, 2):
+            raise subprocess.CalledProcessError(completed.returncode, "extraction")
         with (root / "result" / "extraction.json").open("rb") as output:
             report = output.read(MAX_REPORT_BYTES + 1)
         if len(report) > MAX_REPORT_BYTES:
@@ -104,7 +108,7 @@ def run_extraction(data, kind, timeout):
 def create_app(settings=None, *, source_reader=None, runner=run_extraction):
     settings = settings or Settings.from_env()
     settings.validate()
-    source_reader = source_reader or (lambda job: read_source(job, settings))
+    source_reader = source_reader or (lambda job, capability: read_source(job, settings, capability))
     slot = threading.Lock()
     app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
 
@@ -132,20 +136,24 @@ def create_app(settings=None, *, source_reader=None, runner=run_extraction):
             return reply({"error": "invalid_request"}, 422)
         if (request.headers.get("x-job-id") != str(job.job_id)
                 or request.headers.get("x-tenant-id") != str(job.tenant_id)
+                or request.headers.get("x-source-hash") != job.source_hash
                 or job.source_storage_key != job.expected_key()):
             return reply({"error": "job_scope_mismatch"}, 403)
+        capability = request.headers.get("x-source-capability", "")
+        if not capability or len(capability) > 4096:
+            return reply({"error": "missing_source_capability"}, 403)
         if not slot.acquire(blocking=False):
             return reply({"error": "busy"}, 429, **{"Retry-After": "10"})
         try:
             # Run blocking SDK/process work off the event loop so health stays responsive.
             from starlette.concurrency import run_in_threadpool
-            return await run_in_threadpool(process, job)
+            return await run_in_threadpool(process, job, capability)
         finally:
             slot.release()
 
-    def process(job):
+    def process(job, capability):
         try:
-            data = source_reader(job)
+            data = source_reader(job, capability)
             if data is None or not 0 < len(data) <= MAX_SOURCE_BYTES:
                 return reply({"error": "invalid_source_size"}, 413)
             if hashlib.sha256(data).hexdigest() != job.source_hash:

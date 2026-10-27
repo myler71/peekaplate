@@ -14,7 +14,10 @@ The [VIS-01 infrastructure/service handoff](menu-ingestion-infrastructure.md)
 records provider IDs, private prefixes, the optional Python HTTP service and
 integration order. No deployed extraction URL/secret was found on the existing
 Worker; Containers inventory returned 403, so external hosting availability is
-unconfirmed. Service hosting/credentials, Worker admission/deadline alignment,
+unconfirmed. Scoped Containers authorization subsequently succeeded; an
+explicit-account inventory still denies Container eligibility. Workers-standard
+is true, but billing readback is denied; no plan upgrade was attempted. See the
+handoff before asking for any subscription change. Service hosting/credentials, Worker admission/deadline alignment,
 the report adapter, feature migrations and full menu-flow acceptance remain
 separate gates. No unfinished ingestion feature PR was modified or deployed.
 

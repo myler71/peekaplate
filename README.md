@@ -47,7 +47,7 @@ The backend can include both TypeScript and Python. The existing TypeScript/Hono
 
 The existing Python component uses an isolated `uv` environment, a frozen lockfile and `unittest` regression tests. Install and test its HTTP service with `uv run --project processing --extra service --frozen python -m unittest discover -s processing/tests`; CI runs that suite and builds the package. Python and TypeScript communicate through validated JSON contracts. Job requests must carry backend-authorized restaurant and input references; returned results must be checked against that job before any application change. Use the established command path for business changes rather than writing around permissions, event history or approval rules.
 
-VIS-01 now has a bounded HTTP wrapper and a prepared Cloudflare Containers host for the native PyMuPDF pipeline. The host is not deployed: current Wrangler access lacks `containers:write`. The [service handoff](docs/menu-ingestion-infrastructure.md) covers authentication, exact private R2 sources, processing limits, required credentials and integration order. This setup does not run or replace the unfinished ingestion consumer.
+VIS-01 now has a bounded HTTP wrapper and a prepared Cloudflare Containers host for the native PyMuPDF pipeline. Scoped Wrangler authorization is complete; hosting waits for Vivien's planned $5/month Workers Paid upgrade. The [service handoff](docs/menu-ingestion-infrastructure.md) covers job-bound source authorization, exact private R2 sources, processing limits, required credentials and integration order. This setup does not run or replace the unfinished ingestion consumer.
 
 Choose its runtime after checking the task's packages and resource needs:
 

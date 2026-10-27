@@ -1,10 +1,12 @@
 import { timingSafeEqual } from 'node:crypto';
 import { Container } from '@cloudflare/containers';
+import { readExtractionCapability } from './extraction-capability';
 
 type Stub = { fetch(request: Request): Promise<Response> };
 export type ExtractionHostEnv = {
   APP_ENV: string;
   EXTRACTION_SERVICE_SECRET?: string;
+  EXTRACTION_SOURCE_SIGNING_SECRET?: string;
   EXTRACTION_SOURCE_ORIGIN: string;
   EXTRACTOR: { getByName(name: string): Stub };
   SOURCE_BUCKET: {
@@ -55,7 +57,15 @@ const json = (error: string, status: number) =>
 export default {
   async fetch(request: Request, env: ExtractionHostEnv): Promise<Response> {
     const secret = env.EXTRACTION_SERVICE_SECRET;
-    if (env.APP_ENV !== 'staging' || !secret || secret.length < 48)
+    const signingSecret = env.EXTRACTION_SOURCE_SIGNING_SECRET;
+    if (
+      env.APP_ENV !== 'staging' ||
+      !secret ||
+      secret.length < 48 ||
+      !signingSecret ||
+      signingSecret.length < 48 ||
+      signingSecret === secret
+    )
       return json('not_configured', 503);
     const supplied = new TextEncoder().encode(request.headers.get('authorization') ?? '');
     const expected = new TextEncoder().encode(`Bearer ${secret}`);
@@ -67,7 +77,18 @@ export default {
     try {
       const source = sourcePath.exec(url.pathname);
       if (source && request.method === 'GET') {
-        // Only the authenticated Worker chooses tenant/job IDs; no arbitrary bucket/key input.
+        const scope = await readExtractionCapability(
+          request.headers.get('x-source-capability') ?? '',
+          signingSecret,
+        );
+        if (
+          !scope ||
+          scope.tenantId !== source[1] ||
+          scope.jobId !== source[2] ||
+          scope.sourceHash !== request.headers.get('x-source-hash')
+        )
+          return json('forbidden', 403);
+        // The job-bound grant is separate from service identity and never mintable by Python.
         const object = await env.SOURCE_BUCKET.get(
           `menu-ingestion/sources/${source[1]}/${source[2]}/source`,
         );
@@ -88,6 +109,21 @@ export default {
         (url.pathname === '/extract' && request.method === 'POST') ||
         (url.pathname === '/health' && request.method === 'GET')
       ) {
+        if (url.pathname === '/extract') {
+          const scope = await readExtractionCapability(
+            request.headers.get('x-source-capability') ?? '',
+            signingSecret,
+          );
+          if (
+            !scope ||
+            scope.tenantId !== request.headers.get('x-tenant-id') ||
+            scope.jobId !== request.headers.get('x-job-id')
+          )
+            return json('forbidden', 403);
+          const forwarded = new Request(request);
+          forwarded.headers.set('X-Source-Hash', scope.sourceHash);
+          return await env.EXTRACTOR.getByName('staging-extractor').fetch(forwarded);
+        }
         return await env.EXTRACTOR.getByName('staging-extractor').fetch(request);
       }
       return json('not_found', 404);

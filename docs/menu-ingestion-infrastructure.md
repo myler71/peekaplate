@@ -67,7 +67,18 @@ the service has no database credential and cannot publish dishes.
 
 Only the trusted Worker calls this endpoint. Headers must include
 `Authorization: Bearer <EXTRACTION_SERVICE_SECRET>`, `X-Job-ID` and `X-Tenant-ID`.
-The IDs must match the body and the source key. Example body (synthetic IDs):
+The IDs must match the body and the source key.
+
+Requests also require `X-Source-Capability`: a 15-minute HS256 grant binding the
+tenant UUID, job UUID and source SHA-256. The authorized API Worker mints it with
+`mintExtractionCapability` only after claiming the current job; mint a fresh
+grant for each attempt, not when a job first enters a possibly delayed Queue.
+The host verifies it before source reads and before forwarding extraction,
+overwrites `X-Source-Hash` with the signed digest, and Python checks that digest
+against the body and downloaded bytes. A valid service password alone cannot
+read another job's source. The grant stays server-side and out of logs/fixtures.
+
+Example body (synthetic IDs):
 
 ```json
 {
@@ -142,15 +153,20 @@ Its compatibility date matches the existing project's October 13 runtime;
 the pinned local Wrangler binary cannot execute an October 27 compatibility
 date. Advance that date with a separately verified runtime upgrade.
 
-The host is not yet deployed. The installed Wrangler's real `containers list
---env staging --json` check stopped with missing `containers:write`; the current
-login also lacks `cloudchamber:write`. Refresh only the required deployment
-scopes before trying to provision; do not enable every Wrangler default scope.
+The host is not yet deployed. The initial missing `containers:write` scope is
+resolved: the scoped Wrangler login succeeded and retained existing Worker/Pages
+access. The account is still on Free; **Vivien will activate the $5/month Workers
+Paid plan**. Keep this configuration and wait for that upgrade; no alternative
+hosting provider or automatic purchase is needed. The explicit-account Container
+inventory currently returns the expected Paid-plan eligibility denial.
+`/workers/standard` reported true despite that denial, so that flag must not be
+treated as proof of paid billing activation. Subscription readback was denied.
 Container usage is included up to the existing Workers Paid plan allowances,
 with overage charges possible. See [current pricing](https://developers.cloudflare.com/containers/platform/pricing/).
 This change does not buy or upgrade a subscription.
 
-After the scoped login and reviewed release, the operator deploys with:
+After Vivien's upgrade is active and the service is released from reviewed
+`main`, the operator deploys with:
 
 ```sh
 pnpm --filter @peekaplate/backend exec wrangler deploy --config wrangler.extraction.jsonc
@@ -158,6 +174,10 @@ pnpm --filter @peekaplate/backend exec wrangler deploy --config wrangler.extract
 
 Configure the hosting Worker's secret/provider variables using protected secret
 inputs, and the API Worker's service URL/secret through its release process.
+`EXTRACTION_SOURCE_SIGNING_SECRET` is a second, distinct random 48+ character
+secret on the application API Worker and hosting Worker only. **Never forward
+it to the Python container.** Its allowlisted environment intentionally omits
+this key; the static service secret cannot mint job-scoped grants.
 Never save secret values in either Wrangler config. Test the authenticated host
 health, bad-secret denial, exact synthetic R2 source read and a real extraction
 before connecting the menu consumer. A successful dry run does not prove hosting.
@@ -166,7 +186,8 @@ before connecting the menu consumer. A successful dry run does not prove hosting
 
 1. **Sai / deployment reviewer:** release the binding-only `main` change through
    the existing staging approval gate. The actual queues can remain paused.
-2. **Mohammad + Sai/Vivien:** deploy the Cloudflare container host, configure
+2. **Mohammad + Sai/Vivien:** confirm Vivien's Workers Paid upgrade is active,
+   deploy the Cloudflare container host, configure
    the service secret and OCR/LLM credentials, and verify genuine source extraction. The
    hosted service and real provider accuracy are not covered by local tests.
 3. **Teeyansh:** align PR #45 before enabling jobs. Require the input key/hash
@@ -176,6 +197,8 @@ before connecting the menu consumer. A successful dry run does not prove hosting
    measured overall budget (for example 720 seconds at the Worker, with matching
    proxy/queue/lease limits), batch size one and concurrency one for the pilot.
    Verify limits against the selected runtime rather than silently raising them.
+   Mint and send the job-bound source capability after the durable claim, using
+   the trusted job row's IDs/hash. Do not expose a browser-facing grant-mint route.
 4. **Teeyansh + Jeffin:** land reviewed job/draft migrations and the R2 report
    adapter. PR #45 currently calls `processQueueBatch(client, batch, extractor)`
    without `reportStorage`; merely binding R2 does not archive reports. Inject
@@ -216,15 +239,18 @@ Local service tests use synthetic storage/provider doubles; they do not certify
 hosted extraction, Queue-to-database integration or OCR/LLM accuracy. See the PR's
 verification record for final commands, counts and runtimes.
 
-The final local Docker smoke passed in 3.05 seconds: non-root UID 10001,
+The final local Docker smoke passed in 3.753 seconds: non-root UID 10001,
 read-only filesystem, health 200, unauthenticated extraction 401, authenticated
 invalid request 422 and disabled public OpenAPI 404; the container was removed.
-A separate actual workerd + remote R2 check passed in 2.147 seconds at
-`2026-10-27T19:24:34.653Z`: exact synthetic source bytes 200/no-store,
-missing/wrong credentials 401, different job key 404, key override 400, then
+A separate actual workerd + remote R2 check passed in 3.112 seconds at
+`2026-10-27T19:38:10.577Z`: exact synthetic source bytes 200/no-store,
+missing/wrong credentials 401, a job-A grant requesting job B 403, a digest
+outside the signed grant 403, key override 400, then
 exact cleanup and 404 readback. This probe did not start a hosted Container or
-call OCR/LLM providers. The Python suite passed 108 tests in 4.527 seconds,
-including 19 service tests; the host's five TypeScript checks passed in 404 ms.
+call OCR/LLM providers. The Python suite passed 111 tests in 4.538 seconds,
+including 22 service tests; the host's nine TypeScript checks passed in 502 ms.
+The partial-result regression uses a real child process that writes an
+incomplete needs-review report and exits 2; the service preserves it as HTTP 200.
 
 Provider references: [pull consumers](https://developers.cloudflare.com/queues/configuration/pull-consumers/),
 [pause and retention](https://developers.cloudflare.com/queues/configuration/pause-purge/),

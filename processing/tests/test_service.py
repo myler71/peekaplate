@@ -3,6 +3,7 @@ import hashlib
 import base64
 import json
 import subprocess
+import sys
 import unittest
 from unittest.mock import Mock, patch
 
@@ -25,6 +26,7 @@ class ServiceTests(unittest.TestCase):
         self.headers = {
             "Authorization": "Bearer " + "synthetic-test-token-" * 3,
             "X-Job-ID": self.payload["job_id"], "X-Tenant-ID": self.payload["tenant_id"],
+            "X-Source-Hash": self.digest, "X-Source-Capability": "synthetic-job-bound-capability",
         }
         self.settings = Settings(secret="synthetic-test-token-" * 3,
             source_origin="https://peekaplate-extraction-staging.vxkong.workers.dev")
@@ -70,6 +72,15 @@ class ServiceTests(unittest.TestCase):
         self.assertEqual(self.send(source_storage_key="other-tenant/source").status_code, 403)
         self.storage.assert_not_called()
 
+    def test_body_hash_must_match_host_signed_header(self):
+        self.assertEqual(self.send(source_hash="b" * 64).status_code, 403)
+        self.storage.assert_not_called()
+
+    def test_source_grant_is_required_before_reading_input(self):
+        self.headers.pop("X-Source-Capability")
+        self.assertEqual(self.send().status_code, 403)
+        self.storage.assert_not_called()
+
     def test_missing_hash_and_extra_authority_are_rejected(self):
         for change in ({"source_hash": None}, {"bucket": "production"}):
             with self.subTest(change=change):
@@ -88,6 +99,7 @@ class ServiceTests(unittest.TestCase):
             self.assertEqual(response.status_code, status)
 
     def test_hash_conflict_never_runs_extraction(self):
+        self.headers["X-Source-Hash"] = "b" * 64
         self.assertEqual(self.send(source_hash="b" * 64).status_code, 409)
         self.runner.assert_not_called()
 
@@ -143,6 +155,7 @@ class ServiceTests(unittest.TestCase):
             output = Path(command[command.index("--run-dir") + 1])
             output.mkdir()
             (output / "extraction.json").write_text(json.dumps(self.report), encoding="utf-8")
+            return subprocess.CompletedProcess(command, 0)
         with patch("peekaplate_processing.service.subprocess.run", side_effect=child):
             self.assertEqual(run_extraction(self.data, "pdf", 700), self.report)
 
@@ -153,7 +166,7 @@ class ServiceTests(unittest.TestCase):
         context.__enter__ = Mock(return_value=response)
         context.__exit__ = Mock(return_value=False)
         with patch("peekaplate_processing.service.httpx.stream", return_value=context) as stream:
-            self.assertEqual(read_source(ExtractRequest(**self.payload), self.settings), self.data)
+            self.assertEqual(read_source(ExtractRequest(**self.payload), self.settings, "synthetic-capability"), self.data)
             args, kwargs = stream.call_args
             self.assertEqual(args[1], f"{self.settings.source_origin}/sources/{self.payload['tenant_id']}/{self.payload['job_id']}")
             self.assertFalse(kwargs["follow_redirects"])
@@ -172,9 +185,9 @@ class ServiceTests(unittest.TestCase):
             with self.subTest(status=status, length=length), patch("peekaplate_processing.service.httpx.stream", return_value=context):
                 if raises:
                     with self.assertRaises(ValueError):
-                        read_source(ExtractRequest(**self.payload), self.settings)
+                        read_source(ExtractRequest(**self.payload), self.settings, "synthetic-capability")
                 else:
-                    self.assertIsNone(read_source(ExtractRequest(**self.payload), self.settings))
+                    self.assertIsNone(read_source(ExtractRequest(**self.payload), self.settings, "synthetic-capability"))
             context.__exit__.assert_called_once()
 
     def test_temporary_source_is_removed_after_child_timeout(self):
@@ -187,6 +200,24 @@ class ServiceTests(unittest.TestCase):
         with patch("peekaplate_processing.service.subprocess.run", side_effect=timeout), self.assertRaises(subprocess.TimeoutExpired):
             run_extraction(self.data, "pdf", 0.01)
         self.assertFalse(seen[0].exists())
+
+    def test_real_child_exit_two_preserves_incomplete_reviewable_report(self):
+        partial = {**self.report, "status": "incomplete", "drafts": [{
+            "name": "Synthetic Soup", "source_id": self.report["source"]["source_id"],
+            "source_text": "Synthetic Soup", "status": "needs_review",
+        }]}
+        real_run = subprocess.run
+        def partial_cli(command, **options):
+            destination = command[command.index("--run-dir") + 1]
+            script = "import pathlib,sys; p=pathlib.Path(sys.argv[1]); p.mkdir(); (p/'extraction.json').write_text(sys.argv[2],encoding='utf-8'); sys.exit(2)"
+            return real_run([sys.executable, "-c", script, destination, json.dumps(partial)], **options)
+        client = TestClient(create_app(self.settings, source_reader=self.storage, runner=run_extraction))
+        with patch("peekaplate_processing.service.subprocess.run", side_effect=partial_cli):
+            response = client.post("/extract", json=self.payload, headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["status"], "incomplete")
+        self.assertEqual(response.json()["drafts"][0]["name"], "Synthetic Soup")
+        self.assertEqual(response.json()["drafts"][0]["status"], "needs_review")
 
 
 if __name__ == "__main__":
