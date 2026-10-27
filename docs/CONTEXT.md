@@ -103,7 +103,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "contracts",
         "database"
       ],
-      "sourceFingerprint": "db0800a972bcce8c5f3e4af570688e8213df93d9c0eeedb04d29e750fd4256f4"
+      "sourceFingerprint": "4d823dfc609ac37e3c4d7c0d1c1efa04ca9a4fb4e8aab8ab04dc89e24907374c"
     },
     {
       "id": "database",
@@ -151,7 +151,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "delivery",
       "status": "foundation",
-      "summary": "Protected main staging releases remain manual and require independent environment approval. Isolated PR preview upload/SHA-marker verification and cleanup were verified October26; dated records are in operations/previews. This scoped main release promotes the reviewed local Python processing package required by VIS-01 plus its authenticated HTTP/container host and staging Queue/R2 aliases, without unrelated backend retrieval code. Host deployment awaits Vivien's Workers Paid upgrade and protected credentials; queues stay paused until reviewed feature integration and complete acceptance. No production release or database change.",
+      "summary": "PRs54/55 merged the reviewed VIS-01 setup to develop/main. Main58838e1 CI passed; protected staging run40577213391 awaits independent approval. Actual container deployment was rejected by Cloudflare requiring Workers Paid; a partial extraction Worker has workers.dev disabled and returns404. Existing API health remains200 at its prior version. Queue/DLQ and private R2 probes passed; queues remain paused. Local integration can proceed, while host secrets/provider extraction and complete menu-to-draft acceptance remain unverified. No production or database release.",
       "paths": [
         "README.md",
         "SECURITY.md",
@@ -202,7 +202,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "9819f4d554ffe157ca8aa7e9e103ed7eca0ceb243f7945fd7b5f55fa7935af05"
+      "sourceFingerprint": "828c8811d67624c7c3cfbd3a18f2c6549501bc35e134479cab89064c897f6622"
     },
     {
       "id": "agents",
@@ -313,6 +313,15 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
   ],
   "handoffs": [
     {
+      "summary": "VIS-01 infrastructure released in PRs54/55: Queue/DLQ and private R2 tested, local service and job-bound relay reviewed, main58838e1 CI green. Actual protected API run40577213391 is waiting for independent approval. Actual container deploy failed at /containers/me with Workers Paid eligibility denial; partial host route stays disabled. Existing API health200 and prior bindings unchanged.",
+      "modules": [
+        "backend",
+        "processing",
+        "delivery"
+      ],
+      "next": "Jeffin/Teeyansh approves the existing staging run; verify aliases after success. Vivien activates Workers Paid, then retry the same extraction host and set protected secrets/provider configuration. Teeyansh continues local PR45 admission/hash, claim-time grants, report adapter, deadline and migration/consumer work now. Complete hosted menu-to-draft and recovery/tenant tests before unpausing submissions."
+    },
+    {
       "summary": "Prepared scoped main promotion of PR54: staging menu Queue/DLQ provisioned/tested and paused, existing private R2 reused. Included the already reviewed PR24 processing package because the new service calls that CLI, plus job-bound source grants and partial-result handling. Excluded unrelated retrieval API/module changes and unfinished feature PRs. Both independent reviews and final feature checks passed; main promotion needs its own CI before protected staging deployment.",
       "modules": [
         "backend",
@@ -381,13 +390,6 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "delivery"
       ],
       "next": "Vivien must correct the connection or grant project Admin access. Complete the connection with the official Supabase CA, verify a bounded export and duplicate-safe retry, then resume schedule. Do not claim transfer success from backfill wrapper completion alone."
-    },
-    {
-      "summary": "PR #33 added the first-party staging denial checker. Harshita then helped run the valid outsider check twice, including from a fresh develop clone: GitHub identity 200 and both routes 403 forbidden. The maintainer supplied sanitized reports at 2026-10-24T05:52:32.802Z and 06:07:16.871Z (October 23 Phoenix). Recorded request IDs and updated README, team guide, access runbook, operations and context; no runtime, credential, grant, migration or deployment changed. Earlier collaborator 200 and invalid-token 401 evidence remains distinct.",
-      "modules": [
-        "analytics"
-      ],
-      "next": "Collaborators can continue tickets using their own GitHub identity and the bounded staging API. An authorized operator still needs the separate disposable collaborator-removal test before full hosted access acceptance. Production, real menu ingestion and owner-report delivery remain separate work; do not infer their readiness from this check."
     }
   ]
 }
