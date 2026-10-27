@@ -69,7 +69,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "backend",
       "status": "foundation",
-      "summary": "Hono Worker verifies staff JWTs/membership for atomic draft revisions and individual GitHub collaboration for bounded staging analytics. Dated hosted 200/401/400 and genuine outsider 403 evidence remains in operations. Staging configuration adds OBSERVATION_QUEUE and OBSERVATION_ARCHIVE_BUCKET; their live activation awaits a reviewed main deployment. Existing fetch handler, restricted Hyperdrive and server secrets are preserved. No ingestion route, Queue handler, publication or canonical observation writes are added. Source/DLQ delivery is paused; controlled access-removal acceptance and production remain separate checks.",
+      "summary": "Hono Worker verifies staff JWT/membership for atomic draft revisions and individual GitHub collaboration for bounded staging analytics. October24 observation bindings were deployed; queues remain paused. The reviewed VIS-01 release adds a separate menu producer/report alias and a standalone authenticated extraction host; existing API command code, Auth, Hyperdrive and secrets are unchanged. Host source reads require15-minute tenant/job/hash grants with a signing key never forwarded to Python. Scoped Containers login is authorized; host activation awaits Vivien's Workers Paid upgrade and protected provider/service credentials. No ingestion endpoint, real feature consumer, canonical observation writes or publication is added. Hosted removal acceptance and production remain separate.",
       "paths": [
         "backend/src/index.ts",
         "backend/src/index.test.ts",
@@ -85,7 +85,13 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "backend/src/team-analytics.ts",
         "backend/src/team-analytics.test.ts",
         "backend/src/team-auth.ts",
-        "backend/src/team-auth.test.ts"
+        "backend/src/team-auth.test.ts",
+        "backend/src/extraction-capability.ts",
+        "backend/src/extraction-host.ts",
+        "backend/src/extraction-host.test.ts",
+        "backend/wrangler.extraction.jsonc",
+        "docs/menu-ingestion-infrastructure.md",
+        "scripts/menu-ingestion-infra.test.mjs"
       ],
       "adrs": [
         "docs/adr/0002-selective-event-sourcing.md",
@@ -97,7 +103,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "contracts",
         "database"
       ],
-      "sourceFingerprint": "e0a6edc49c04bf2fd301105e58bbbb493dd88dd9bcaa865ea3448279a150388e"
+      "sourceFingerprint": "db0800a972bcce8c5f3e4af570688e8213df93d9c0eeedb04d29e750fd4256f4"
     },
     {
       "id": "database",
@@ -123,7 +129,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "docs/adr/0014-team-analytics-access.md"
       ],
       "dependsOn": [],
-      "sourceFingerprint": "fccd1d02035493216fcb1fae4fb672e25ec554da17005a27354ae2a4f975f7f8"
+      "sourceFingerprint": "5c576f557201a6d1af09e9c2c860bb1e5cd0430a3af8fdc6b3e8f1ee4528c0e6"
     },
     {
       "id": "measurement",
@@ -145,7 +151,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "delivery",
       "status": "foundation",
-      "summary": "Main supplies protected manual staging and later production releases under ADR0012. October 26 read-only checks found staging Pages at 2a135fa, Worker version fcb87dc6, and healthy team analytics reads. Observation producer/R2 infrastructure is present; consumer and canonical reporting remain separate work. PR41 merged previews into develop, but GitHub requires the workflow/helper on default main. Preview-only repair adds credential-free PR builds, isolated Pages upload/cleanup, trusted SHA markers and exact-alias readiness. The enable variable is true; actual GitHub upload/comment/close acceptance and production remain unverified.",
+      "summary": "Protected main staging releases remain manual and require independent environment approval. Isolated PR preview upload/SHA-marker verification and cleanup were verified October26; dated records are in operations/previews. This scoped main release promotes the reviewed local Python processing package required by VIS-01 plus its authenticated HTTP/container host and staging Queue/R2 aliases, without unrelated backend retrieval code. Host deployment awaits Vivien's Workers Paid upgrade and protected credentials; queues stay paused until reviewed feature integration and complete acceptance. No production release or database change.",
       "paths": [
         "README.md",
         "SECURITY.md",
@@ -183,7 +189,9 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         ".github/workflows/deploy-preview.yml",
         "docs/previews.md",
         "scripts/preview.mjs",
-        "scripts/preview.test.mjs"
+        "scripts/preview.test.mjs",
+        "docs/menu-ingestion-infrastructure.md",
+        "scripts/menu-ingestion-infra.test.mjs"
       ],
       "adrs": [
         "docs/adr/0007-delivery-and-recovery.md",
@@ -194,7 +202,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "4aa39dd6578114269d320aecf8903ee77e683092e7eb37cb7bd6373533e429e5"
+      "sourceFingerprint": "9819f4d554ffe157ca8aa7e9e103ed7eca0ceb243f7945fd7b5f55fa7935af05"
     },
     {
       "id": "agents",
@@ -252,9 +260,67 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "contracts"
       ],
       "sourceFingerprint": "1dd5e77257b699965de953a06b67cae41efa432a18b804d92f6e69d68988d8e0"
+    },
+    {
+      "id": "processing",
+      "status": "foundation",
+      "summary": "Local PDF/image acquisition uses an injectable OCRProvider restricted to validated OCR.space Engine 3-compatible results. Incompatible OCR fails its segment and preserves later native pages. LLM extraction retains needs_review drafts and evidence. Shared Unicode fixtures check spans; combined integration, separate verification and quality acceptance remain pending. Optional staging FastAPI/Uvicorn service authenticates a trusted Worker, verifies tenant/job-derived private R2 sources and hashes, and runs the existing pipeline in a bounded subprocess. It has no database access, URL fetch path or publication ability; hosting/credentials and PR45 admission/deadline/report-adapter alignment remain pending. Expected CLI exit2 retains validated partial/failed reports instead of converting them to transport errors.",
+      "paths": [
+        "processing/.gitignore",
+        "processing/.python-version",
+        "processing/README.md",
+        "processing/pyproject.toml",
+        "processing/src/peekaplate_processing/__init__.py",
+        "processing/src/peekaplate_processing/check_llm.py",
+        "processing/src/peekaplate_processing/errors.py",
+        "processing/src/peekaplate_processing/extract_menus.py",
+        "processing/src/peekaplate_processing/images.py",
+        "processing/src/peekaplate_processing/model_cache.py",
+        "processing/src/peekaplate_processing/ocr_regions.py",
+        "processing/src/peekaplate_processing/ocr_space.py",
+        "processing/src/peekaplate_processing/pdf.py",
+        "processing/src/peekaplate_processing/run_pipeline.py",
+        "processing/src/peekaplate_processing/schemas.py",
+        "processing/src/peekaplate_processing/sources.py",
+        "processing/src/peekaplate_processing/storage.py",
+        "processing/src/peekaplate_processing/workflow.py",
+        "processing/tests/fixture_factory.py",
+        "processing/tests/test_ocr_regions.py",
+        "processing/tests/test_ocr_space.py",
+        "processing/tests/test_pdf_images.py",
+        "processing/tests/test_schemas.py",
+        "processing/tests/test_workflow.py",
+        "processing/uv.lock",
+        "docs/ocr-delivery.md",
+        "processing/tests/fixtures/source-spans.json",
+        "processing/tests/test_handoff.py",
+        "scripts/processing-handoff.test.mjs",
+        "processing/src/peekaplate_processing/ocr.py",
+        "processing/tests/test_ocr_provider.py",
+        "test-data/README.md",
+        "processing/src/peekaplate_processing/service.py",
+        "processing/tests/test_service.py",
+        "processing/Dockerfile",
+        "processing/.dockerignore"
+      ],
+      "adrs": [
+        "docs/adr/0001-scope-and-repository.md",
+        "docs/adr/0005-tenancy-and-privacy.md"
+      ],
+      "dependsOn": [],
+      "sourceFingerprint": "9a915eb9ef0fd34234e116710436f4798e0be3ecc84e9b06cc034b0dfb4c88d1"
     }
   ],
   "handoffs": [
+    {
+      "summary": "Prepared scoped main promotion of PR54: staging menu Queue/DLQ provisioned/tested and paused, existing private R2 reused. Included the already reviewed PR24 processing package because the new service calls that CLI, plus job-bound source grants and partial-result handling. Excluded unrelated retrieval API/module changes and unfinished feature PRs. Both independent reviews and final feature checks passed; main promotion needs its own CI before protected staging deployment.",
+      "modules": [
+        "backend",
+        "processing",
+        "delivery"
+      ],
+      "next": "Merge reviewed main promotion, run its protected staging API deployment and verify actual bindings plus existing access routes. Vivien activates Workers Paid; operator then sets protected signing/service/provider secrets and deploys the standalone host from reviewed main. Teeyansh integrates PR45 admission, claim-time grants, report adapter, migrations and consumer before full synthetic menu-to-draft/recovery/tenant acceptance. Do not enable real collection while queues are paused."
+    },
     {
       "summary": "Investigated accidental PR41 develop merge aa7c717: merged CI passed; read-only staging health, frontend and team reads remain HTTP200 with unchanged provider versions. Found default-main workflow activation prerequisite and a Windows EPERM symlink fixture failure. Preview-only main repair carries trusted orchestration/helpers without unreleased app changes, uses a real portable directory link test and exact-SHA alias markers. Local focused tests pass; hosted writes, credentials, staging deployment and migrations are unchanged.",
       "modules": [
@@ -322,14 +388,6 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "analytics"
       ],
       "next": "Collaborators can continue tickets using their own GitHub identity and the bounded staging API. An authorized operator still needs the separate disposable collaborator-removal test before full hosted access acceptance. Production, real menu ingestion and owner-report delivery remain separate work; do not infer their readiness from this check."
-    },
-    {
-      "summary": "Provisioned missing staging observation Queue f4979c52a09a4c40ad55e46d32b0ff93 and DLQ 45eda79d781d47fe8bca7bb6f5d05bde, reused private staging-assets R2, configured paused HTTP pull consumers with 24-hour retention/three source retries. R2 conditional race passed; complete synthetic archive-before-ACK and retry-to-DLQ repeat passed at 2026-10-24T17:30:36.147Z. Cleaned only probe objects/messages; both Queues empty/paused. Added staging producer/R2 config and handoff docs; no unfinished consumer, DB or production change.",
-      "modules": [
-        "backend",
-        "delivery"
-      ],
-      "next": "Review binding-only change and deploy an approved exact main release. Teeyansh then integrates the real consumer using these binding names and Jeffin migrations; replace temporary HTTP pull source consumer without dropping messages, run full archive-to-DB/ACK/recovery acceptance, then enable collection. Keep queues paused until then; pause does not stop 24-hour expiry."
     }
   ]
 }
