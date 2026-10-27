@@ -1,5 +1,26 @@
 # Local and staging operations
 
+## VIS-01 infrastructure — October 27, 2026
+
+Provisioned only `peekaplate-staging-menu-ingestion` and its DLQ; reused the
+existing private staging-assets bucket. Real synthetic source delivery,
+archive/readback before ACK, attempts 0–3 to DLQ, R2 create-only contention and
+exact cleanup passed at `2026-10-27T18:57:46.560Z`. Both queues are empty/paused,
+with 24-hour retention. Observation resources and production were unchanged.
+The new producer/report aliases need the reviewed `main` staging deployment;
+provisioning does not establish live Worker bindings.
+
+The [VIS-01 infrastructure/service handoff](menu-ingestion-infrastructure.md)
+records provider IDs, private prefixes, the optional Python HTTP service and
+integration order. No deployed extraction URL/secret was found on the existing
+Worker; Containers inventory returned 403, so external hosting availability is
+unconfirmed. Scoped Containers authorization subsequently succeeded; an
+explicit-account inventory still denies Container eligibility. Workers-standard
+is true, but billing readback is denied; no plan upgrade was attempted. See the
+handoff before asking for any subscription change. Service hosting/credentials, Worker admission/deadline alignment,
+the report adapter, feature migrations and full menu-flow acceptance remain
+separate gates. No unfinished ingestion feature PR was modified or deployed.
+
 ## Observation infrastructure — October 24, 2026
 
 Created only the missing staging source Queue and DLQ in the existing account, reused private `peekaplate-staging-assets`, and verified source retry-to-DLQ routing with HTTP pull consumers. The complete synthetic repeat at `2026-10-24T17:30:36.147Z` passed archive/readback before ACK, initial delivery plus three retries, DLQ arrival and exact probe cleanup. A separate real R2 concurrency check allowed exactly one create-only writer and preserved its bytes on conflicting attempts. Provider readback confirms both Queues empty and paused, 24-hour retention, `r2.dev` disabled, no custom domain and no CORS rule. No production resource, application consumer, database fact or unfinished PR changed.
@@ -196,7 +217,7 @@ The staff-command cloud checks above are complete within their recorded scope: e
 
 ## PR previews
 
-Static diner and console previews for PRs use separate `*-preview` Pages projects and a Pages-only token in the `preview` GitHub environment. October 26 readback found `PREVIEW_DEPLOYMENT_ENABLED=true`; automatic activation still requires the reviewed workflow and helper on default branch `main`. The merged `develop` CI passed, but no automatic preview run has been verified. Setup, exact-commit readiness, isolation, retention and lifecycle acceptance are in [PR previews](previews.md).
+Static diner and console previews for PRs use separate `*-preview` Pages projects and a Pages-only token in the `preview` GitHub environment. The reviewed workflow/helper are now on default `main` at `ab6f9c4`, with `PREVIEW_DEPLOYMENT_ENABLED=true`. Automatic upload, exact-SHA readiness, browser rendering, one bot comment and close cleanup passed on synthetic PR #48. Setup, isolation, retention and the dated acceptance evidence are in [PR previews](previews.md#hosted-lifecycle-acceptance--october-26).
 
 ## Later Actions-based staging activation
 
@@ -269,3 +290,11 @@ Local reproduction found the preview symlink test relied on `/etc/passwd` and Wi
 Read-only provider checks at `2026-10-26T19:55:24Z` confirmed both preview projects are isolated Direct Upload projects with production branch `unused-production`, no canonical production deployment and no resource/secret bindings accepted by the preflight. The manually uploaded PR #37 aliases returned HTTP 200 with API connections blocked by CSP. These observations do not validate GitHub-held credentials or automatic cleanup.
 
 Staging diner and console, Worker health and both authenticated team analytics read routes returned HTTP 200. Pages deployment IDs remain `013f89a7-d20a-42ef-b3f9-0a3612301e60` and `9ebf0f78-b3f4-47b1-857d-d04abf76ab55`, serving frontend commit `2a135fa`. The active Worker version remains `fcb87dc6-f1c6-4f1c-84c9-542a8014520f`, deployed October 24. This pass made no hosted writes, deployment, migration or credential changes; no separate production application was tested.
+
+### Automatic preview activation and cleanup
+
+The subsequent maintainer-authorized main merge (`ab6f9c4`) activated the registered workflow. [Run 40393096652](https://github.com/vivienk/peekaplate/actions/runs/40393096652) uploaded synthetic PR #48 head `1339089` through the GitHub-held token. Both trusted markers matched that exact head, both screens rendered successfully and the bot posted one comment. Provider deployment IDs were `e816ec3d-4e59-4194-a372-9273f1319940` (diner) and `46b649bb-c367-4cb6-bc07-40d5a8ca0740` (console).
+
+[Close cleanup run 40393553935](https://github.com/vivienk/peekaplate/actions/runs/40393553935) removed both PR deployments and updated the existing comment. Provider readback found zero matching deployments; after edge propagation, both aliases and markers returned 404 at `2026-10-26T20:13:56Z`. Build/deploy job durations were 19/41 seconds and cleanup 16 seconds. See [full acceptance](previews.md#hosted-lifecycle-acceptance--october-26).
+
+These hosted writes were limited to disposable preview deployments and PR comments. Staging Pages/Worker versions, application databases, Queue/R2 infrastructure, PostHog and production were unchanged. The preview token is verified for this lifecycle, not certified for unrelated permissions or future configuration.
