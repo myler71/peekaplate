@@ -11,7 +11,8 @@ delivery/storage tests passed. Both menu Queues are empty and paused.
 
 The [Python HTTP service](../processing/src/peekaplate_processing/service.py)
 adds the missing server layer around Mohammad's existing extraction code. It is
-container-ready, not a deployed service. Teeyansh's unfinished PR is unchanged.
+deployed on staging with hosted health, access and private source-read checks
+verified. Teeyansh's unfinished PR is unchanged.
 Queue and bucket provisioning alone does not enable full menu ingestion.
 
 | Item | Name / binding | Provider ID or state |
@@ -20,7 +21,7 @@ Queue and bucket provisioning alone does not enable full menu ingestion.
 | Dead-letter Queue | `peekaplate-staging-menu-ingestion-dlq` | `70eb635f90e7458197b1d581e6c83284` |
 | Existing R2 bucket | `peekaplate-staging-assets` / `INGESTION_REPORTS_BUCKET` | Private; `r2.dev` disabled; no public custom domain or CORS rule |
 | Target API Worker | `peekaplate-api-staging` | Existing account `51eda1917fd22a9478808a82d2980741` |
-| Python endpoint | `POST /extract` | Local/container implementation; hosted URL and secret not configured |
+| Python endpoint | `POST /extract` | `https://peekaplate-extraction-staging.vxkong.workers.dev/extract`; internal service authentication configured |
 
 The Worker bindings in `backend/wrangler.jsonc` are now live on staging after
 [the protected deployment](https://github.com/vivienk/peekaplate/actions/runs/40577213391)
@@ -28,7 +29,10 @@ succeeded. Provider readback verified both menu aliases. Preserve Hyperdrive, Au
 observation bindings. No database, production resource, subscription or extra
 bucket is created by this change; normal provider usage can still incur charges.
 
-## Release and deployment attempt — October 27, 2026
+## Earlier release attempt — October 27, 2026
+
+Historical snapshot: the pending states below are superseded by the hosted
+acceptance record later in this document.
 
 [PR #54](https://github.com/vivienk/peekaplate/pull/54) merged to develop and
 [PR #55](https://github.com/vivienk/peekaplate/pull/55) promoted the reviewed
@@ -184,19 +188,20 @@ Its compatibility date matches the existing project's October 13 runtime;
 the pinned local Wrangler binary cannot execute an October 27 compatibility
 date. Advance that date with a separately verified runtime upgrade.
 
-Vivien activated Workers Paid on October 27 (Phoenix). Explicit-account Container
-inventory now succeeds; the earlier eligibility denial is resolved. The Docker
-image was uploaded, but application creation then rejected the old `default`
-scheduler. The direct-API repair must reach reviewed `main` before retrying the
-same host/application; no Container application or instance existed at this
-checkpoint. Protected service/signing/provider configuration and hosted
-acceptance still need verification after that release. Subscription readback
-remains denied, so no total monthly bill is certified here.
+Vivien activated Workers Paid; explicit Container inventory now succeeds.
+The scheduler repair in [PR #60](https://github.com/vivienk/peekaplate/pull/60)
+is deployed from main `7bbe0d3729503f69a05c0f360ed09a41b9ecaf08`. The existing host and namespace
+are reused, with one Container application. The existing uploaded image was
+reused by immutable digest; no second large upload was necessary.
+Service authentication, source-signing credentials and the API service URL are
+configured in protected Cloudflare secret bindings. Actual provider-backed
+menu extraction remains untested because no OCR/AI provider keys are configured.
+Subscription readback is denied, so no total monthly bill is certified here.
 Container usage is included up to the existing Workers Paid plan allowances,
 with overage charges possible. See [current pricing](https://developers.cloudflare.com/containers/platform/pricing/).
 This change does not buy or upgrade a subscription.
 
-After the runtime repair is released from reviewed `main`, the operator deploys with:
+For a later reviewed release, build and deploy from its exact `main` commit with:
 
 ```sh
 pnpm --filter @peekaplate/backend exec wrangler deploy --config wrangler.extraction.jsonc
@@ -214,11 +219,15 @@ before connecting the menu consumer. A successful dry run does not prove hosting
 
 ## Integration order and responsibilities
 
-1. **Sai / deployment reviewer:** the protected API release succeeded and menu
-   aliases are live. Keep the actual queues paused until feature acceptance.
-2. **Mohammad + Sai/Vivien:** release/deploy the direct-API runtime repair, configure
-   the service secret and OCR/LLM credentials, and verify genuine source extraction. The
-   hosted service and real provider accuracy are not covered by local tests.
+1. **Completed infrastructure:** protected API deployment, menu aliases, the
+   hosted Python container and matched service/signing credentials are verified.
+   Keep the actual queues paused until feature acceptance.
+2. **Mohammad + Sai/Vivien:** configure the approved existing OCR/AI provider
+   credentials privately, then test genuine menu extraction and quality. The
+   generic MENU_AI_* names refer to a configured provider, not a required new
+   subscription. Standalone OCR-only checks can use OCR.space; the current full
+   extraction endpoint also requires the AI step. Do not buy another service
+   or silently change the extraction model for infrastructure acceptance.
 3. **Teeyansh:** verify PR #45 before enabling jobs. Require the input key/hash
    above before enqueue; either reject URL/text clearly or materialize approved
    retrieval output first. The observed `e26f3c1` transport uses a 600-second
@@ -245,43 +254,81 @@ before connecting the menu consumer. A successful dry run does not prove hosting
 Steps 2–4 can proceed in parallel after agreeing the interface; step 6 needs all
 of them. No unfinished feature PR was merged to achieve this setup.
 
-## Verification record
+## Hosted acceptance — October 27, 2026 (Phoenix)
 
-The live provider probe at `2026-10-27T18:57:46.560Z` passed using synthetic
-run `bf506728-7747-40d4-8e7d-06333f1b8cd0`:
+The passing service run completed at `2026-10-28T03:43:48.367Z` (UTC), and the
+remote Queue/R2 run began at `2026-10-28T03:45:07.923Z`. These are infrastructure
+checks using synthetic bytes, not restaurant extraction-quality acceptance.
 
-- Source delivery → R2 write/read verification → individual ACK.
-- Four delivery attempts (`0, 1, 2, 3`) → configured DLQ → individual recovery ACK.
-- Two concurrent R2 create-only writes: exactly one won; later conflicting writes
-  could not replace it. This tests R2 behavior, not PR #45's report adapter.
-- Source/DLQ backlog zero; both paused again; exact test objects deleted and
-  absence verified. Observation queue/consumer settings remained unchanged.
-- Bucket remained private. No restaurant rows, database schema or production data changed.
+| Deployed component | Recorded identity |
+| --- | --- |
+| API application code | Main `58838e1`, protected run [40577213391](https://github.com/vivienk/peekaplate/actions/runs/40577213391) |
+| Extraction application code | Main `7bbe0d3729503f69a05c0f360ed09a41b9ecaf08` via [PR #60](https://github.com/vivienk/peekaplate/pull/60); post-merge CI passed |
+| Active API version after private configuration | `12dd701c-3d5a-4bf3-95f5-02882da715a6` |
+| Active extraction version after private configuration | `313da013-bd3d-4d6d-bf1e-af3e9e4911b3` |
+| Container application / namespace | `cba39d4d236043019b3f1491021c1539`; existing host name reused |
+| Python image digest | `sha256:01d8b0d9d34e8aa38b26872c73c6abef47bc097ac2813c1aea917e7178eba5ca` |
 
-The probe used temporary local Wrangler code with a remote R2 binding and
-Cloudflare's HTTP pull API. It exercised real provider resources without deploying
-a placeholder application consumer. The source/report paths above were not
-created by this probe: its files used `infra-probes/vis01/<run-id>/` only.
+**Service and private source checks — PASS:** authenticated Python health 200
+(5.816 seconds in the passing run); missing/wrong credentials 401; missing or
+expired job grants, wrong job/digest and mismatched body scope 403; query-key
+override 400; invalid body 422; exact signed private-R2 read 200/no-store.
+The real hosted Worker → Python → signed R2 relay round trip rejected unsupported
+synthetic bytes with 422 before any provider call. A valid grant whose claimed
+hash differed from the stored bytes returned 409. The exact owned test object
+was deleted and its absence verified with 404.
 
-Local service tests use synthetic storage/provider doubles; they do not certify
-hosted extraction, Queue-to-database integration or OCR/LLM accuracy. See the PR's
-verification record for final commands, counts and runtimes.
+**Queue/R2 checks — PASS:** actual source delivery → cloud R2 write/read →
+individual ACK; retry attempts 0/1/2/3 → configured DLQ → individual recovery
+ACK; concurrent create-only R2 writes had exactly one winner. Both queues ended
+with zero backlog and paused delivery; test objects were removed and absence
+verified. Observation settings were unchanged. Temporary remote development
+sessions were stopped; provider inventory still contains only the two existing
+application Workers.
 
-The final local Docker smoke passed in 3.753 seconds: non-root UID 10001,
-read-only filesystem, health 200, unauthenticated extraction 401, authenticated
-invalid request 422 and disabled public OpenAPI 404; the container was removed.
-A separate actual workerd + remote R2 check passed in 3.112 seconds at
-`2026-10-27T19:38:10.577Z`: exact synthetic source bytes 200/no-store,
-missing/wrong credentials 401, a job-A grant requesting job B 403, a digest
-outside the signed grant 403, key override 400, then
-exact cleanup and 404 readback. This probe did not start a hosted Container or
-call OCR/LLM providers. The Python suite passed 111 tests in 4.538 seconds,
-including 22 service tests; the host's nine TypeScript checks passed in 502 ms.
-The partial-result regression uses a real child process that writes an
-incomplete needs-review report and exits 2; the service preserves it as HTTP 200.
+**Existing API checks — PASS:** both team read APIs returned 200 using the
+operator's own GitHub identity, and 401 without authentication. API health is
+200; existing Auth, Hyperdrive, observation bindings and TEAM_GITHUB_TOKEN were
+preserved. No Supabase schema/data or production deployment changed.
 
-Provider references: [pull consumers](https://developers.cloudflare.com/queues/configuration/pull-consumers/),
-[pause and retention](https://developers.cloudflare.com/queues/configuration/pause-purge/),
-[DLQ routing](https://developers.cloudflare.com/queues/configuration/dead-letter-queues/),
-[Containers setup](https://developers.cloudflare.com/containers/get-started/),
-[FastAPI containers](https://fastapi.tiangolo.com/deployment/docker/).
+The host has EXTRACTION_SERVICE_SECRET and EXTRACTION_SOURCE_SIGNING_SECRET;
+the API has the matching two plus EXTRACTION_SERVICE_URL. Values were generated
+in memory and written only to protected Cloudflare secret bindings, not files,
+chat or Git. The signing key is never forwarded to Python. Opening the host in
+a browser without service authentication returns 401 by design. A partial
+credential update requires keeping the queues paused and reapplying the full
+matched set; allow an old test container to go idle before retesting. Credentials
+are opaque in provider readback; never treat a list of names as proof of pairing.
+The successful signed read and Python round trip establish the tested pairing.
+
+**NOT RUN:** real OCR/AI extraction (provider keys absent), PR #45's report
+adapter/database draft persistence, the complete authenticated upload-to-ACK
+flow, representative load/accuracy and production. This setup adds neither a
+placeholder feature consumer nor fake successful extraction results.
+
+## Evidence correction and local checks
+
+The earlier 18:57 UTC Queue probe did use Cloudflare's real HTTP pull API,
+but its R2 steps and the 19:38 UTC source-relay probe ran with local Wrangler
+and forceLocal enabled. They established local behavior, not hosted R2 access;
+their earlier remote-R2 claims are superseded by the genuine remote runs above.
+The first hosted reader returned 404 for a fixture the local writer reported
+as created, exposing that test-helper mistake. Remote-mode fixture writes and
+an independently deployed reader then agreed. For provider acceptance, use an
+actual remote Worker or explicit remote CLI operation and independent readback;
+a remote flag in a local emulator is not proof of destination.
+
+The local Docker smoke remains valid: UID 10001, read-only filesystem, health
+200, unauthenticated extraction 401, invalid request 422 and disabled public
+OpenAPI 404; the test container was removed. The unchanged Python package's
+earlier 111-test run is local evidence only. The scheduler repair passed 69
+TypeScript tests, 57 script tests, 73 SQL assertions, 14 database integration
+tests, builds, generated binding checks and 13 focused host tests. Readiness
+retries, single-POST forwarding, concurrent startup and failure recovery are
+covered locally; no production-readiness claim follows from those checks.
+
+Provider references: [scheduling and runtime configuration](https://developers.cloudflare.com/containers/configuration/scheduling-policy/),
+[direct Container API](https://developers.cloudflare.com/containers/api/durable-object-container/),
+[instance sizes](https://developers.cloudflare.com/containers/platform/limits/),
+[pull consumers](https://developers.cloudflare.com/queues/configuration/pull-consumers/),
+[pause/retention](https://developers.cloudflare.com/queues/configuration/pause-purge/).
