@@ -1,5 +1,22 @@
 # Local and staging operations
 
+## OCR credential activation — October 28, 2026 (Phoenix)
+
+`OCR_SPACE_API_KEY` is configured in GitHub's existing protected `staging`
+environment and as a secret binding on `peekaplate-extraction-staging`. No key
+value was committed, saved in operator files or printed. Existing host bindings,
+service/signing credentials, image, database and production resources were unchanged.
+The secret update created extraction Worker version
+`7b505396-501e-4d46-870f-d6dbd87655ee`; its application code remains main `7bbe0d3`.
+
+One fresh call through the existing Python OCR adapter to OCR.space Engine 3
+completed in **4.654 seconds** with no cache hit. It read all three expected
+synthetic dish names and prices. This was an OCR-only provider check from the
+operator's machine, not a hosted `/extract` or Queue/database acceptance test.
+The [service handoff](menu-ingestion-infrastructure.md#ocr-credential-and-provider-check--october-28-2026)
+records the configuration boundary and remaining AI/migration/consumer work.
+Both menu queues remain paused; no workflow or production deployment was triggered.
+
 ## VIS-01 hosted activation — October 27, 2026 (Phoenix)
 
 Workers Paid entitlement, the existing menu Queue/DLQ and private R2 bucket are
