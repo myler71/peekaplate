@@ -69,7 +69,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "backend",
       "status": "foundation",
-      "summary": "Staging API menu Queue/R2 aliases are live. Separate extraction host at main7bbe0d3 is deployed with matching service/signing secrets and API URL in protected bindings. Hosted Python health, service/job denials, signed private R2 source round trip, unsupported input and hash conflict passed; existing team APIs remain200/401. DirectDO named-image startup, fixed singleton and native60s inactivity are verified within that boundary. No provider keys, real extraction, ingestion endpoint, feature consumer or canonical/database writes are added.",
+      "summary": "Staging API Queue/R2 aliases and separate Python host are deployed with protected service/signing configuration. Hosted authorization and signed source checks passed. OCR_SPACE_API_KEY is now in the protected GitHub staging environment and extraction Worker; a focused test verifies Python forwarding without its signing key. Fresh standalone provider OCR passed, not hosted extraction. Full AI configuration, feature consumer/migration and upload-to-drafts/ACK acceptance remain pending; queues stay paused.",
       "paths": [
         "backend/src/index.ts",
         "backend/src/index.test.ts",
@@ -104,7 +104,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "contracts",
         "database"
       ],
-      "sourceFingerprint": "ae96f497605bdaa5a3cef6f4cb40b6e8e57a900a46bbdc6b9ffcb606e7c57d05"
+      "sourceFingerprint": "71e3eec5fb2d2d0bc4709fc012b3a25326ef5207af614f485e35e60155c7ef57"
     },
     {
       "id": "database",
@@ -152,7 +152,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "delivery",
       "status": "foundation",
-      "summary": "PR60 scheduler repair merged/deployed from exact main7bbe0d3; CI and two pinned reviews passed. Paid entitlement, protected API release, private host configuration and actual remote Queue/R2/ACK/retry/DLQ tests passed; both queues remain empty/paused. Operator tests corrected an earlier local-R2 proof mistake, cleaned owned fixtures and preserved observation settings/TEAM secret. Hosted OCR/AI and complete feature acceptance remain unrun; production and Supabase unchanged.",
+      "summary": "PR60 scheduler repair is deployed; hosted authorization and genuine remote Queue/R2/ACK/retry/DLQ tests passed. October28 OCR key stored in GitHub staging and extraction Worker; other bindings preserved and fresh standalone OCR passed4.654s. Runtime code, image, API, database and production unchanged. Updated handoff distinguishes credential setup from AI configuration and complete feature acceptance. Queues remain paused; PR45 verifier zero-check result needs correction before reliance.",
       "paths": [
         "README.md",
         "SECURITY.md",
@@ -204,7 +204,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "f7182579f00bc5a4fa1bd484a0919149a1bcc9dc5fbd493e2d3f9591e9974ffc"
+      "sourceFingerprint": "04171ae7a656107ffe1ed2ad2d71abb97223e4becfd7f4e574fe3746c7f10811"
     },
     {
       "id": "agents",
@@ -266,7 +266,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "processing",
       "status": "foundation",
-      "summary": "Reviewed Python PDF/image OCR and AI extraction package plus deployed staging FastAPI/Uvicorn container. Hosted Worker→Python→signed private R2 source validation passed with synthetic unsupported bytes and hash-conflict cases; health/auth checks pass. Real OCR/AI extraction is unrun because provider keys are absent. Internal service/signing configuration is protected; Python never gets the signing key or database credentials. No automatic 2.5D/3D generation or publication.",
+      "summary": "Python PDF/image OCR and AI package plus deployed staging FastAPI/Uvicorn container. October28 fresh OCR.space Engine3 adapter call read three synthetic dishes/prices in4.654s without cache. OCR key is protected in GitHub staging and host secret bindings. This was operator-side OCR, not hosted full extraction or quality acceptance. Full AI provider configuration and VIS01 integration remain pending. Python gets no source-signing or database credentials; no automatic 2.5D/3D generation or publication.",
       "paths": [
         "processing/.gitignore",
         "processing/.python-version",
@@ -314,6 +314,15 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     }
   ],
   "handoffs": [
+    {
+      "summary": "October28: stored OCR_SPACE_API_KEY in protected GitHub staging environment and existing extraction Worker. Host version7b505396 retains main7bbe0d3 code/image and other bindings. Fresh OCR-only provider call read all three synthetic names/prices in4.654s with no cache; local output stays outside Git. Focused host regression checks OCR forwarding and signing-key exclusion. No production, migration or consumer activation.",
+      "modules": [
+        "backend",
+        "processing",
+        "delivery"
+      ],
+      "next": "Teeyansh fixes PR45 verifier zero-check success, finalizes reviewed consumer/deadline settings and prepares controlled E2E cases. Operators configure the approved AI provider and verify/apply the reviewed migration/release before replacing the temporary pull consumer. Run full upload-to-drafts/ACK and failure/tenant checks before enabling real submissions. Hosted full extraction remains NOT RUN."
+    },
     {
       "summary": "Completed VIS-01 host activation after Paid upgrade and PR60 directDO repair. Deployed main7bbe0d3 using existing image; set matched internal secrets privately. Hosted health/auth/job/source/hash checks and genuine remote Queue/R2/ACK/retry/DLQ probes passed with exact cleanup and queues paused. Existing team reads200/anonymous401. Corrected previous local-R2 evidence claim after independent hosted read exposed forceLocal helper behavior.",
       "modules": [
@@ -386,13 +395,6 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "delivery"
       ],
       "next": "Configure the isolated staging Supabase/auth/Hyperdrive and frontend/API connections, supply scoped GitHub deployment credentials, then verify the deployed staging flow before activation or production promotion."
-    },
-    {
-      "summary": "Prepared history-preserving core import, marketing split, develop CI, PR 13-derived ruleset proposals and disabled staging deployment gate. Reconciled all eight later source commits through b40e3ca, retaining their history and five updated planning links. Application runtime and backend bindings are unchanged. Owner chooses private GitHub Free; branch rules remain inactive and manual PR/CI gates apply.",
-      "modules": [
-        "delivery"
-      ],
-      "next": "Obtain independent human review; reconcile open source PRs and establish provider parity before release or archival. Apply manual PR/CI gates because private branch enforcement is unavailable on the selected free plan."
     }
   ]
 }

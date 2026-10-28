@@ -178,13 +178,15 @@ describe('staging extraction host', () => {
     expect((await host.fetch(input, env)).status).toBe(403);
     expect(get).not.toHaveBeenCalled();
   });
-  it('keeps the source signing key out of the Python container environment', () => {
+  it('forwards the OCR key to Python while keeping the source signing key out', () => {
     const { env } = setup();
+    env.OCR_SPACE_API_KEY = 'synthetic-ocr-provider-key';
     const container = new ExtractionContainer(
       {} as ConstructorParameters<typeof ExtractionContainer>[0],
       env,
     );
     expect(container.envVars.EXTRACTION_SERVICE_SECRET).toBe(secret);
+    expect(container.envVars.OCR_SPACE_API_KEY).toBe('synthetic-ocr-provider-key');
     expect(container.envVars.EXTRACTION_SOURCE_SIGNING_SECRET).toBeUndefined();
   });
   it('requires distinct service and source-signing credentials', async () => {
