@@ -9,7 +9,7 @@ private staging R2 bucket. These are separate from diner observations: a slow
 menu job must not hold up diner events. The resources exist and their synthetic
 delivery/storage tests passed. Both menu Queues are empty and paused.
 
-The [Python HTTP service on develop](https://github.com/vivienk/peekaplate/blob/develop/processing/src/peekaplate_processing/service.py)
+The [Python HTTP service](../processing/src/peekaplate_processing/service.py)
 adds the missing server layer around Mohammad's existing extraction code. It is
 container-ready, not a deployed service. Teeyansh's unfinished PR is unchanged.
 Queue and bucket provisioning alone does not enable full menu ingestion.
@@ -22,9 +22,9 @@ Queue and bucket provisioning alone does not enable full menu ingestion.
 | Target API Worker | `peekaplate-api-staging` | Existing account `51eda1917fd22a9478808a82d2980741` |
 | Python endpoint | `POST /extract` | Local/container implementation; hosted URL and secret not configured |
 
-The Worker bindings are declared in `backend/wrangler.jsonc`, staging only.
-They become live only after a reviewed `main` release passes the protected
-staging deployment. Preserve Hyperdrive, Auth, `TEAM_GITHUB_TOKEN` and both
+The Worker bindings in `backend/wrangler.jsonc` are now live on staging after
+[the protected deployment](https://github.com/vivienk/peekaplate/actions/runs/40577213391)
+succeeded. Provider readback verified both menu aliases. Preserve Hyperdrive, Auth, `TEAM_GITHUB_TOKEN` and both
 observation bindings. No database, production resource, subscription or extra
 bucket is created by this change; normal provider usage can still incur charges.
 
@@ -166,29 +166,37 @@ that collaborators can retrieve. Use protected operator setup.
 
 Cloudflare Containers is the selected staging host; configuration is in
 `backend/wrangler.extraction.jsonc` and the authenticated bridge in
-`backend/src/extraction-host.ts`. It uses one `basic` instance (1 GiB memory,
-1/4 vCPU), one fixed Durable Object name, one Uvicorn process, and sleeps after
-60 idle seconds. The SDK keeps active requests alive; the process lock is not
+`backend/src/extraction-host.ts`. The account requires `durable_object`
+scheduling, named `images.base`, and the direct Durable Object Container API.
+The former helper class and application-level `max_instances` cannot be used
+with this policy. Startup selects `standard-1` (4 GiB, 1/2 vCPU); `basic` is
+not supported by the direct startup API, and `lite` has only 256 MiB.
+The Worker always selects the fixed `staging-extractor` name, so application
+routing uses one instance. This is not an account-wide billing limit.
+One Uvicorn process runs; the native timeout stops the container 60 seconds
+after the Durable Object becomes inactive, preserving active HTTP jobs.
+An authenticated health probe waits up to 30 seconds before forwarding a
+request. Readiness probes may retry; extraction POSTs are forwarded once.
+The process lock is not
 a replacement for durable job leases. The source-download route does not start
 a container, and invalid credentials cannot start one either.
 Its compatibility date matches the existing project's October 13 runtime;
 the pinned local Wrangler binary cannot execute an October 27 compatibility
 date. Advance that date with a separately verified runtime upgrade.
 
-The host is not yet deployed. The initial missing `containers:write` scope is
-resolved: the scoped Wrangler login succeeded and retained existing Worker/Pages
-access. The account is still on Free; **Vivien will activate the $5/month Workers
-Paid plan**. Keep this configuration and wait for that upgrade; no alternative
-hosting provider or automatic purchase is needed. The explicit-account Container
-inventory currently returns the expected Paid-plan eligibility denial.
-`/workers/standard` reported true despite that denial, so that flag must not be
-treated as proof of paid billing activation. Subscription readback was denied.
+Vivien activated Workers Paid on October 27 (Phoenix). Explicit-account Container
+inventory now succeeds; the earlier eligibility denial is resolved. The Docker
+image was uploaded, but application creation then rejected the old `default`
+scheduler. The direct-API repair must reach reviewed `main` before retrying the
+same host/application; no Container application or instance existed at this
+checkpoint. Protected service/signing/provider configuration and hosted
+acceptance still need verification after that release. Subscription readback
+remains denied, so no total monthly bill is certified here.
 Container usage is included up to the existing Workers Paid plan allowances,
 with overage charges possible. See [current pricing](https://developers.cloudflare.com/containers/platform/pricing/).
 This change does not buy or upgrade a subscription.
 
-After Vivien's upgrade is active and the service is released from reviewed
-`main`, the operator deploys with:
+After the runtime repair is released from reviewed `main`, the operator deploys with:
 
 ```sh
 pnpm --filter @peekaplate/backend exec wrangler deploy --config wrangler.extraction.jsonc
@@ -206,24 +214,22 @@ before connecting the menu consumer. A successful dry run does not prove hosting
 
 ## Integration order and responsibilities
 
-1. **Sai / deployment reviewer:** release the binding-only `main` change through
-   the existing staging approval gate. The actual queues can remain paused.
-2. **Mohammad + Sai/Vivien:** confirm Vivien's Workers Paid upgrade is active,
-   deploy the Cloudflare container host, configure
+1. **Sai / deployment reviewer:** the protected API release succeeded and menu
+   aliases are live. Keep the actual queues paused until feature acceptance.
+2. **Mohammad + Sai/Vivien:** release/deploy the direct-API runtime repair, configure
    the service secret and OCR/LLM credentials, and verify genuine source extraction. The
    hosted service and real provider accuracy are not covered by local tests.
-3. **Teeyansh:** align PR #45 before enabling jobs. Require the input key/hash
+3. **Teeyansh:** verify PR #45 before enabling jobs. Require the input key/hash
    above before enqueue; either reject URL/text clearly or materialize approved
-   retrieval output first. Its current optional-hash/URL admission and 120-second
-   extractor timeout are incompatible with this bounded service. Configure a
-   measured overall budget (for example 720 seconds at the Worker, with matching
+   retrieval output first. The observed `e26f3c1` transport uses a 600-second
+   timeout; that is shorter than the service's 700-second processing cap plus
+   cold startup and transfer. Configure a measured overall budget with matching
    proxy/queue/lease limits), batch size one and concurrency one for the pilot.
    Verify limits against the selected runtime rather than silently raising them.
    Mint and send the job-bound source capability after the durable claim, using
    the trusted job row's IDs/hash. Do not expose a browser-facing grant-mint route.
-4. **Teeyansh + Jeffin:** land reviewed job/draft migrations and the R2 report
-   adapter. PR #45 currently calls `processQueueBatch(client, batch, extractor)`
-   without `reportStorage`; merely binding R2 does not archive reports. Inject
+4. **Teeyansh + Jeffin:** land reviewed job/draft migrations and verify the R2 report
+   adapter is injected into the actual Queue handler; merely binding R2 does not archive reports. Inject
    the adapter, enforce job/tenant scope, and retain validated output before
    durable draft completion/ACK. Test storage errors and conflicting retries.
 5. **Operator + Teeyansh:** replace the temporary source pull consumer with the

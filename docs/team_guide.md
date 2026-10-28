@@ -52,11 +52,11 @@ ClickUp's “Complete” status describes a task's recorded progress. It is not 
 **Menu extraction setup:** its own Queue and failed-job Queue now exist, and both
 passed real synthetic delivery tests. Reports will use the existing private R2
 bucket. The new Python HTTP service wraps the existing OCR/extraction code and
-has local tests and a Docker build; its Cloudflare host awaits Vivien's planned
-$5/month Workers Paid upgrade and protected provider credentials.
-PRs #54/#55 are merged. The API release is waiting for an independent staging
-reviewer; the actual container deployment was rejected until Workers Paid is
-active. This does not stop local integration work. Teeyansh must connect the real
+has local tests and a Docker build. Vivien's Workers Paid upgrade is active,
+and the protected API deployment succeeded: menu Queue/R2 bindings are live.
+The first Container application attempt exposed a provider requirement for
+direct Durable Object scheduling. Its runtime repair must be released before
+host activation and protected credential tests. This does not stop local integration work. Teeyansh must connect the real
 consumer, report adapter and reviewed database changes before live menu tests.
 The queues stay paused until then. Follow the
 [VIS-01 setup and handoff](menu-ingestion-infrastructure.md) for exact names,
