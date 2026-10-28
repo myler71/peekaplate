@@ -1,26 +1,27 @@
 # Local and staging operations
 
-## VIS-01 infrastructure — October 27, 2026
+## VIS-01 infrastructure — October 27, 2026 (Phoenix)
 
-Provisioned the separate menu Queue/DLQ and reused the private staging-assets
-bucket. Synthetic delivery/archive/readback/ACK, attempts 0–3 to DLQ, R2
-create-only contention and exact cleanup passed. Both queues remain empty and
-paused with 24-hour retention; existing observation resources are unchanged.
+The menu Queue/DLQ and private staging-assets bucket passed synthetic delivery,
+archive/ACK, retries-to-DLQ and create-only-write checks. Both queues stay paused
+with 24-hour retention; real submissions remain off. The protected API run
+[40577213391](https://github.com/vivienk/peekaplate/actions/runs/40577213391)
+succeeded at main 58838e1. Provider readback verified INGESTION_QUEUE and
+INGESTION_REPORTS_BUCKET; existing authorization, Hyperdrive and observations
+remain intact.
 
-PRs #54/#55 are merged; reviewed main release `58838e1` passed CI. Its protected
-[API deployment](https://github.com/vivienk/peekaplate/actions/runs/40577213391)
-is waiting for an independent reviewer. At 20:25 UTC the existing API still
-served October 24 version `fcb87dc6-f1c6-4f1c-84c9-542a8014520f` with health
-HTTP 200; new menu bindings were not live yet.
+Vivien activated Workers Paid; Container inventory now succeeds. The operator
+restarted the stopped Docker daemon without resetting/deleting data, then built
+and uploaded the reviewed image. Container registration rejected the default
+scheduler, so the prepared repair uses the direct Durable Object API with a
+named image, fixed singleton and native 60-second idle timeout. It uses
+standard-1 (4 GiB/halfCPU); basic is unsupported on that startup API. This is
+usage-based capacity, not a new subscription or a hard account spending cap.
 
-The separate container deployment was actually attempted. Cloudflare rejected
-image registration with HTTP 401 requiring Workers Paid. A partial extraction
-Worker exists with workers.dev disabled; its URLs return 404, and settings
-readback returned provider HTTP 500. Reuse its existing name after Vivien's
-planned upgrade. No subscription was purchased, secret changed, migration
-applied or production release made. Teeyansh can continue local integration;
-hosted Python extraction and complete menu-to-draft acceptance remain unverified.
-See the [exact release record and next steps](menu-ingestion-infrastructure.md#release-and-deployment-attempt--october-27-2026).
+The repaired host still needs its reviewed main release, protected service keys
+and hosted acceptance. OCR/AI provider keys are absent. No application data,
+migration or production deployment changed. Exact interfaces and integration
+order are in the [service handoff](menu-ingestion-infrastructure.md).
 
 ## Observation infrastructure — October 24, 2026
 

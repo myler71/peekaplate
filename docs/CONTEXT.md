@@ -69,7 +69,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "backend",
       "status": "foundation",
-      "summary": "Hono Worker verifies staff JWT/membership for atomic draft revisions and individual GitHub collaboration for bounded staging analytics. October24 observation bindings were deployed; queues remain paused. The reviewed VIS-01 release adds a separate menu producer/report alias and a standalone authenticated extraction host; existing API command code, Auth, Hyperdrive and secrets are unchanged. Host source reads require15-minute tenant/job/hash grants with a signing key never forwarded to Python. Scoped Containers login is authorized; host activation awaits Vivien's Workers Paid upgrade and protected provider/service credentials. No ingestion endpoint, real feature consumer, canonical observation writes or publication is added. Hosted removal acceptance and production remain separate.",
+      "summary": "Hono API authorization and menu Queue/R2 aliases are deployed on staging. Separate extraction host preserves service auth and tenant/job/hash source grants; the account requires direct Durable Object scheduling. The repair uses images.base, standard-1, fixed singleton routing, authenticated bounded readiness and native 60-second inactivity timeout; provider secrets stay allowlisted and the signing key never enters Python. Paid entitlement is verified; repaired host activation and real provider extraction remain pending. No feature consumer, ingestion endpoint or database migration is introduced.",
       "paths": [
         "backend/src/index.ts",
         "backend/src/index.test.ts",
@@ -91,7 +91,8 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "backend/src/extraction-host.test.ts",
         "backend/wrangler.extraction.jsonc",
         "docs/menu-ingestion-infrastructure.md",
-        "scripts/menu-ingestion-infra.test.mjs"
+        "scripts/menu-ingestion-infra.test.mjs",
+        "backend/tsconfig.json"
       ],
       "adrs": [
         "docs/adr/0002-selective-event-sourcing.md",
@@ -103,7 +104,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "contracts",
         "database"
       ],
-      "sourceFingerprint": "4d823dfc609ac37e3c4d7c0d1c1efa04ca9a4fb4e8aab8ab04dc89e24907374c"
+      "sourceFingerprint": "7a9d0e26815aa12109534e46d52de781a58921333088967ae9cb83ed5d0431f9"
     },
     {
       "id": "database",
@@ -151,7 +152,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "delivery",
       "status": "foundation",
-      "summary": "PRs54/55 merged the reviewed VIS-01 setup to develop/main. Main58838e1 CI passed; protected staging run40577213391 awaits independent approval. Actual container deployment was rejected by Cloudflare requiring Workers Paid; a partial extraction Worker has workers.dev disabled and returns404. Existing API health remains200 at its prior version. Queue/DLQ and private R2 probes passed; queues remain paused. Local integration can proceed, while host secrets/provider extraction and complete menu-to-draft acceptance remain unverified. No production or database release.",
+      "summary": "Protected staging run40577213391 succeeded for main58838e1; menu aliases were read back live. Paid Container entitlement now succeeds. Docker was restarted without data changes and the image uploaded, but provider application creation rejected the default scheduler. A focused direct-API repair includes mature pinned development types and startup/config regressions. Release the reviewed repair to main, retry the same host, set protected service keys and verify hosted behavior. Queues remain paused; no database or production release.",
       "paths": [
         "README.md",
         "SECURITY.md",
@@ -191,7 +192,8 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "scripts/preview.mjs",
         "scripts/preview.test.mjs",
         "docs/menu-ingestion-infrastructure.md",
-        "scripts/menu-ingestion-infra.test.mjs"
+        "scripts/menu-ingestion-infra.test.mjs",
+        "pnpm-lock.yaml"
       ],
       "adrs": [
         "docs/adr/0007-delivery-and-recovery.md",
@@ -202,7 +204,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "828c8811d67624c7c3cfbd3a18f2c6549501bc35e134479cab89064c897f6622"
+      "sourceFingerprint": "c4da1dfcd091ee88f72f8b5946c1f7fbadc8e4f9ed505d8ee4301db9dfdc0a90"
     },
     {
       "id": "agents",
@@ -313,6 +315,15 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
   ],
   "handoffs": [
     {
+      "summary": "Paid activation resolved Container eligibility. Existing protected API run succeeded and menu aliases are live. Actual container registration then rejected default scheduling; prepared directDO runtime repair with RED/GREEN config guard and startup/readiness/concurrency/failure-recovery tests. Dev-only official Worker types are pinned to mature October26 release; latest October28 was blocked by dependency maturity policy, which remains unchanged.",
+      "modules": [
+        "backend",
+        "processing",
+        "delivery"
+      ],
+      "next": "Review and merge runtime repair, deploy its exact main commit, configure matched service/signing secrets through protected provider stores and test real hosted container/R2 authorization. OCR/AI provider credentials are absent; real menu extraction and complete Queue-to-draft acceptance remain separate. Teeyansh can continue local integration, keeping the queue paused."
+    },
+    {
       "summary": "VIS-01 infrastructure released in PRs54/55: Queue/DLQ and private R2 tested, local service and job-bound relay reviewed, main58838e1 CI green. Actual protected API run40577213391 is waiting for independent approval. Actual container deploy failed at /containers/me with Workers Paid eligibility denial; partial host route stays disabled. Existing API health200 and prior bindings unchanged.",
       "modules": [
         "backend",
@@ -381,15 +392,6 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "delivery"
       ],
       "next": "Finish exact-head review and CI for the local recovery PR. Keep the GitHub protection policy in a separate owner-action PR; stop before Cloudflare/Supabase integration until protected credentials are supplied."
-    },
-    {
-      "summary": "PRs 14/15 released hosted PostHog consented shell capture at main 2a135fa, verified by live synthetic capture and provider readback. Added private export landing migration, conflict-aware deduplication view and least-privilege tests. pnpm check and test:db pass; technical/security review found no supported defect and guide review corrections are applied. Hosted migration applied with explicit access approval; tables and effective role boundaries verified. Export connection created; first run failed TLS verification and schedule is paused. User reported correction requires project Admin access. No rows transferred; no bypass attempted.",
-      "modules": [
-        "analytics",
-        "database",
-        "delivery"
-      ],
-      "next": "Vivien must correct the connection or grant project Admin access. Complete the connection with the official Supabase CA, verify a bounded export and duplicate-safe retry, then resume schedule. Do not claim transfer success from backfill wrapper completion alone."
     }
   ]
 }
