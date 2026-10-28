@@ -69,7 +69,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "backend",
       "status": "foundation",
-      "summary": "Hono API authorization and menu Queue/R2 aliases are deployed on staging. Separate extraction host preserves service auth and tenant/job/hash source grants; the account requires direct Durable Object scheduling. The repair uses images.base, standard-1, fixed singleton routing, authenticated bounded readiness and native 60-second inactivity timeout; provider secrets stay allowlisted and the signing key never enters Python. Paid entitlement is verified; repaired host activation and real provider extraction remain pending. No feature consumer, ingestion endpoint or database migration is introduced.",
+      "summary": "Staging API menu Queue/R2 aliases are live. Separate extraction host at main7bbe0d3 is deployed with matching service/signing secrets and API URL in protected bindings. Hosted Python health, service/job denials, signed private R2 source round trip, unsupported input and hash conflict passed; existing team APIs remain200/401. DirectDO named-image startup, fixed singleton and native60s inactivity are verified within that boundary. No provider keys, real extraction, ingestion endpoint, feature consumer or canonical/database writes are added.",
       "paths": [
         "backend/src/index.ts",
         "backend/src/index.test.ts",
@@ -104,7 +104,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "contracts",
         "database"
       ],
-      "sourceFingerprint": "7a9d0e26815aa12109534e46d52de781a58921333088967ae9cb83ed5d0431f9"
+      "sourceFingerprint": "ae96f497605bdaa5a3cef6f4cb40b6e8e57a900a46bbdc6b9ffcb606e7c57d05"
     },
     {
       "id": "database",
@@ -152,7 +152,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "delivery",
       "status": "foundation",
-      "summary": "Protected staging run40577213391 succeeded for main58838e1; menu aliases were read back live. Paid Container entitlement now succeeds. Docker was restarted without data changes and the image uploaded, but provider application creation rejected the default scheduler. A focused direct-API repair includes mature pinned development types and startup/config regressions. Release the reviewed repair to main, retry the same host, set protected service keys and verify hosted behavior. Queues remain paused; no database or production release.",
+      "summary": "PR60 scheduler repair merged/deployed from exact main7bbe0d3; CI and two pinned reviews passed. Paid entitlement, protected API release, private host configuration and actual remote Queue/R2/ACK/retry/DLQ tests passed; both queues remain empty/paused. Operator tests corrected an earlier local-R2 proof mistake, cleaned owned fixtures and preserved observation settings/TEAM secret. Hosted OCR/AI and complete feature acceptance remain unrun; production and Supabase unchanged.",
       "paths": [
         "README.md",
         "SECURITY.md",
@@ -204,7 +204,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "c4da1dfcd091ee88f72f8b5946c1f7fbadc8e4f9ed505d8ee4301db9dfdc0a90"
+      "sourceFingerprint": "f7182579f00bc5a4fa1bd484a0919149a1bcc9dc5fbd493e2d3f9591e9974ffc"
     },
     {
       "id": "agents",
@@ -266,7 +266,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     {
       "id": "processing",
       "status": "foundation",
-      "summary": "Local PDF/image acquisition uses an injectable OCRProvider restricted to validated OCR.space Engine 3-compatible results. Incompatible OCR fails its segment and preserves later native pages. LLM extraction retains needs_review drafts and evidence. Shared Unicode fixtures check spans; combined integration, separate verification and quality acceptance remain pending. Optional staging FastAPI/Uvicorn service authenticates a trusted Worker, verifies tenant/job-derived private R2 sources and hashes, and runs the existing pipeline in a bounded subprocess. It has no database access, URL fetch path or publication ability; hosting/credentials and PR45 admission/deadline/report-adapter alignment remain pending. Expected CLI exit2 retains validated partial/failed reports instead of converting them to transport errors.",
+      "summary": "Reviewed Python PDF/image OCR and AI extraction package plus deployed staging FastAPI/Uvicorn container. Hosted Worker→Python→signed private R2 source validation passed with synthetic unsupported bytes and hash-conflict cases; health/auth checks pass. Real OCR/AI extraction is unrun because provider keys are absent. Internal service/signing configuration is protected; Python never gets the signing key or database credentials. No automatic 2.5D/3D generation or publication.",
       "paths": [
         "processing/.gitignore",
         "processing/.python-version",
@@ -314,6 +314,15 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
     }
   ],
   "handoffs": [
+    {
+      "summary": "Completed VIS-01 host activation after Paid upgrade and PR60 directDO repair. Deployed main7bbe0d3 using existing image; set matched internal secrets privately. Hosted health/auth/job/source/hash checks and genuine remote Queue/R2/ACK/retry/DLQ probes passed with exact cleanup and queues paused. Existing team reads200/anonymous401. Corrected previous local-R2 evidence claim after independent hosted read exposed forceLocal helper behavior.",
+      "modules": [
+        "backend",
+        "processing",
+        "delivery"
+      ],
+      "next": "Teeyansh can use staging runtime bindings without receiving internal secret values. Configure approved existing OCR/AI provider credentials when ready, finish/review PR45 and its migrations/report adapter, align600s transport with700s processing plus cold start, then run controlled authorized upload→Queue→service→private report→database drafts→ACK and failure/tenant tests before unpausing. No production or restaurant-data tests were performed."
+    },
     {
       "summary": "Paid activation resolved Container eligibility. Existing protected API run succeeded and menu aliases are live. Actual container registration then rejected default scheduling; prepared directDO runtime repair with RED/GREEN config guard and startup/readiness/concurrency/failure-recovery tests. Dev-only official Worker types are pinned to mature October26 release; latest October28 was blocked by dependency maturity policy, which remains unchanged.",
       "modules": [
@@ -384,14 +393,6 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "delivery"
       ],
       "next": "Obtain independent human review; reconcile open source PRs and establish provider parity before release or archival. Apply manual PR/CI gates because private branch enforcement is unavailable on the selected free plan."
-    },
-    {
-      "summary": "Recovered Windows Docker after checksummed offline disk backups and an official Desktop 4.95 upgrade. Real testing exposed a pnpm.mjs launcher rejection; the DB harness now invokes installed Vitest directly, with a failing-then-passing launcher regression. All 43 SQL assertions, 13 Worker/Postgres cases and local startup/demo/cleanup passed on Windows. Contributor Claude/Codex setup is independently owned.",
-      "modules": [
-        "database",
-        "delivery"
-      ],
-      "next": "Finish exact-head review and CI for the local recovery PR. Keep the GitHub protection policy in a separate owner-action PR; stop before Cloudflare/Supabase integration until protected credentials are supplied."
     }
   ]
 }

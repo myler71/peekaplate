@@ -1,27 +1,27 @@
 # Local and staging operations
 
-## VIS-01 infrastructure — October 27, 2026 (Phoenix)
+## VIS-01 hosted activation — October 27, 2026 (Phoenix)
 
-The menu Queue/DLQ and private staging-assets bucket passed synthetic delivery,
-archive/ACK, retries-to-DLQ and create-only-write checks. Both queues stay paused
-with 24-hour retention; real submissions remain off. The protected API run
-[40577213391](https://github.com/vivienk/peekaplate/actions/runs/40577213391)
-succeeded at main 58838e1. Provider readback verified INGESTION_QUEUE and
-INGESTION_REPORTS_BUCKET; existing authorization, Hyperdrive and observations
-remain intact.
+Workers Paid entitlement, the existing menu Queue/DLQ and private R2 bucket are
+verified. The protected API release at main 58838e1 succeeded and menu aliases
+are live. The scheduler repair in [PR #60](https://github.com/vivienk/peekaplate/pull/60)
+deployed the extraction host from main `7bbe0d3729503f69a05c0f360ed09a41b9ecaf08`, reusing the
+already-uploaded image and existing host/application namespace. It uses direct
+Durable Object scheduling, standard-1 capacity and a native 60-second idle
+timeout. Fixed-name routing selects one instance; it is not a billing cap.
 
-Vivien activated Workers Paid; Container inventory now succeeds. The operator
-restarted the stopped Docker daemon without resetting/deleting data, then built
-and uploaded the reviewed image. Container registration rejected the default
-scheduler, so the prepared repair uses the direct Durable Object API with a
-named image, fixed singleton and native 60-second idle timeout. It uses
-standard-1 (4 GiB/halfCPU); basic is unsupported on that startup API. This is
-usage-based capacity, not a new subscription or a hard account spending cap.
+Service/signing secrets and the API URL are configured privately. Hosted Python
+health, authorization denials, signed private source reads, unsupported-input
+rejection, hash conflict and exact cleanup passed. The separate genuine remote
+Queue→R2→ACK/retry→DLQ test passed and left both queues empty and paused.
+Team APIs still return 200 with the operator's own identity and 401 anonymously.
+No provider keys, Supabase changes or production release were added.
 
-The repaired host still needs its reviewed main release, protected service keys
-and hosted acceptance. OCR/AI provider keys are absent. No application data,
-migration or production deployment changed. Exact interfaces and integration
-order are in the [service handoff](menu-ingestion-infrastructure.md).
+Earlier local-Worker R2 claims are corrected: forceLocal meant those R2 steps
+were local even though Queue delivery was real. The corrected remote tests and
+exact component versions are in the [hosted acceptance record](menu-ingestion-infrastructure.md#hosted-acceptance--october-27-2026-phoenix).
+Real OCR/AI extraction and PR #45's full upload/report/database/ACK acceptance
+remain separate. Keep real submissions off until those pass.
 
 ## Observation infrastructure — October 24, 2026
 

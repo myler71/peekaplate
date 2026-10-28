@@ -54,16 +54,19 @@ passed real synthetic delivery tests. Reports will use the existing private R2
 bucket. The new Python HTTP service wraps the existing OCR/extraction code and
 has local tests and a Docker build. Vivien's Workers Paid upgrade is active,
 and the protected API deployment succeeded: menu Queue/R2 bindings are live.
-The first Container application attempt exposed a provider requirement for
-direct Durable Object scheduling. Its runtime repair must be released before
-host activation and protected credential tests. This does not stop local integration work. Teeyansh must connect the real
-consumer, report adapter and reviewed database changes before live menu tests.
-The queues stay paused until then. Follow the
+The Python host is now deployed and its private connection is configured.
+Live tests confirmed Python health, signed source reads from private R2,
+wrong-job denial and source-hash conflict handling. The Queue-to-R2/retry/DLQ
+checks also passed against real Cloudflare resources. Teeyansh can continue
+integration using the runtime bindings; nobody needs to put internal keys in
+frontend code or receive them in chat. OCR/AI provider credentials and complete
+menu-to-draft acceptance still need their own verification. The queues stay
+paused until that passes. Follow the
 [VIS-01 setup and handoff](menu-ingestion-infrastructure.md) for exact names,
 interfaces and who does what next. Provisioned infrastructure is not a completed
 menu-processing feature.
 
-The [observation Queue, DLQ and private R2 setup](observation-infrastructure.md) is now provisioned and tested with synthetic messages. Think of the Queue as the waiting room, R2 as the original evidence archive and the DLQ as the recovery tray for work that repeatedly fails. Both Queues are paused while Teeyansh's real consumer is unfinished. They retain messages for 24 hours even while paused, so real collection must remain off. The staging binding configuration needs its reviewed release before the API Worker can use it; actual archive-to-database processing remains separate work.
+The [observation Queue, DLQ and private R2 setup](observation-infrastructure.md) is provisioned with live API bindings. Think of the Queue as the waiting room, R2 as the original evidence archive and the DLQ as the recovery tray for work that repeatedly fails. Both Queues are paused while Teeyansh's real consumer is unfinished. They retain messages for 24 hours even while paused, so real collection must remain off. Actual archive-to-database processing remains separate work; the menu-infrastructure acceptance does not certify that feature.
 
 **Staging is our shared online test environment.** It lets the team test the same version before real restaurant use. We are keeping these existing names; no domain purchase or rename is needed.
 
