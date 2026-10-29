@@ -217,7 +217,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "console",
         "backend"
       ],
-      "sourceFingerprint": "026590781ff55b814e68b33de98a8c19db7771354176c287e4dcedac8cbfe06e"
+      "sourceFingerprint": "208de851085373d9387430015b87fb88ca9813a8dc121cb4fbbd5966de882481"
     },
     {
       "id": "agents",
@@ -334,7 +334,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "docs/adr/0005-tenancy-and-privacy.md"
       ],
       "dependsOn": [],
-      "sourceFingerprint": "9a915eb9ef0fd34234e116710436f4798e0be3ecc84e9b06cc034b0dfb4c88d1"
+      "sourceFingerprint": "910887c40acb95f917c014eec67692350611613e6174c7b6756e17863698ffdf"
     }
   ],
   "handoffs": [
@@ -424,7 +424,7 @@ The append-only `errors.md` operational ledger is deliberately outside source fi
         "backend"
       ],
       "next": "Submit PR #23 for re-review with permanent regression test coverage across all review findings."
-    },
+    }
   ]
 }
 ```
